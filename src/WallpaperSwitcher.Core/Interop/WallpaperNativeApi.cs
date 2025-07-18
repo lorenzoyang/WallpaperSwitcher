@@ -1,12 +1,15 @@
 ﻿using System.ComponentModel;
 using System.Runtime.InteropServices;
 
+// ReSharper disable CommentTypo
+
+// ReSharper disable IdentifierTypo
+
 // ReSharper disable InconsistentNaming
 
+namespace WallpaperSwitcher.Core.Interop;
 
-namespace WallpaperSwitcher;
-
-public partial class WallpaperChanger
+internal static partial class WallpaperNativeApi
 {
     // Windows API constants
     private const int SPI_SETDESKWALLPAPER = 20; // Sets the desktop wallpaper
@@ -44,14 +47,14 @@ public partial class WallpaperChanger
     )]
     private static partial int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
 
-    public static void SetWallpaper(string path)
+    public static int SetWallpaper(string path)
     {
         if (string.IsNullOrEmpty(path))
         {
             throw new ArgumentException("Wallpaper path cannot be null or empty.", nameof(path));
         }
 
-        // Attempt to set the wallpaper using the Windows API
+        // Call the Windows API to set the wallpaper
         int result = SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, path, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
 
         // Check for errors
@@ -60,17 +63,7 @@ public partial class WallpaperChanger
             int errorCode = Marshal.GetLastWin32Error();
             throw new Win32Exception(errorCode, "Failed to set wallpaper.");
         }
-    }
-}
 
-// TODO: using windows registry to set wallpaper style,
-// SystemParametersInfo does not support setting wallpaper style directly
-public enum WallpaperStyle
-{
-    Fill,
-    Fit,
-    Stretch,
-    Tile,
-    Center,
-    Span
+        return result;
+    }
 }

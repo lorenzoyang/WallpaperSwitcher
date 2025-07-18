@@ -5,7 +5,11 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallpaperSwitcher", "src\WallpaperSwitcher\WallpaperSwitcher.csproj", "{D2829CD0-3DFD-4965-9C37-0F301BB1879A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallpaperSwitcher.Cli", "src\WallpaperSwitcher.Cli\WallpaperSwitcher.Cli.csproj", "{D2829CD0-3DFD-4965-9C37-0F301BB1879A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallpaperSwitcher.Core", "src\WallpaperSwitcher.Core\WallpaperSwitcher.Core.csproj", "{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallpaperSwitcher.Desktop", "src\WallpaperSwitcher.Desktop\WallpaperSwitcher.Desktop.csproj", "{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,11 +33,37 @@ Global
 		{D2829CD0-3DFD-4965-9C37-0F301BB1879A}.Release|x64.Build.0 = Release|Any CPU
 		{D2829CD0-3DFD-4965-9C37-0F301BB1879A}.Release|x86.ActiveCfg = Release|Any CPU
 		{D2829CD0-3DFD-4965-9C37-0F301BB1879A}.Release|x86.Build.0 = Release|Any CPU
+		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}.Debug|x64.Build.0 = Debug|Any CPU
+		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}.Debug|x86.Build.0 = Debug|Any CPU
+		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}.Release|x64.ActiveCfg = Release|Any CPU
+		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}.Release|x64.Build.0 = Release|Any CPU
+		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}.Release|x86.ActiveCfg = Release|Any CPU
+		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}.Release|x86.Build.0 = Release|Any CPU
+		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Debug|x64.Build.0 = Debug|Any CPU
+		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Debug|x86.Build.0 = Debug|Any CPU
+		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Release|x64.ActiveCfg = Release|Any CPU
+		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Release|x64.Build.0 = Release|Any CPU
+		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Release|x86.ActiveCfg = Release|Any CPU
+		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{D2829CD0-3DFD-4965-9C37-0F301BB1879A} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal
