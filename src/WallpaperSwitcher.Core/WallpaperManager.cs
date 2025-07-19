@@ -1,40 +1,66 @@
 ﻿using System.ComponentModel;
 using System.Runtime.InteropServices;
+using WallpaperSwitcher.Core.Interop;
 
 namespace WallpaperSwitcher.Core;
 
-public class WallpaperManager
+public sealed class WallpaperManager
 {
-    private readonly List<string> _supportedExtensions = [".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".webp"];
+    private static readonly string[] SupportedExtensions = [".jpg", ".jpeg", ".png", ".bmp"];
+    private string _folderPath = string.Empty;
+    private List<string> _wallpaperPaths = [];
+    private int _currentIndex = 0;
 
-
-    public static void Set(string path)
+    public WallpaperManager(string folderPath)
     {
-        if (string.IsNullOrEmpty(path))
-        {
-            throw new ArgumentException("Wallpaper path cannot be null or empty.", nameof(path));
-        }
+        FolderPath = folderPath;
+    }
 
-        // Attempt to set the wallpaper using the Windows API
-        int result = Interop.WallpaperNativeApi.SetWallpaper(path);
-
-        // Check for errors
-        if (result == 0)
+    public string FolderPath
+    {
+        get => _folderPath;
+        set
         {
-            int errorCode = Marshal.GetLastWin32Error();
-            throw new Win32Exception(errorCode, "Failed to set wallpaper.");
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentException("Folder path cannot be null or empty.", nameof(value));
+            }
+
+            if (!Directory.Exists(value))
+            {
+                throw new DirectoryNotFoundException($"The specified folder does not exist: {value}");
+            }
+
+            _folderPath = value;
+            _wallpaperPaths = Directory.GetFiles(value)
+                .Where(file => SupportedExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()))
+                .ToList();
         }
     }
-}
 
-// TODO: using windows registry to set wallpaper style,
-// SystemParametersInfo does not support setting wallpaper style directly
-public enum WallpaperStyle
-{
-    Fill,
-    Fit,
-    Stretch,
-    Tile,
-    Center,
-    Span
+    public IReadOnlyList<string> WallpaperPaths => _wallpaperPaths.AsReadOnly();
+
+    private int CurrentIndex
+    {
+        get => _currentIndex;
+        set
+        {
+            if (value >= WallpaperPaths.Count)
+            {
+                _currentIndex = 0;
+            }
+            else if (value < 0)
+            {
+                _currentIndex = WallpaperPaths.Count - 1;
+            }
+            else
+            {
+                _currentIndex = value;
+            }
+        }
+    }
+
+    public void NextWallpaper() => WallpaperNativeApi.SetWallpaper(WallpaperPaths[CurrentIndex++]);
+
+    public void PreviousWallpaper() => WallpaperNativeApi.SetWallpaper(WallpaperPaths[CurrentIndex--]);
 }
