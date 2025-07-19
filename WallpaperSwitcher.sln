@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallpaperSwitcher.Cli", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallpaperSwitcher.Core", "src\WallpaperSwitcher.Core\WallpaperSwitcher.Core.csproj", "{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallpaperSwitcher.Desktop", "src\WallpaperSwitcher.Desktop\WallpaperSwitcher.Desktop.csproj", "{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallpaperSwitcher.Desktop", "src\WallpaperSwitcher.Desktop\WallpaperSwitcher.Desktop.csproj", "{2D7C8DE9-0E54-45B7-B815-A1D9EA8077B8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,18 +45,18 @@ Global
 		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}.Release|x64.Build.0 = Release|Any CPU
 		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}.Release|x86.ActiveCfg = Release|Any CPU
 		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960}.Release|x86.Build.0 = Release|Any CPU
-		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Debug|x64.Build.0 = Debug|Any CPU
-		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Debug|x86.Build.0 = Debug|Any CPU
-		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Release|x64.ActiveCfg = Release|Any CPU
-		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Release|x64.Build.0 = Release|Any CPU
-		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Release|x86.ActiveCfg = Release|Any CPU
-		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96}.Release|x86.Build.0 = Release|Any CPU
+		{2D7C8DE9-0E54-45B7-B815-A1D9EA8077B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D7C8DE9-0E54-45B7-B815-A1D9EA8077B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D7C8DE9-0E54-45B7-B815-A1D9EA8077B8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2D7C8DE9-0E54-45B7-B815-A1D9EA8077B8}.Debug|x64.Build.0 = Debug|Any CPU
+		{2D7C8DE9-0E54-45B7-B815-A1D9EA8077B8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2D7C8DE9-0E54-45B7-B815-A1D9EA8077B8}.Debug|x86.Build.0 = Debug|Any CPU
+		{2D7C8DE9-0E54-45B7-B815-A1D9EA8077B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D7C8DE9-0E54-45B7-B815-A1D9EA8077B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D7C8DE9-0E54-45B7-B815-A1D9EA8077B8}.Release|x64.ActiveCfg = Release|Any CPU
+		{2D7C8DE9-0E54-45B7-B815-A1D9EA8077B8}.Release|x64.Build.0 = Release|Any CPU
+		{2D7C8DE9-0E54-45B7-B815-A1D9EA8077B8}.Release|x86.ActiveCfg = Release|Any CPU
+		{2D7C8DE9-0E54-45B7-B815-A1D9EA8077B8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -64,6 +64,9 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{D2829CD0-3DFD-4965-9C37-0F301BB1879A} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{D6EFBC16-7631-4CD6-9B88-7FDAF88FB960} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
-		{D9F2A544-B9B6-4BA9-A7C7-1AAD41EBDB96} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{2D7C8DE9-0E54-45B7-B815-A1D9EA8077B8} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {67B66634-B9C1-4F20-8652-559D4ACEFCDB}
 	EndGlobalSection
 EndGlobal
