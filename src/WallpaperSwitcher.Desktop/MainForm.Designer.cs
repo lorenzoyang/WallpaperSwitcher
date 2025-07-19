@@ -28,266 +28,198 @@
         /// </summary>
         private void InitializeComponent()
         {
-            wallpaperFoldersGroupBox = new GroupBox();
-            browseFolder3Button = new Button();
-            browseFolder1Button = new Button();
-            browseFolder2Button = new Button();
-            folder3TextBox = new TextBox();
-            folder2TextBox = new TextBox();
-            folder1TextBox = new TextBox();
-            thirdFolderLabel = new Label();
+            foldersManagementGroupBox = new GroupBox();
+            removeFolderComboBox = new ComboBox();
+            removeFolderButton = new Button();
+            removeFolderLabel = new Label();
+            addFolderLabel = new Label();
+            addFolderButton = new Button();
+            browseFolderButton = new Button();
+            addFolderTextBox = new TextBox();
             secondFolderLabel = new Label();
-            firstFolderLabel = new Label();
             currentFolderComboBox = new ComboBox();
-            selectFolderLabel = new Label();
+            currentFolderLabel = new Label();
             wallpaperSwitchingGroupBox = new GroupBox();
-            prevShortCutTextBox = new TextBox();
-            prevWallpaperLabel = new Label();
             prevWallpaperButton = new Button();
-            nextShortCutTextBox = new TextBox();
-            nextWallpaperLabel = new Label();
             nextWallpaperButton = new Button();
-            saveButton = new Button();
-            wallpaperFoldersGroupBox.SuspendLayout();
+            foldersManagementGroupBox.SuspendLayout();
             wallpaperSwitchingGroupBox.SuspendLayout();
             SuspendLayout();
             // 
-            // wallpaperFoldersGroupBox
+            // foldersManagementGroupBox
             // 
-            wallpaperFoldersGroupBox.Controls.Add(browseFolder3Button);
-            wallpaperFoldersGroupBox.Controls.Add(browseFolder1Button);
-            wallpaperFoldersGroupBox.Controls.Add(browseFolder2Button);
-            wallpaperFoldersGroupBox.Controls.Add(folder3TextBox);
-            wallpaperFoldersGroupBox.Controls.Add(folder2TextBox);
-            wallpaperFoldersGroupBox.Controls.Add(folder1TextBox);
-            wallpaperFoldersGroupBox.Controls.Add(thirdFolderLabel);
-            wallpaperFoldersGroupBox.Controls.Add(secondFolderLabel);
-            wallpaperFoldersGroupBox.Controls.Add(firstFolderLabel);
-            wallpaperFoldersGroupBox.Controls.Add(currentFolderComboBox);
-            wallpaperFoldersGroupBox.Controls.Add(selectFolderLabel);
-            wallpaperFoldersGroupBox.Location = new Point(42, 37);
-            wallpaperFoldersGroupBox.Name = "wallpaperFoldersGroupBox";
-            wallpaperFoldersGroupBox.Size = new Size(894, 378);
-            wallpaperFoldersGroupBox.TabIndex = 0;
-            wallpaperFoldersGroupBox.TabStop = false;
-            wallpaperFoldersGroupBox.Text = "Wallpaper Folders";
+            foldersManagementGroupBox.Controls.Add(removeFolderComboBox);
+            foldersManagementGroupBox.Controls.Add(removeFolderButton);
+            foldersManagementGroupBox.Controls.Add(removeFolderLabel);
+            foldersManagementGroupBox.Controls.Add(addFolderLabel);
+            foldersManagementGroupBox.Controls.Add(addFolderButton);
+            foldersManagementGroupBox.Controls.Add(browseFolderButton);
+            foldersManagementGroupBox.Controls.Add(addFolderTextBox);
+            foldersManagementGroupBox.Controls.Add(secondFolderLabel);
+            foldersManagementGroupBox.Controls.Add(currentFolderComboBox);
+            foldersManagementGroupBox.Controls.Add(currentFolderLabel);
+            foldersManagementGroupBox.Location = new Point(54, 48);
+            foldersManagementGroupBox.Name = "foldersManagementGroupBox";
+            foldersManagementGroupBox.Size = new Size(705, 536);
+            foldersManagementGroupBox.TabIndex = 0;
+            foldersManagementGroupBox.TabStop = false;
+            foldersManagementGroupBox.Text = "Folder Management";
             // 
-            // browseFolder3Button
+            // removeFolderComboBox
             // 
-            browseFolder3Button.Location = new Point(730, 295);
-            browseFolder3Button.Name = "browseFolder3Button";
-            browseFolder3Button.Size = new Size(150, 39);
-            browseFolder3Button.TabIndex = 10;
-            browseFolder3Button.Text = "Browse...";
-            browseFolder3Button.UseVisualStyleBackColor = true;
+            removeFolderComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            removeFolderComboBox.FormattingEnabled = true;
+            removeFolderComboBox.Location = new Point(27, 431);
+            removeFolderComboBox.Name = "removeFolderComboBox";
+            removeFolderComboBox.Size = new Size(624, 40);
+            removeFolderComboBox.TabIndex = 14;
             // 
-            // browseFolder1Button
+            // removeFolderButton
             // 
-            browseFolder1Button.Location = new Point(730, 142);
-            browseFolder1Button.Name = "browseFolder1Button";
-            browseFolder1Button.Size = new Size(150, 39);
-            browseFolder1Button.TabIndex = 9;
-            browseFolder1Button.Text = "Browse...";
-            browseFolder1Button.UseVisualStyleBackColor = true;
-            browseFolder1Button.Click += button2_Click;
+            removeFolderButton.Location = new Point(353, 359);
+            removeFolderButton.Name = "removeFolderButton";
+            removeFolderButton.Size = new Size(134, 40);
+            removeFolderButton.TabIndex = 13;
+            removeFolderButton.Text = "Remove";
+            removeFolderButton.UseVisualStyleBackColor = true;
             // 
-            // browseFolder2Button
+            // removeFolderLabel
             // 
-            browseFolder2Button.Location = new Point(730, 216);
-            browseFolder2Button.Name = "browseFolder2Button";
-            browseFolder2Button.Size = new Size(150, 39);
-            browseFolder2Button.TabIndex = 8;
-            browseFolder2Button.Text = "Browse...";
-            browseFolder2Button.UseVisualStyleBackColor = true;
+            removeFolderLabel.AutoSize = true;
+            removeFolderLabel.Location = new Point(27, 367);
+            removeFolderLabel.Name = "removeFolderLabel";
+            removeFolderLabel.Size = new Size(274, 32);
+            removeFolderLabel.TabIndex = 12;
+            removeFolderLabel.Text = "Select Folder to Remove";
             // 
-            // folder3TextBox
+            // addFolderLabel
             // 
-            folder3TextBox.Location = new Point(210, 295);
-            folder3TextBox.Name = "folder3TextBox";
-            folder3TextBox.Size = new Size(486, 39);
-            folder3TextBox.TabIndex = 7;
+            addFolderLabel.AutoSize = true;
+            addFolderLabel.Location = new Point(27, 203);
+            addFolderLabel.Name = "addFolderLabel";
+            addFolderLabel.Size = new Size(239, 32);
+            addFolderLabel.TabIndex = 11;
+            addFolderLabel.Text = "Add New Folder Path";
             // 
-            // folder2TextBox
+            // addFolderButton
             // 
-            folder2TextBox.Location = new Point(210, 216);
-            folder2TextBox.Name = "folder2TextBox";
-            folder2TextBox.Size = new Size(486, 39);
-            folder2TextBox.TabIndex = 6;
-            folder2TextBox.TextChanged += textBox2_TextChanged;
+            addFolderButton.Location = new Point(353, 203);
+            addFolderButton.Name = "addFolderButton";
+            addFolderButton.Size = new Size(134, 40);
+            addFolderButton.TabIndex = 10;
+            addFolderButton.Text = "Add";
+            addFolderButton.UseVisualStyleBackColor = true;
             // 
-            // folder1TextBox
+            // browseFolderButton
             // 
-            folder1TextBox.Location = new Point(210, 142);
-            folder1TextBox.Name = "folder1TextBox";
-            folder1TextBox.Size = new Size(486, 39);
-            folder1TextBox.TabIndex = 5;
-            folder1TextBox.TextChanged += textBox1_TextChanged;
+            browseFolderButton.Location = new Point(517, 268);
+            browseFolderButton.Name = "browseFolderButton";
+            browseFolderButton.Size = new Size(134, 39);
+            browseFolderButton.TabIndex = 9;
+            browseFolderButton.Text = "Browse...";
+            browseFolderButton.UseVisualStyleBackColor = true;
             // 
-            // thirdFolderLabel
+            // addFolderTextBox
             // 
-            thirdFolderLabel.AutoSize = true;
-            thirdFolderLabel.Location = new Point(27, 302);
-            thirdFolderLabel.Name = "thirdFolderLabel";
-            thirdFolderLabel.Size = new Size(106, 32);
-            thirdFolderLabel.TabIndex = 4;
-            thirdFolderLabel.Text = "Folder 3:";
+            addFolderTextBox.Location = new Point(27, 268);
+            addFolderTextBox.Name = "addFolderTextBox";
+            addFolderTextBox.ReadOnly = true;
+            addFolderTextBox.Size = new Size(460, 39);
+            addFolderTextBox.TabIndex = 5;
             // 
             // secondFolderLabel
             // 
             secondFolderLabel.AutoSize = true;
             secondFolderLabel.Location = new Point(27, 219);
             secondFolderLabel.Name = "secondFolderLabel";
-            secondFolderLabel.Size = new Size(106, 32);
+            secondFolderLabel.Size = new Size(0, 32);
             secondFolderLabel.TabIndex = 3;
-            secondFolderLabel.Text = "Folder 2:";
-            secondFolderLabel.Click += label2_Click;
-            // 
-            // firstFolderLabel
-            // 
-            firstFolderLabel.AutoSize = true;
-            firstFolderLabel.Location = new Point(27, 145);
-            firstFolderLabel.Name = "firstFolderLabel";
-            firstFolderLabel.Size = new Size(106, 32);
-            firstFolderLabel.TabIndex = 2;
-            firstFolderLabel.Text = "Folder 1:";
-            firstFolderLabel.Click += label1_Click;
             // 
             // currentFolderComboBox
             // 
             currentFolderComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             currentFolderComboBox.FormattingEnabled = true;
-            currentFolderComboBox.Location = new Point(210, 66);
+            currentFolderComboBox.Location = new Point(27, 115);
             currentFolderComboBox.Name = "currentFolderComboBox";
-            currentFolderComboBox.Size = new Size(670, 40);
+            currentFolderComboBox.Size = new Size(624, 40);
             currentFolderComboBox.TabIndex = 1;
             // 
-            // selectFolderLabel
+            // currentFolderLabel
             // 
-            selectFolderLabel.AutoSize = true;
-            selectFolderLabel.Location = new Point(27, 66);
-            selectFolderLabel.Name = "selectFolderLabel";
-            selectFolderLabel.Size = new Size(152, 32);
-            selectFolderLabel.TabIndex = 0;
-            selectFolderLabel.Text = "Select Folder";
+            currentFolderLabel.AutoSize = true;
+            currentFolderLabel.Location = new Point(27, 66);
+            currentFolderLabel.Name = "currentFolderLabel";
+            currentFolderLabel.Size = new Size(281, 32);
+            currentFolderLabel.TabIndex = 0;
+            currentFolderLabel.Text = "Current Wallpaper Folder";
             // 
             // wallpaperSwitchingGroupBox
             // 
-            wallpaperSwitchingGroupBox.Controls.Add(prevShortCutTextBox);
-            wallpaperSwitchingGroupBox.Controls.Add(prevWallpaperLabel);
             wallpaperSwitchingGroupBox.Controls.Add(prevWallpaperButton);
-            wallpaperSwitchingGroupBox.Controls.Add(nextShortCutTextBox);
-            wallpaperSwitchingGroupBox.Controls.Add(nextWallpaperLabel);
             wallpaperSwitchingGroupBox.Controls.Add(nextWallpaperButton);
-            wallpaperSwitchingGroupBox.Location = new Point(42, 447);
+            wallpaperSwitchingGroupBox.Location = new Point(54, 639);
             wallpaperSwitchingGroupBox.Name = "wallpaperSwitchingGroupBox";
-            wallpaperSwitchingGroupBox.Size = new Size(894, 234);
+            wallpaperSwitchingGroupBox.Size = new Size(705, 132);
             wallpaperSwitchingGroupBox.TabIndex = 1;
             wallpaperSwitchingGroupBox.TabStop = false;
             wallpaperSwitchingGroupBox.Text = "Wallpaper Switching";
             // 
-            // prevShortCutTextBox
-            // 
-            prevShortCutTextBox.Location = new Point(453, 154);
-            prevShortCutTextBox.Name = "prevShortCutTextBox";
-            prevShortCutTextBox.Size = new Size(427, 39);
-            prevShortCutTextBox.TabIndex = 5;
-            // 
-            // prevWallpaperLabel
-            // 
-            prevWallpaperLabel.AutoSize = true;
-            prevWallpaperLabel.Location = new Point(313, 160);
-            prevWallpaperLabel.Name = "prevWallpaperLabel";
-            prevWallpaperLabel.Size = new Size(109, 32);
-            prevWallpaperLabel.TabIndex = 4;
-            prevWallpaperLabel.Text = "Shortcut:";
-            // 
             // prevWallpaperButton
             // 
-            prevWallpaperButton.Location = new Point(27, 154);
+            prevWallpaperButton.Location = new Point(27, 49);
             prevWallpaperButton.Name = "prevWallpaperButton";
-            prevWallpaperButton.Size = new Size(244, 44);
+            prevWallpaperButton.Size = new Size(260, 52);
             prevWallpaperButton.TabIndex = 3;
             prevWallpaperButton.Text = "Previous Wallpaper";
             prevWallpaperButton.UseVisualStyleBackColor = true;
-            prevWallpaperButton.Click += button1_Click;
-            // 
-            // nextShortCutTextBox
-            // 
-            nextShortCutTextBox.Location = new Point(453, 67);
-            nextShortCutTextBox.Name = "nextShortCutTextBox";
-            nextShortCutTextBox.Size = new Size(427, 39);
-            nextShortCutTextBox.TabIndex = 2;
-            // 
-            // nextWallpaperLabel
-            // 
-            nextWallpaperLabel.AutoSize = true;
-            nextWallpaperLabel.Location = new Point(313, 70);
-            nextWallpaperLabel.Name = "nextWallpaperLabel";
-            nextWallpaperLabel.Size = new Size(109, 32);
-            nextWallpaperLabel.TabIndex = 1;
-            nextWallpaperLabel.Text = "Shortcut:";
-            nextWallpaperLabel.Click += label1_Click_1;
             // 
             // nextWallpaperButton
             // 
-            nextWallpaperButton.Location = new Point(27, 64);
+            nextWallpaperButton.Location = new Point(391, 49);
             nextWallpaperButton.Name = "nextWallpaperButton";
-            nextWallpaperButton.Size = new Size(244, 44);
+            nextWallpaperButton.Size = new Size(260, 52);
             nextWallpaperButton.TabIndex = 0;
             nextWallpaperButton.Text = "Next Wallpaper";
             nextWallpaperButton.UseVisualStyleBackColor = true;
-            nextWallpaperButton.Click += nextWallpaperButton_Click;
-            // 
-            // saveButton
-            // 
-            saveButton.Location = new Point(743, 709);
-            saveButton.Name = "saveButton";
-            saveButton.Size = new Size(193, 46);
-            saveButton.TabIndex = 2;
-            saveButton.Text = "Save";
-            saveButton.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(974, 785);
-            Controls.Add(saveButton);
+            ClientSize = new Size(814, 883);
             Controls.Add(wallpaperSwitchingGroupBox);
-            Controls.Add(wallpaperFoldersGroupBox);
+            Controls.Add(foldersManagementGroupBox);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Wallpaper Switcher";
-            wallpaperFoldersGroupBox.ResumeLayout(false);
-            wallpaperFoldersGroupBox.PerformLayout();
+            foldersManagementGroupBox.ResumeLayout(false);
+            foldersManagementGroupBox.PerformLayout();
             wallpaperSwitchingGroupBox.ResumeLayout(false);
-            wallpaperSwitchingGroupBox.PerformLayout();
             ResumeLayout(false);
         }
 
         #endregion
 
-        private GroupBox wallpaperFoldersGroupBox;
+        private GroupBox foldersManagementGroupBox;
         private ComboBox currentFolderComboBox;
         private Label thirdFolderLabel;
         private Label secondFolderLabel;
-        private Label firstFolderLabel;
-        private Label selectFolderLabel;
+        private Label currentFolderLabel;
         private TextBox folder3TextBox;
         private TextBox folder2TextBox;
-        private TextBox folder1TextBox;
+        private TextBox addFolderTextBox;
         private Button browseFolder3Button;
-        private Button browseFolder1Button;
+        private Button browseFolderButton;
         private Button browseFolder2Button;
         private GroupBox wallpaperSwitchingGroupBox;
-        private TextBox nextShortCutTextBox;
-        private Label nextWallpaperLabel;
         private Button nextWallpaperButton;
         private Button prevWallpaperButton;
-        private TextBox prevShortCutTextBox;
-        private Label prevWallpaperLabel;
-        private Button saveButton;
+        private Button addFolderButton;
+        private Label addFolderLabel;
+        private Label removeFolderLabel;
+        private ComboBox removeFolderComboBox;
+        private Button removeFolderButton;
     }
 }
