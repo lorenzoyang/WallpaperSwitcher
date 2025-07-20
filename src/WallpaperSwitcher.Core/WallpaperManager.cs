@@ -4,20 +4,14 @@ namespace WallpaperSwitcher.Core;
 
 public sealed class WallpaperManager
 {
-    public static readonly string[] SupportedExtensions = [".jpg", ".jpeg", ".png", ".bmp"];
+    public static readonly string[] SupportedExtensions =
+    [
+        ".jpg", ".jpeg", ".png", ".bmp", "dib", ".gif", ".tif", ".tiff", "jfif"
+    ];
 
     private string _folderPath = string.Empty;
     private List<string> _wallpaperPaths = [];
     private int _currentIndex;
-
-    public WallpaperManager()
-    {
-    }
-
-    public WallpaperManager(string folderPath)
-    {
-        FolderPath = folderPath;
-    }
 
     public string FolderPath
     {
@@ -74,10 +68,7 @@ public sealed class WallpaperManager
         }
     }
 
-    public void ChangeWallpaperFolder(string newFolderPath)
-    {
-        FolderPath = newFolderPath;
-    }
+    public void ChangeWallpaperFolder(string newFolderPath) => FolderPath = newFolderPath;
 
     public void NextWallpaper()
     {

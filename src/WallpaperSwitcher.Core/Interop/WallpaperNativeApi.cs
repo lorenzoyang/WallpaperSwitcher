@@ -55,7 +55,12 @@ internal static partial class WallpaperNativeApi
         }
 
         // Call the Windows API to set the wallpaper
-        int result = SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, path, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
+        int result = SystemParametersInfo(
+            SPI_SETDESKWALLPAPER,
+            0,
+            path,
+            SPIF_UPDATEINIFILE | SPIF_SENDCHANGE
+        );
 
         // Check for errors
         if (result == 0)

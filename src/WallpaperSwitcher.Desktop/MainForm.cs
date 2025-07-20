@@ -27,11 +27,9 @@ namespace WallpaperSwitcher.Desktop
             }
 
             var lastSelectedFolder = Properties.Settings.Default.LastSelectedFolder;
-
             if (string.IsNullOrEmpty(lastSelectedFolder)) return;
             // User might have deleted the last selected folder, so we check if it still exists
             if (!currentFolderComboBox.Items.Contains(lastSelectedFolder)) return;
-
             currentFolderComboBox.SelectedItem = lastSelectedFolder;
             _wallpaperManager.ChangeWallpaperFolder(lastSelectedFolder);
         }
@@ -55,52 +53,6 @@ namespace WallpaperSwitcher.Desktop
             }
 
             Properties.Settings.Default.Save();
-        }
-
-        private static bool ValidateFolder(string folderPath, out string errorMessage)
-        {
-            errorMessage = string.Empty;
-            
-            if (string.IsNullOrWhiteSpace(folderPath))
-            {
-                errorMessage = "Please select a folder.";
-                return false;
-            }
-
-            if (!Directory.Exists(folderPath))
-            {
-                errorMessage = "The selected folder does not exist.";
-                return false;
-            }
-
-            // Check if folder contains any image files
-            try
-            {
-                var imageFiles = Directory
-                    .GetFiles(folderPath, "*.*", SearchOption.TopDirectoryOnly)
-                    .Where(file =>
-                        WallpaperManager.SupportedExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()))
-                    .ToArray();
-
-                if (imageFiles.Length == 0)
-                {
-                    errorMessage =
-                        "The selected folder does not contain any supported image files (JPG, PNG, BMP, etc.).";
-                    return false;
-                }
-            }
-            catch (UnauthorizedAccessException)
-            {
-                errorMessage = "Access denied to the selected folder.";
-                return false;
-            }
-            catch (Exception ex)
-            {
-                errorMessage = $"Error accessing folder: {ex.Message}";
-                return false;
-            }
-
-            return true;
         }
 
         private static void ShowSuccessMessage(string message)
@@ -146,8 +98,7 @@ namespace WallpaperSwitcher.Desktop
         {
             var newFolderPath = addFolderTextBox.Text.Trim();
 
-            // Validate the folder
-            if (!ValidateFolder(newFolderPath, out var errorMessage))
+            if (!WallpaperHelper.ValidateWallpaperFolder(newFolderPath, out var errorMessage))
             {
                 ShowErrorMessage(errorMessage);
                 addFolderTextBox.Clear();
@@ -169,10 +120,7 @@ namespace WallpaperSwitcher.Desktop
             // Clear the text box and show success message
             addFolderTextBox.Clear();
             // Get image count for user feedback
-            var imageCount = Directory
-                .GetFiles(newFolderPath, "*.*", SearchOption.TopDirectoryOnly)
-                .Count(file =>
-                    WallpaperManager.SupportedExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()));
+            var imageCount = WallpaperHelper.GetImageCount(newFolderPath);
             ShowSuccessMessage($"Folder added successfully!\n\nPath: {newFolderPath}\nImages found: {imageCount}");
         }
 
