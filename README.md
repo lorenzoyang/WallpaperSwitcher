@@ -27,8 +27,6 @@
   - Change wallpaper at user-defined intervals
 - [ ] **Real-Time Folder Monitoring**
   - Automatically detect changes in wallpaper folders
-- [ ] **UI Enhancements**
-  - Improve visual design using modern UI libraries
 - [ ] **Startup Optimization**
   - Reduce application launch time
 

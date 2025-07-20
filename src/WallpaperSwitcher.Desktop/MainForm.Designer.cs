@@ -74,6 +74,7 @@
             removeFolderComboBox.Size = new Size(624, 40);
             removeFolderComboBox.TabIndex = 14;
             removeFolderComboBox.SelectedIndexChanged += removeFolderComboBox_SelectedIndexChanged;
+            removeFolderComboBox.MouseEnter += removeFolderComboBox_MouseEnter;
             // 
             // removeFolderButton
             // 
@@ -151,6 +152,7 @@
             currentFolderComboBox.Size = new Size(624, 40);
             currentFolderComboBox.TabIndex = 1;
             currentFolderComboBox.SelectedIndexChanged += currentFolderComboBox_SelectedIndexChanged;
+            currentFolderComboBox.MouseEnter += currentFolderComboBox_MouseEnter;
             // 
             // currentFolderLabel
             // 

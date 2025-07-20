@@ -7,6 +7,14 @@ namespace WallpaperSwitcher.Desktop
     {
         private readonly WallpaperManager _wallpaperManager = new();
 
+        private readonly ToolTip toolTip = new()
+        {
+            AutoPopDelay = 10000, // Show for 10 seconds
+            InitialDelay = 500, // Wait 0.5 seconds before showing
+            ReshowDelay = 100, // Quick reshow
+            ShowAlways = true
+        };
+
         public MainForm()
         {
             InitializeComponent();
@@ -78,6 +86,29 @@ namespace WallpaperSwitcher.Desktop
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
         }
+
+        private void ShowToolTipForComboBox(ComboBox? comboBox)
+        {
+            if (comboBox != null && comboBox.SelectedItem != null)
+            {
+                string fullText = comboBox.SelectedItem?.ToString() ?? string.Empty;
+
+                // Only show tooltip if text is longer than what can be displayed
+                // -20: to account for padding and dropdown arrow
+                if (TextRenderer.MeasureText(fullText, comboBox.Font).Width > comboBox.Width - 20)
+                {
+                    toolTip.SetToolTip(comboBox, fullText);
+                }
+                else
+                {
+                    toolTip.SetToolTip(comboBox, ""); // Clear tooltip for short text
+                }
+            }
+        }
+
+        // *********************************
+        // Event handlers for Form events  *
+        // *********************************
 
         private void MainForm_Load(object sender, EventArgs e) => LoadSettings();
 
@@ -174,11 +205,25 @@ namespace WallpaperSwitcher.Desktop
             prevWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
             nextWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
             _wallpaperManager.ChangeWallpaperFolder(currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty);
+            _wallpaperManager.NextWallpaper();
         }
 
         private void addFolderTextBox_TextChanged(object sender, EventArgs e)
         {
             addFolderButton.Enabled = !string.IsNullOrWhiteSpace(addFolderTextBox.Text);
+            addFolderTextBox.SelectionStart = addFolderTextBox.Text.Length; // Move cursor to the end
+        }
+
+        private void currentFolderComboBox_MouseEnter(object sender, EventArgs e)
+        {
+            var comboBox = sender as ComboBox;
+            ShowToolTipForComboBox(comboBox);
+        }
+
+        private void removeFolderComboBox_MouseEnter(object sender, EventArgs e)
+        {
+            var comboBox = sender as ComboBox;
+            ShowToolTipForComboBox(comboBox);
         }
     }
 }
