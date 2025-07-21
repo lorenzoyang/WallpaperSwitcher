@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             foldersManagementGroupBox = new GroupBox();
             removeFolderComboBox = new ComboBox();
             removeFolderButton = new Button();
@@ -204,6 +205,7 @@
             Controls.Add(wallpaperSwitchingGroupBox);
             Controls.Add(foldersManagementGroupBox);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;

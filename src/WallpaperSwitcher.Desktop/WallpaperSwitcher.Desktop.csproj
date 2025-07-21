@@ -6,7 +6,12 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>WallpaperSwitcherIconFile.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="WallpaperSwitcherIconFile.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\WallpaperSwitcher.Core\WallpaperSwitcher.Core.csproj" />
