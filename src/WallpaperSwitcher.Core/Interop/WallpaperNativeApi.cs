@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Text;
 
 // ReSharper disable CommentTypo
 
@@ -11,11 +12,6 @@ namespace WallpaperSwitcher.Core.Interop;
 
 internal static partial class WallpaperNativeApi
 {
-    // Windows API constants
-    private const int SPI_SETDESKWALLPAPER = 20; // Sets the desktop wallpaper
-    private const int SPIF_UPDATEINIFILE = 0x01; // Saves the change to registry (legacy: win.ini)
-    private const int SPIF_SENDCHANGE = 0x02; // Broadcasts a system message to notify all applications
-
     /// <summary>
     /// Wraps the Windows API <c>SystemParametersInfo</c> function to get or set system-wide parameters.
     /// Commonly used to set the desktop wallpaper or retrieve system metrics.
@@ -47,8 +43,18 @@ internal static partial class WallpaperNativeApi
     )]
     private static partial int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
 
+    // Alternative version using StringBuilder for lpvParam
+    // LibraryImport does not support StringBuilder directly, so we use P/Invoke
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern int SystemParametersInfo(int uAction, int uParam, StringBuilder lpvParam, int fuWinIni);
+
     public static int SetWallpaper(string path)
     {
+        // Windows API constants
+        const int SPI_SETDESKWALLPAPER = 20; // Sets the desktop wallpaper
+        const int SPIF_UPDATEINIFILE = 0x01; // Saves the change to registry (legacy: win.ini)
+        const int SPIF_SENDCHANGE = 0x02; // Broadcasts a system message to notify all applications
+
         if (string.IsNullOrEmpty(path))
         {
             throw new ArgumentException("Wallpaper path cannot be null or empty.", nameof(path));
@@ -70,5 +76,23 @@ internal static partial class WallpaperNativeApi
         }
 
         return result;
+    }
+
+    public static string GetCurrentWallpaperPath()
+    {
+        // Constants
+        const int SPI_GETDESKWALLPAPER = 0x0073; // Retrieves the full path to the current desktop wallpaper
+        const int MAX_PATH = 260; // Maximum path length for file names in Windows
+
+        var sb = new StringBuilder(MAX_PATH);
+        int result = SystemParametersInfo(SPI_GETDESKWALLPAPER, MAX_PATH, sb, 0);
+
+        if (result == 0)
+        {
+            int errorCode = Marshal.GetLastWin32Error();
+            throw new Win32Exception(errorCode, "Failed to retrieve wallpaper path.");
+        }
+
+        return sb.ToString();
     }
 }

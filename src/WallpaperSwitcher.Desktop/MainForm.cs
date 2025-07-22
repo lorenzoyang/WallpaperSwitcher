@@ -54,7 +54,6 @@ public partial class MainForm : Form
         // User might have deleted the last selected folder, so we check if it still exists
         if (!currentFolderComboBox.Items.Contains(lastSelectedFolder)) return;
         currentFolderComboBox.SelectedItem = lastSelectedFolder;
-        _wallpaperManager.ChangeWallpaperFolder(lastSelectedFolder);
     }
 
     private void SaveSettings()
@@ -300,8 +299,8 @@ public partial class MainForm : Form
         prevWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
         nextWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
         _wallpaperManager.ChangeWallpaperFolder(currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty);
-        _wallpaperManager.SetFirstWallpaper();
-        SaveSettings();
+        _wallpaperManager.Start();
+        SaveSettings(); // Save user selection promptly
     }
 
     private void addFolderTextBox_TextChanged(object sender, EventArgs e)

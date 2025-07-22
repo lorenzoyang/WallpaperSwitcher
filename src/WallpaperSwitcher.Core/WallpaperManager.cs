@@ -40,26 +40,24 @@ public sealed class WallpaperManager
         }
     }
 
-    private IReadOnlyList<string> WallpaperPaths => _wallpaperPaths.AsReadOnly();
-
     private int CurrentIndex
     {
         get => _currentIndex;
         set
         {
-            if (WallpaperPaths.Count == 0)
+            if (_wallpaperPaths.Count == 0)
             {
                 _currentIndex = 0;
                 return;
             }
 
-            if (value >= WallpaperPaths.Count)
+            if (value >= _wallpaperPaths.Count)
             {
                 _currentIndex = 0;
             }
             else if (value < 0)
             {
-                _currentIndex = WallpaperPaths.Count - 1;
+                _currentIndex = _wallpaperPaths.Count - 1;
             }
             else
             {
@@ -72,21 +70,35 @@ public sealed class WallpaperManager
 
     public void NextWallpaper()
     {
-        if (WallpaperPaths.Count is 0 or 1) return;
+        if (_wallpaperPaths.Count is 0 or 1) return;
         CurrentIndex++;
-        WallpaperNativeApi.SetWallpaper(WallpaperPaths[CurrentIndex]);
-    }
-
-    public void SetFirstWallpaper()
-    {
-        if (WallpaperPaths.Count is 0) return;
-        WallpaperNativeApi.SetWallpaper(WallpaperPaths[0]);
+        WallpaperNativeApi.SetWallpaper(_wallpaperPaths[CurrentIndex]);
     }
 
     public void PreviousWallpaper()
     {
-        if (WallpaperPaths.Count is 0 or 1) return;
+        if (_wallpaperPaths.Count is 0 or 1) return;
         CurrentIndex--;
-        WallpaperNativeApi.SetWallpaper(WallpaperPaths[CurrentIndex]);
+        WallpaperNativeApi.SetWallpaper(_wallpaperPaths[CurrentIndex]);
+    }
+
+    /// <summary>
+    /// Start "playing" from the current desktop wallpaper.
+    /// If the current desktop wallpaper is not in the currently selected wallpaper folder,
+    /// start from the first wallpaper (sorted by name) in the current folder.
+    /// </summary>
+    public void Start()
+    {
+        if (_wallpaperPaths.Count is 0) return;
+
+        var currentWallpaperPath = WallpaperNativeApi.GetCurrentWallpaperPath();
+
+        CurrentIndex = _wallpaperPaths.IndexOf(currentWallpaperPath);
+        if (CurrentIndex < 0)
+        {
+            CurrentIndex = 0;
+        }
+
+        WallpaperNativeApi.SetWallpaper(_wallpaperPaths[CurrentIndex]);
     }
 }
