@@ -18,7 +18,7 @@
 - [ ] **Dedicated Settings Interface**
   - Manage hotkey configuration
   - Configure auto-start on boot
-- [ ] **System Tray Integration**
+- [x] **System Tray Integration**
   - Minimize to system tray
   - Right-click menu with options: Open, Exit
 - [ ] **Auto Start on Boot**
@@ -30,6 +30,21 @@
 - [ ] **Startup Optimization**
   - Reduce application launch time
 
+## Installation & Usage
+
+You can run **Wallpaper Switcher** without needing to install anything. Just download the executable file and launch it:
+
+### 🔽 Download
+
+1. Visit the [Releases](https://github.com/yourusername/wallpaper-switcher/releases) page on GitHub.
+2. Download the latest version of `WallpaperSwitcher.exe`.
+3. (Optional) Move the file to a convenient location on your computer, such as your Desktop or a dedicated folder like `C:\Programs\WallpaperSwitcher`.
+
+### ▶️ Run
+
+- **Double-click** `WallpaperSwitcher.exe` to launch the application.
+- A desktop window will appear. You can click the close button in the upper right corner, and the window will disappear. The program will continue running in the system tray.
+- You need to exit the program by selecting the "Exit" option in the system tray.
 
 ## License
 
