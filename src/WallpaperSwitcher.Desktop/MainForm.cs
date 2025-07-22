@@ -1,229 +1,300 @@
 using System.Collections.Specialized;
 using WallpaperSwitcher.Core;
 
-namespace WallpaperSwitcher.Desktop
+namespace WallpaperSwitcher.Desktop;
+
+public partial class MainForm : Form
 {
-    public partial class MainForm : Form
+    private readonly WallpaperManager _wallpaperManager = new();
+
+    private readonly ToolTip _toolTip = new()
     {
-        private readonly WallpaperManager _wallpaperManager = new();
+        AutoPopDelay = 10000, // Show for 10 seconds
+        InitialDelay = 500, // Wait 0.5 seconds before showing
+        ReshowDelay = 100, // Quick reshow
+        ShowAlways = true
+    };
 
-        private readonly ToolTip toolTip = new()
+    private readonly NotifyIcon _trayIcon;
+
+    // When the user closes the form, if this is true the program will exit completely.
+    // If false, it will minimize to the system tray.
+    private bool IsExiting { get; set; }
+
+    public MainForm()
+    {
+        InitializeComponent();
+
+        // System Tray Icon Initialization
+        _trayIcon = new NotifyIcon()
         {
-            AutoPopDelay = 10000, // Show for 10 seconds
-            InitialDelay = 500, // Wait 0.5 seconds before showing
-            ReshowDelay = 100, // Quick reshow
-            ShowAlways = true
+            Icon = Icon,
+            Visible = true, // Always visible while app is running
+            Text = @"Wallpaper Switcher"
         };
+        InitializeSystemTray();
+    }
 
-        public MainForm()
+    private void LoadSettings()
+    {
+        currentFolderComboBox.Items.Clear();
+        removeFolderComboBox.Items.Clear();
+
+        var wallpaperFolders = Properties.Settings.Default.WallpaperFolders ?? [];
+        foreach (var folderPath in wallpaperFolders)
         {
-            InitializeComponent();
+            // User might have deleted the folder, so we check if it still exists
+            if (!Directory.Exists(folderPath)) continue;
+            currentFolderComboBox.Items.Add(folderPath);
+            removeFolderComboBox.Items.Add(folderPath);
         }
 
-        private void LoadSettings()
-        {
-            currentFolderComboBox.Items.Clear();
-            removeFolderComboBox.Items.Clear();
+        var lastSelectedFolder = Properties.Settings.Default.LastSelectedFolder;
+        if (string.IsNullOrEmpty(lastSelectedFolder)) return;
+        // User might have deleted the last selected folder, so we check if it still exists
+        if (!currentFolderComboBox.Items.Contains(lastSelectedFolder)) return;
+        currentFolderComboBox.SelectedItem = lastSelectedFolder;
+        _wallpaperManager.ChangeWallpaperFolder(lastSelectedFolder);
+    }
 
-            var wallpaperFolders = Properties.Settings.Default.WallpaperFolders ?? [];
-            foreach (var folderPath in wallpaperFolders)
+    private void SaveSettings()
+    {
+        var wallpaperFolders = new StringCollection();
+        foreach (string? item in currentFolderComboBox.Items)
+        {
+            if (!string.IsNullOrEmpty(item) && Directory.Exists(item))
             {
-                // User might have deleted the folder, so we check if it still exists
-                if (!Directory.Exists(folderPath)) continue;
-                currentFolderComboBox.Items.Add(folderPath);
-                removeFolderComboBox.Items.Add(folderPath);
-            }
-
-            var lastSelectedFolder = Properties.Settings.Default.LastSelectedFolder;
-            if (string.IsNullOrEmpty(lastSelectedFolder)) return;
-            // User might have deleted the last selected folder, so we check if it still exists
-            if (!currentFolderComboBox.Items.Contains(lastSelectedFolder)) return;
-            currentFolderComboBox.SelectedItem = lastSelectedFolder;
-            _wallpaperManager.ChangeWallpaperFolder(lastSelectedFolder);
-        }
-
-        private void SaveSettings()
-        {
-            var wallpaperFolders = new StringCollection();
-            foreach (string? item in currentFolderComboBox.Items)
-            {
-                if (!string.IsNullOrEmpty(item) && Directory.Exists(item))
-                {
-                    wallpaperFolders.Add(item);
-                }
-            }
-
-            Properties.Settings.Default.WallpaperFolders = wallpaperFolders;
-
-            if (currentFolderComboBox.SelectedItem != null)
-            {
-                Properties.Settings.Default.LastSelectedFolder = currentFolderComboBox.SelectedItem.ToString();
-            }
-
-            Properties.Settings.Default.Save();
-        }
-
-        private static void ShowSuccessMessage(string message)
-        {
-            MessageBox.Show(message,
-                @"Success",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-        }
-
-        private static void ShowErrorMessage(string message)
-        {
-            MessageBox.Show(message,
-                @"Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-        }
-
-        private static void ShowWarningMessage(string message)
-        {
-            MessageBox.Show(message,
-                @"Warning",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-        }
-
-        private void ShowToolTipForComboBox(ComboBox? comboBox)
-        {
-            if (comboBox != null && comboBox.SelectedItem != null)
-            {
-                string fullText = comboBox.SelectedItem?.ToString() ?? string.Empty;
-
-                // Only show tooltip if text is longer than what can be displayed
-                // -20: to account for padding and dropdown arrow
-                if (TextRenderer.MeasureText(fullText, comboBox.Font).Width > comboBox.Width - 20)
-                {
-                    toolTip.SetToolTip(comboBox, fullText);
-                }
-                else
-                {
-                    toolTip.SetToolTip(comboBox, ""); // Clear tooltip for short text
-                }
+                wallpaperFolders.Add(item);
             }
         }
 
-        // *********************************
-        // Event handlers for Form events  *
-        // *********************************
+        Properties.Settings.Default.WallpaperFolders = wallpaperFolders;
 
-        private void MainForm_Load(object sender, EventArgs e) => LoadSettings();
-
-        private void MainForm_FormClosing(object sender, FormClosingEventArgs e) => SaveSettings();
-
-        private void browseFolderButton_Click(object sender, EventArgs e)
+        if (currentFolderComboBox.SelectedItem != null)
         {
-            using var folderBrowserDialog = new FolderBrowserDialog();
-            folderBrowserDialog.Description = @"Select a folder containing wallpapers";
-            folderBrowserDialog.ShowNewFolderButton = false; // User should select existing folders
-            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
-            {
-                addFolderTextBox.Text = folderBrowserDialog.SelectedPath;
-            }
+            Properties.Settings.Default.LastSelectedFolder = currentFolderComboBox.SelectedItem.ToString();
         }
 
-        private void addFolderButton_Click(object sender, EventArgs e)
+        Properties.Settings.Default.Save();
+    }
+
+    private static void ShowSuccessMessage(string message)
+    {
+        MessageBox.Show(message,
+            @"Success",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+    }
+
+    private static void ShowErrorMessage(string message)
+    {
+        MessageBox.Show(message,
+            @"Error",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error);
+    }
+
+    private static void ShowWarningMessage(string message)
+    {
+        MessageBox.Show(message,
+            @"Warning",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Warning);
+    }
+
+    private void ShowToolTipForComboBox(ComboBox? comboBox)
+    {
+        if (comboBox is { SelectedItem: not null })
         {
-            var newFolderPath = addFolderTextBox.Text.Trim();
+            var fullText = comboBox.SelectedItem?.ToString() ?? string.Empty;
 
-            if (!WallpaperHelper.ValidateWallpaperFolder(newFolderPath, out var errorMessage))
-            {
-                ShowErrorMessage(errorMessage);
-                addFolderTextBox.Clear();
-                return;
-            }
+            // Only show tooltip if text is longer than what can be displayed
+            // -20: to account for padding and dropdown arrow
+            _toolTip.SetToolTip(comboBox,
+                (TextRenderer.MeasureText(fullText, comboBox.Font).Width > comboBox.Width - 20)
+                    ? fullText
+                    : ""); // Clear tooltip for short text
+        }
+    }
 
-            // Check for duplicates
-            if (currentFolderComboBox.Items.Contains(newFolderPath))
-            {
-                ShowWarningMessage("This folder is already added.");
-                addFolderTextBox.Clear();
-                return;
-            }
+    // ****************************
+    // System Tray Implementation
+    // ****************************
+    private void InitializeSystemTray()
+    {
+        var trayMenu = new ContextMenuStrip();
+        // Add folder selection submenu
+        trayMenu.Items.Add(new ToolStripMenuItem("Switch Folder"));
+        trayMenu.Items.Add(new ToolStripSeparator());
+        // Add "Exit" option
+        trayMenu.Items.Add(new ToolStripMenuItem("Exit", null, ExitApplication));
+        // Double-click to restore window
+        _trayIcon.DoubleClick += ShowMainForm;
 
-            // Add the folder
-            currentFolderComboBox.Items.Add(newFolderPath);
-            removeFolderComboBox.Items.Add(newFolderPath);
+        _trayIcon.ContextMenuStrip = trayMenu;
+    }
 
-            // Clear the text box and show success message
+    private void ExitApplication(object? sender, EventArgs e)
+    {
+        IsExiting = true; // Set to true to exit application completely
+        _trayIcon.Visible = false;
+        Application.Exit();
+    }
+
+    private void ShowMainForm(object? sender, EventArgs e)
+    {
+        Show();
+        WindowState = FormWindowState.Normal;
+        Activate();
+    }
+
+    private void MinimizeToTray()
+    {
+        Hide();
+
+        // Show balloon tip on first minimize
+        if (Properties.Settings.Default.HasShownTrayTip) return;
+        _trayIcon.BalloonTipTitle = @"Wallpaper Switcher";
+        _trayIcon.BalloonTipText =
+            @"Application minimized to system tray. Double-click the tray icon to restore.";
+        _trayIcon.BalloonTipIcon = ToolTipIcon.Info;
+        _trayIcon.ShowBalloonTip(3000);
+
+        Properties.Settings.Default.HasShownTrayTip = true;
+        SaveSettings();
+    }
+
+    // **********************************
+    // End of System Tray Implementation
+    // **********************************
+
+    // *********************************
+    // Event handlers for Form events  *
+    // *********************************
+
+    private void MainForm_Load(object sender, EventArgs e) => LoadSettings();
+
+    private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+    {
+        if (e.CloseReason == CloseReason.UserClosing && !IsExiting)
+        {
+            e.Cancel = true;
+            MinimizeToTray();
+            return;
+        }
+
+        SaveSettings();
+    }
+
+    private void browseFolderButton_Click(object sender, EventArgs e)
+    {
+        using var folderBrowserDialog = new FolderBrowserDialog();
+        folderBrowserDialog.Description = @"Select a folder containing wallpapers";
+        folderBrowserDialog.ShowNewFolderButton = false; // User should select existing folders
+        if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+        {
+            addFolderTextBox.Text = folderBrowserDialog.SelectedPath;
+        }
+    }
+
+    private void addFolderButton_Click(object sender, EventArgs e)
+    {
+        var newFolderPath = addFolderTextBox.Text.Trim();
+
+        if (!WallpaperHelper.ValidateWallpaperFolder(newFolderPath, out var errorMessage))
+        {
+            ShowErrorMessage(errorMessage);
             addFolderTextBox.Clear();
-            // Get image count for user feedback
-            var imageCount = WallpaperHelper.GetImageCount(newFolderPath);
-            ShowSuccessMessage($"Folder added successfully!\n\nPath: {newFolderPath}\nImages found: {imageCount}");
+            return;
         }
 
-        private void removeFolderButton_Click(object sender, EventArgs e)
+        // Check for duplicates
+        if (currentFolderComboBox.Items.Contains(newFolderPath))
         {
-            if (removeFolderComboBox.SelectedItem is not string folderToRemove) return;
-
-            // Confirm removal
-            var result = MessageBox.Show(
-                $"""
-                 Are you sure you want to remove this folder from the list?
-
-                 {folderToRemove}
-                 """,
-                @"Confirm Removal",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            if (result != DialogResult.Yes) return;
-
-            var isCurrentSelected = (currentFolderComboBox.SelectedItem?.ToString() == folderToRemove);
-
-            currentFolderComboBox.Items.Remove(folderToRemove);
-            removeFolderComboBox.Items.Remove(folderToRemove);
-
-            if (isCurrentSelected)
-            {
-                currentFolderComboBox_SelectedIndexChanged(currentFolderComboBox, EventArgs.Empty);
-            }
-
-            removeFolderComboBox_SelectedIndexChanged(removeFolderComboBox, EventArgs.Empty);
+            ShowWarningMessage("This folder is already added.");
+            addFolderTextBox.Clear();
+            return;
         }
 
-        private void nextWallpaperButton_Click(object sender, EventArgs e)
+        // Add the folder
+        currentFolderComboBox.Items.Add(newFolderPath);
+        removeFolderComboBox.Items.Add(newFolderPath);
+
+        // Clear the text box and show success message
+        addFolderTextBox.Clear();
+        // Get image count for user feedback
+        var imageCount = WallpaperHelper.GetImageCount(newFolderPath);
+        ShowSuccessMessage($"Folder added successfully!\n\nPath: {newFolderPath}\nImages found: {imageCount}");
+    }
+
+    private void removeFolderButton_Click(object sender, EventArgs e)
+    {
+        if (removeFolderComboBox.SelectedItem is not string folderToRemove) return;
+
+        // Confirm removal
+        var result = MessageBox.Show(
+            $"""
+             Are you sure you want to remove this folder from the list?
+
+             {folderToRemove}
+             """,
+            @"Confirm Removal",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question);
+
+        if (result != DialogResult.Yes) return;
+
+        var isCurrentSelected = (currentFolderComboBox.SelectedItem?.ToString() == folderToRemove);
+
+        currentFolderComboBox.Items.Remove(folderToRemove);
+        removeFolderComboBox.Items.Remove(folderToRemove);
+
+        if (isCurrentSelected)
         {
-            _wallpaperManager.NextWallpaper();
+            currentFolderComboBox_SelectedIndexChanged(currentFolderComboBox, EventArgs.Empty);
         }
 
-        private void prevWallpaperButton_Click(object sender, EventArgs e)
-        {
-            _wallpaperManager.PreviousWallpaper();
-        }
+        removeFolderComboBox_SelectedIndexChanged(removeFolderComboBox, EventArgs.Empty);
+    }
 
-        private void removeFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            removeFolderButton.Enabled = removeFolderComboBox.SelectedItem != null;
-        }
+    private void nextWallpaperButton_Click(object sender, EventArgs e)
+    {
+        _wallpaperManager.NextWallpaper();
+    }
 
-        private void currentFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            prevWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
-            nextWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
-            _wallpaperManager.ChangeWallpaperFolder(currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty);
-            _wallpaperManager.NextWallpaper();
-        }
+    private void prevWallpaperButton_Click(object sender, EventArgs e)
+    {
+        _wallpaperManager.PreviousWallpaper();
+    }
 
-        private void addFolderTextBox_TextChanged(object sender, EventArgs e)
-        {
-            addFolderButton.Enabled = !string.IsNullOrWhiteSpace(addFolderTextBox.Text);
-            addFolderTextBox.SelectionStart = addFolderTextBox.Text.Length; // Move cursor to the end
-        }
+    private void removeFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        removeFolderButton.Enabled = removeFolderComboBox.SelectedItem != null;
+    }
 
-        private void currentFolderComboBox_MouseEnter(object sender, EventArgs e)
-        {
-            var comboBox = sender as ComboBox;
-            ShowToolTipForComboBox(comboBox);
-        }
+    private void currentFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        prevWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
+        nextWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
+        _wallpaperManager.ChangeWallpaperFolder(currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty);
+        _wallpaperManager.NextWallpaper();
+    }
 
-        private void removeFolderComboBox_MouseEnter(object sender, EventArgs e)
-        {
-            var comboBox = sender as ComboBox;
-            ShowToolTipForComboBox(comboBox);
-        }
+    private void addFolderTextBox_TextChanged(object sender, EventArgs e)
+    {
+        addFolderButton.Enabled = !string.IsNullOrWhiteSpace(addFolderTextBox.Text);
+        addFolderTextBox.SelectionStart = addFolderTextBox.Text.Length; // Move cursor to the end
+    }
+
+    private void currentFolderComboBox_MouseEnter(object sender, EventArgs e)
+    {
+        var comboBox = sender as ComboBox;
+        ShowToolTipForComboBox(comboBox);
+    }
+
+    private void removeFolderComboBox_MouseEnter(object sender, EventArgs e)
+    {
+        var comboBox = sender as ComboBox;
+        ShowToolTipForComboBox(comboBox);
     }
 }
