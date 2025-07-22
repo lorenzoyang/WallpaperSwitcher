@@ -81,18 +81,79 @@ public partial class MainForm : Form
     // ****************************
     // System Tray Implementation
     // ****************************
+    private static readonly string[] TrayMenuItemNames =
+    [
+        "Switch Folder",
+        "Next Wallpaper",
+        "Previous Wallpaper",
+        "Exit"
+    ];
+
     private void InitializeSystemTray()
     {
         var trayMenu = new ContextMenuStrip();
         // Add folder selection submenu
-        trayMenu.Items.Add(new ToolStripMenuItem("Switch Folder"));
+        trayMenu.Items.Add(new ToolStripMenuItem(TrayMenuItemNames[0]));
+        trayMenu.Items.Add(new ToolStripSeparator());
+        // Add wallpaper controls
+        var nextWallpaperItem = new ToolStripMenuItem(TrayMenuItemNames[1], null, nextWallpaperButton_Click);
+        var prevWallpaperItem = new ToolStripMenuItem(TrayMenuItemNames[2], null, prevWallpaperButton_Click);
+        trayMenu.Items.Add(nextWallpaperItem);
+        trayMenu.Items.Add(prevWallpaperItem);
         trayMenu.Items.Add(new ToolStripSeparator());
         // Add "Exit" option
-        trayMenu.Items.Add(new ToolStripMenuItem("Exit", null, ExitApplication));
+        trayMenu.Items.Add(new ToolStripMenuItem(TrayMenuItemNames[3], null, ExitApplication));
         // Double-click to restore window
         _trayIcon.DoubleClick += ShowMainForm;
+        trayMenu.Opening += (_, _) => UpdateTrayMenu();
 
         _trayIcon.ContextMenuStrip = trayMenu;
+    }
+
+    private void UpdateTrayMenu()
+    {
+        if (GetTrayMenuItemByName(TrayMenuItemNames[0]) is not ToolStripMenuItem folderMenuItem) return;
+        folderMenuItem.DropDownItems.Clear();
+        foreach (string folderPath in currentFolderComboBox.Items)
+        {
+            var menuItem = new ToolStripMenuItem(Path.GetFileName(folderPath)) // Use folder name as display text
+            {
+                Tag = folderPath, // Store the full path in the Tag property
+                Checked = folderPath == currentFolderComboBox.SelectedItem?.ToString(),
+                ToolTipText = folderPath
+            };
+            menuItem.Click += (s, _) =>
+            {
+                if (s is ToolStripMenuItem { Tag: string selectedFolderPath })
+                {
+                    currentFolderComboBox.SelectedItem = selectedFolderPath;
+                }
+            };
+
+            folderMenuItem.DropDownItems.Add(menuItem);
+        }
+
+        if (folderMenuItem.DropDownItems.Count == 0)
+        {
+            folderMenuItem.DropDownItems.Add(new ToolStripMenuItem("No folders configured") { Enabled = false });
+        }
+
+        // Disable wallpaper controls if no folder is selected
+        var nextWallpaperMenuItem = GetTrayMenuItemByName(TrayMenuItemNames[1]);
+        var prevWallpaperMenuItem = GetTrayMenuItemByName(TrayMenuItemNames[2]);
+        var hasSelectedFolder = currentFolderComboBox.SelectedItem != null;
+        nextWallpaperMenuItem.Enabled = hasSelectedFolder;
+        prevWallpaperMenuItem.Enabled = hasSelectedFolder;
+
+        return;
+
+        ToolStripItem GetTrayMenuItemByName(string name)
+        {
+            return _trayIcon.ContextMenuStrip?.Items
+                       .Cast<ToolStripItem>()
+                       .FirstOrDefault(item => item.Text == name) ??
+                   throw new InvalidOperationException($"Menu item '{name}' not found.");
+        }
     }
 
     private void ExitApplication(object? sender, EventArgs e)
@@ -219,12 +280,12 @@ public partial class MainForm : Form
         removeFolderComboBox_SelectedIndexChanged(removeFolderComboBox, EventArgs.Empty);
     }
 
-    private void nextWallpaperButton_Click(object sender, EventArgs e)
+    private void nextWallpaperButton_Click(object? sender, EventArgs e)
     {
         _wallpaperManager.NextWallpaper();
     }
 
-    private void prevWallpaperButton_Click(object sender, EventArgs e)
+    private void prevWallpaperButton_Click(object? sender, EventArgs e)
     {
         _wallpaperManager.PreviousWallpaper();
     }
@@ -239,7 +300,8 @@ public partial class MainForm : Form
         prevWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
         nextWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
         _wallpaperManager.ChangeWallpaperFolder(currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty);
-        _wallpaperManager.NextWallpaper();
+        _wallpaperManager.SetFirstWallpaper();
+        SaveSettings();
     }
 
     private void addFolderTextBox_TextChanged(object sender, EventArgs e)

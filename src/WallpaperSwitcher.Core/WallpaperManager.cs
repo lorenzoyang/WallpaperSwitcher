@@ -73,12 +73,20 @@ public sealed class WallpaperManager
     public void NextWallpaper()
     {
         if (WallpaperPaths.Count is 0 or 1) return;
-        WallpaperNativeApi.SetWallpaper(WallpaperPaths[CurrentIndex++]);
+        CurrentIndex++;
+        WallpaperNativeApi.SetWallpaper(WallpaperPaths[CurrentIndex]);
+    }
+
+    public void SetFirstWallpaper()
+    {
+        if (WallpaperPaths.Count is 0) return;
+        WallpaperNativeApi.SetWallpaper(WallpaperPaths[0]);
     }
 
     public void PreviousWallpaper()
     {
         if (WallpaperPaths.Count is 0 or 1) return;
-        WallpaperNativeApi.SetWallpaper(WallpaperPaths[CurrentIndex--]);
+        CurrentIndex--;
+        WallpaperNativeApi.SetWallpaper(WallpaperPaths[CurrentIndex]);
     }
 }
