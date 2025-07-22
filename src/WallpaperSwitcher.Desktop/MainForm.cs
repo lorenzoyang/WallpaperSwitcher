@@ -78,45 +78,6 @@ public partial class MainForm : Form
         Properties.Settings.Default.Save();
     }
 
-    private static void ShowSuccessMessage(string message)
-    {
-        MessageBox.Show(message,
-            @"Success",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
-    }
-
-    private static void ShowErrorMessage(string message)
-    {
-        MessageBox.Show(message,
-            @"Error",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Error);
-    }
-
-    private static void ShowWarningMessage(string message)
-    {
-        MessageBox.Show(message,
-            @"Warning",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Warning);
-    }
-
-    private void ShowToolTipForComboBox(ComboBox? comboBox)
-    {
-        if (comboBox is { SelectedItem: not null })
-        {
-            var fullText = comboBox.SelectedItem?.ToString() ?? string.Empty;
-
-            // Only show tooltip if text is longer than what can be displayed
-            // -20: to account for padding and dropdown arrow
-            _toolTip.SetToolTip(comboBox,
-                (TextRenderer.MeasureText(fullText, comboBox.Font).Width > comboBox.Width - 20)
-                    ? fullText
-                    : ""); // Clear tooltip for short text
-        }
-    }
-
     // ****************************
     // System Tray Implementation
     // ****************************
@@ -203,7 +164,7 @@ public partial class MainForm : Form
 
         if (!WallpaperHelper.ValidateWallpaperFolder(newFolderPath, out var errorMessage))
         {
-            ShowErrorMessage(errorMessage);
+            FormHelper.ShowErrorMessage(errorMessage);
             addFolderTextBox.Clear();
             return;
         }
@@ -211,7 +172,7 @@ public partial class MainForm : Form
         // Check for duplicates
         if (currentFolderComboBox.Items.Contains(newFolderPath))
         {
-            ShowWarningMessage("This folder is already added.");
+            FormHelper.ShowWarningMessage("This folder is already added.");
             addFolderTextBox.Clear();
             return;
         }
@@ -224,7 +185,8 @@ public partial class MainForm : Form
         addFolderTextBox.Clear();
         // Get image count for user feedback
         var imageCount = WallpaperHelper.GetImageCount(newFolderPath);
-        ShowSuccessMessage($"Folder added successfully!\n\nPath: {newFolderPath}\nImages found: {imageCount}");
+        FormHelper.ShowSuccessMessage(
+            $"Folder added successfully!\n\nPath: {newFolderPath}\nImages found: {imageCount}");
     }
 
     private void removeFolderButton_Click(object sender, EventArgs e)
@@ -289,12 +251,12 @@ public partial class MainForm : Form
     private void currentFolderComboBox_MouseEnter(object sender, EventArgs e)
     {
         var comboBox = sender as ComboBox;
-        ShowToolTipForComboBox(comboBox);
+        FormHelper.ShowToolTipForComboBox(_toolTip, comboBox);
     }
 
     private void removeFolderComboBox_MouseEnter(object sender, EventArgs e)
     {
         var comboBox = sender as ComboBox;
-        ShowToolTipForComboBox(comboBox);
+        FormHelper.ShowToolTipForComboBox(_toolTip, comboBox);
     }
 }
