@@ -4,12 +4,12 @@
 
 <table>
   <tr>
-    <td align="center"><img src="./assets/gifs/GUI_Demo.gif" width="400"/></td>
-    <td align="center"><img src="./assets/gifs/SystemTray_Demo.gif" width="400"/></td>
+    <td><img src="./assets/gifs/GUI_Demo.gif" width="390"/></td>
+    <td><img src="./assets/gifs/SystemTray_Demo.gif" width="390"/></td>
   </tr>
   <tr>
-    <td align="center"><img src="./assets/imgs/GUI.png" width="400"/></td>
-    <td align="center"><img src="./assets/imgs/SystemTray.png" width="400"/></td>
+    <td><img src="./assets/imgs/GUI.png" width="390"/></td>
+    <td><img src="./assets/imgs/SystemTray.png" width="390"/></td>
   </tr>
 </table>
 
