@@ -224,14 +224,9 @@
 
         private GroupBox foldersManagementGroupBox;
         private ComboBox currentFolderComboBox;
-        private Label thirdFolderLabel;
         private Label secondFolderLabel;
         private Label currentFolderLabel;
-        private TextBox folder3TextBox;
-        private TextBox folder2TextBox;
-        private Button browseFolder3Button;
         private Button browseFolderButton;
-        private Button browseFolder2Button;
         private GroupBox wallpaperSwitchingGroupBox;
         private Button nextWallpaperButton;
         private Button prevWallpaperButton;
