@@ -5,6 +5,16 @@ namespace WallpaperSwitcher.Desktop;
 
 public partial class MainForm : Form
 {
+    protected override void WndProc(ref Message m)
+    {
+        if (m.Msg == FormHelper.WmShowFirstInstance)
+        {
+            ShowMainForm(null, EventArgs.Empty);
+        }
+
+        base.WndProc(ref m);
+    }
+
     private readonly WallpaperManager _wallpaperManager = new();
 
     private readonly ToolTip _toolTip = new()
