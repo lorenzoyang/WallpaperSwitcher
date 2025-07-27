@@ -15,7 +15,7 @@ public partial class MainForm : Form
         base.WndProc(ref m);
     }
 
-    private readonly WallpaperManager _wallpaperManager = new();
+    private readonly DesktopWallpaperManager _desktopWallpaperManager = new();
 
     private readonly ToolTip _toolTip = new()
     {
@@ -291,12 +291,12 @@ public partial class MainForm : Form
 
     private void nextWallpaperButton_Click(object? sender, EventArgs e)
     {
-        _wallpaperManager.NextWallpaper();
+        _desktopWallpaperManager.NextWallpaper();
     }
 
     private void prevWallpaperButton_Click(object? sender, EventArgs e)
     {
-        _wallpaperManager.PreviousWallpaper();
+        _desktopWallpaperManager.PreviousWallpaper();
     }
 
     private void removeFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -308,8 +308,8 @@ public partial class MainForm : Form
     {
         prevWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
         nextWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
-        _wallpaperManager.ChangeWallpaperFolder(currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty);
-        _wallpaperManager.Start();
+        _desktopWallpaperManager.ChangeWallpaperFolder(currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty);
+        _desktopWallpaperManager.Start();
         SaveSettings(); // Save user selection promptly
     }
 

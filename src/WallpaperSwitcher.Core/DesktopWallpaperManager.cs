@@ -1,14 +1,21 @@
-﻿using WallpaperSwitcher.Core.Interop;
+﻿using Windows.Win32.UI.Shell;
+using Windows.Win32;
+
 
 namespace WallpaperSwitcher.Core;
 
-public sealed class WallpaperManager
+public sealed class DesktopWallpaperManager
 {
     public static readonly string[] SupportedExtensions =
     [
         ".jpg", ".jpeg", ".png", ".bmp", "dib", ".gif", ".tif", ".tiff", "jfif"
     ];
 
+    /// <summary>
+    /// A wrapper class for the IDesktopWallpaper interface,
+    /// generated via the 'CsWin32' source code generation tool.
+    /// </summary>
+    private readonly IDesktopWallpaper _desktopWallpaper = new DesktopWallpaper() as IDesktopWallpaper;
     private string _folderPath = string.Empty;
     private List<string> _wallpaperPaths = [];
     private int _currentIndex;
@@ -72,14 +79,14 @@ public sealed class WallpaperManager
     {
         if (_wallpaperPaths.Count is 0 or 1) return;
         CurrentIndex++;
-        WallpaperNativeApi.SetWallpaper(_wallpaperPaths[CurrentIndex]);
+        _desktopWallpaper.SetWallpaper(null, _wallpaperPaths[CurrentIndex]);
     }
 
     public void PreviousWallpaper()
     {
         if (_wallpaperPaths.Count is 0 or 1) return;
         CurrentIndex--;
-        WallpaperNativeApi.SetWallpaper(_wallpaperPaths[CurrentIndex]);
+        _desktopWallpaper.SetWallpaper(null, _wallpaperPaths[CurrentIndex]);
     }
 
     /// <summary>
@@ -91,7 +98,8 @@ public sealed class WallpaperManager
     {
         if (_wallpaperPaths.Count is 0) return;
 
-        var currentWallpaperPath = WallpaperNativeApi.GetCurrentWallpaperPath();
+        _desktopWallpaper.GetWallpaper(null, out var nativeWallpaperPath);
+        var currentWallpaperPath = nativeWallpaperPath.ToString() ?? string.Empty;
 
         CurrentIndex = _wallpaperPaths.IndexOf(currentWallpaperPath);
         if (CurrentIndex < 0)
@@ -99,6 +107,6 @@ public sealed class WallpaperManager
             CurrentIndex = 0;
         }
 
-        WallpaperNativeApi.SetWallpaper(_wallpaperPaths[CurrentIndex]);
+        _desktopWallpaper.SetWallpaper(null, _wallpaperPaths[CurrentIndex]);
     }
 }

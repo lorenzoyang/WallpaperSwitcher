@@ -12,7 +12,7 @@ public static class WallpaperHelper
         return Directory
             .GetFiles(folderPath, "*.*", SearchOption.TopDirectoryOnly)
             .Count(file =>
-                WallpaperManager.SupportedExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()));
+                DesktopWallpaperManager.SupportedExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()));
     }
 
     public static bool ValidateWallpaperFolder(string folderPath, out string errorMessage)
