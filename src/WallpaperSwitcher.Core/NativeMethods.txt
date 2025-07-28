@@ -4,3 +4,9 @@
 // namespace Windows.Win32.UI.Shell:
 DesktopWallpaper
 IDesktopWallpaper
+
+// Methods to set up wallpaper SlideShow
+SHCreateItemFromParsingName
+SHCreateShellItemArrayFromShellItem
+IShellItem
+IShellItemArray

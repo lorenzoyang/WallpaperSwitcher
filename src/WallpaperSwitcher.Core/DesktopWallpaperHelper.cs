@@ -1,6 +1,9 @@
-﻿namespace WallpaperSwitcher.Core;
+﻿using Windows.Win32;
+using Windows.Win32.UI.Shell;
 
-public static class WallpaperHelper
+namespace WallpaperSwitcher.Core;
+
+public static class DesktopWallpaperHelper
 {
     public static int GetImageCount(string folderPath)
     {
@@ -51,5 +54,26 @@ public static class WallpaperHelper
         }
 
         return true;
+    }
+
+    internal static IShellItemArray CreateShellItemArrayFromFolder(string folder)
+    {
+        // Create shell item from folder path
+        var hr = PInvoke.SHCreateItemFromParsingName(
+            folder,
+            null,
+            typeof(IShellItem).GUID,
+            out var shellItemObj);
+        hr.ThrowOnFailure();
+        var shellItem = (IShellItem)shellItemObj;
+
+        // Create shell item array from shell item
+        hr = PInvoke.SHCreateShellItemArrayFromShellItem(
+            shellItem,
+            typeof(IShellItemArray).GUID,
+            out var shellItemArrayObj);
+        hr.ThrowOnFailure();
+
+        return (IShellItemArray)shellItemArrayObj;
     }
 }

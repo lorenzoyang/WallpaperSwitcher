@@ -1,4 +1,5 @@
-﻿using Windows.Win32.UI.Shell;
+﻿using System.Runtime.Versioning;
+using Windows.Win32.UI.Shell;
 using Windows.Win32;
 
 
@@ -16,6 +17,7 @@ public sealed class DesktopWallpaperManager
     /// generated via the 'CsWin32' source code generation tool.
     /// </summary>
     private readonly IDesktopWallpaper _desktopWallpaper = new DesktopWallpaper() as IDesktopWallpaper;
+
     private string _folderPath = string.Empty;
     private List<string> _wallpaperPaths = [];
     private int _currentIndex;
@@ -108,5 +110,11 @@ public sealed class DesktopWallpaperManager
         }
 
         _desktopWallpaper.SetWallpaper(null, _wallpaperPaths[CurrentIndex]);
+    }
+
+    [SupportedOSPlatform("windows8.0")]
+    public void SetSlideShow()
+    {
+        _desktopWallpaper.SetSlideshow(DesktopWallpaperHelper.CreateShellItemArrayFromFolder(_folderPath));
     }
 }

@@ -232,7 +232,7 @@ public partial class MainForm : Form
     {
         var newFolderPath = addFolderTextBox.Text.Trim();
 
-        if (!WallpaperHelper.ValidateWallpaperFolder(newFolderPath, out var errorMessage))
+        if (!DesktopWallpaperHelper.ValidateWallpaperFolder(newFolderPath, out var errorMessage))
         {
             FormHelper.ShowErrorMessage(errorMessage);
             addFolderTextBox.Clear();
@@ -254,7 +254,7 @@ public partial class MainForm : Form
         // Clear the text box and show success message
         addFolderTextBox.Clear();
         // Get image count for user feedback
-        var imageCount = WallpaperHelper.GetImageCount(newFolderPath);
+        var imageCount = DesktopWallpaperHelper.GetImageCount(newFolderPath);
         FormHelper.ShowSuccessMessage(
             $"Folder added successfully!\n\nPath: {newFolderPath}\nImages found: {imageCount}");
     }
