@@ -18,7 +18,7 @@ public static class DesktopWallpaperHelper
                 DesktopWallpaperManager.SupportedExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()));
     }
 
-    public static bool ValidateWallpaperFolder(string folderPath, out string errorMessage)
+    public static bool IsValidWallpaperFolderPath(string folderPath, out string errorMessage)
     {
         errorMessage = string.Empty;
         if (string.IsNullOrWhiteSpace(folderPath))

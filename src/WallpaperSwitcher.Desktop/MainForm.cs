@@ -1,4 +1,5 @@
 using System.Collections.Specialized;
+using System.Runtime.Versioning;
 using WallpaperSwitcher.Core;
 
 namespace WallpaperSwitcher.Desktop;
@@ -31,6 +32,7 @@ public partial class MainForm : Form
     // If false, it will minimize to the system tray.
     private bool IsExiting { get; set; }
 
+    [SupportedOSPlatform("windows8.0")]
     public MainForm()
     {
         InitializeComponent();
@@ -98,6 +100,7 @@ public partial class MainForm : Form
         "Exit"
     ];
 
+    [SupportedOSPlatform("windows8.0")]
     private void InitializeSystemTray()
     {
         var trayMenu = new ContextMenuStrip();
@@ -232,7 +235,7 @@ public partial class MainForm : Form
     {
         var newFolderPath = addFolderTextBox.Text.Trim();
 
-        if (!DesktopWallpaperHelper.ValidateWallpaperFolder(newFolderPath, out var errorMessage))
+        if (!DesktopWallpaperHelper.IsValidWallpaperFolderPath(newFolderPath, out var errorMessage))
         {
             FormHelper.ShowErrorMessage(errorMessage);
             addFolderTextBox.Clear();
@@ -259,6 +262,7 @@ public partial class MainForm : Form
             $"Folder added successfully!\n\nPath: {newFolderPath}\nImages found: {imageCount}");
     }
 
+    [SupportedOSPlatform("windows8.0")]
     private void removeFolderButton_Click(object sender, EventArgs e)
     {
         if (removeFolderComboBox.SelectedItem is not string folderToRemove) return;
@@ -289,14 +293,16 @@ public partial class MainForm : Form
         removeFolderComboBox_SelectedIndexChanged(removeFolderComboBox, EventArgs.Empty);
     }
 
+    [SupportedOSPlatform("windows8.0")]
     private void nextWallpaperButton_Click(object? sender, EventArgs e)
     {
-        _desktopWallpaperManager.NextWallpaper();
+        _desktopWallpaperManager.AdvanceForwardSlideshow();
     }
 
+    [SupportedOSPlatform("windows8.0")]
     private void prevWallpaperButton_Click(object? sender, EventArgs e)
     {
-        _desktopWallpaperManager.PreviousWallpaper();
+        _desktopWallpaperManager.AdvanceBackwardSlideshow();
     }
 
     private void removeFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -304,12 +310,12 @@ public partial class MainForm : Form
         removeFolderButton.Enabled = removeFolderComboBox.SelectedItem != null;
     }
 
+    [SupportedOSPlatform("windows8.0")]
     private void currentFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
         prevWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
         nextWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
-        _desktopWallpaperManager.ChangeWallpaperFolder(currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty);
-        _desktopWallpaperManager.Start();
+        _desktopWallpaperManager.SetSlideShow(currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty);
         SaveSettings(); // Save user selection promptly
     }
 
