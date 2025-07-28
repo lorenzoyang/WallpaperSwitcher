@@ -2,8 +2,8 @@
 
 **Wallpaper Switcher** is a lightweight and user-friendly wallpaper manager for Windows. It allows users to manage multiple wallpaper folders and quickly switch between images with ease.
 
-<img src="./assets/gifs/GUI_Demo.gif" alt="GUI Demo" style="max-width:600px; max-height:400px; width:auto; height:auto;" />
-<img src="./assets/gifs/SystemTray_Demo.gif" alt="System Tray Demo" style="max-width:600px; max-height:400px; width:auto; height:auto;" />
+<img src="./assets/gifs/GUI_Demo.gif" alt="GUI Demo" style="max-width:500px; max-height:300px; width:auto; height:auto;" />
+<img src="./assets/gifs/SystemTray_Demo.gif" alt="System Tray Demo" style="max-width:500px; max-height:300px; width:auto; height:auto;" />
 
 ## Features 
 
@@ -37,13 +37,13 @@
 
 You can run **Wallpaper Switcher** without needing to install anything. Just download the executable file and launch it:
 
-### 🔽 Download
+### Download
 
 1. Visit the [Releases](https://github.com/lorenzoyang/WallpaperSwitcher/releases) page on GitHub.
 2. Download the latest version of `WallpaperSwitcher.exe`.
 3. (Optional) Move the file to a convenient location on your computer, such as your Desktop or a dedicated folder like `C:\Programs\WallpaperSwitcher`.
 
-### ▶️ Run
+### Run
 
 - **Double-click** `WallpaperSwitcher.exe` to launch the application.
 - A desktop window will appear. You can click the close button in the upper right corner, and the window will disappear. The program will continue running in the system tray.

@@ -315,7 +315,12 @@ public partial class MainForm : Form
     {
         prevWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
         nextWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
-        _desktopWallpaperManager.SetSlideShow(currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty);
+        var currentFolderPath = currentFolderComboBox.SelectedItem?.ToString();
+        if (currentFolderPath != _desktopWallpaperManager.GetSlideShowFolderPath())
+        {
+            _desktopWallpaperManager.SetSlideShow(currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty);
+        }
+
         SaveSettings(); // Save user selection promptly
     }
 

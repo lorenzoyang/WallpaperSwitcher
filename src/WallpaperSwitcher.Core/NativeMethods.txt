@@ -10,3 +10,4 @@ SHCreateItemFromParsingName
 SHCreateShellItemArrayFromShellItem
 IShellItem
 IShellItemArray
+SIGDN

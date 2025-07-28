@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.Versioning;
 
 namespace WallpaperSwitcher.Desktop
 {
@@ -13,6 +14,7 @@ namespace WallpaperSwitcher.Desktop
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
+        [SupportedOSPlatform("windows8.0")]
         static void Main()
         {
             try
