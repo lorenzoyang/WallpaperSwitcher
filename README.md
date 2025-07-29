@@ -2,8 +2,8 @@
 
 **Wallpaper Switcher** is a lightweight and user-friendly wallpaper manager for Windows. It allows users to manage multiple wallpaper folders and quickly switch between images with ease.
 
-<img src="./assets/gifs/GUI_Demo.gif" alt="GUI Demo" style="max-width:500px; max-height:300px; width:auto; height:auto;" />
-<img src="./assets/gifs/SystemTray_Demo.gif" alt="System Tray Demo" style="max-width:500px; max-height:300px; width:auto; height:auto;" />
+<img src="./assets/gifs/GUI_Demo.gif" alt="GUI Demo" style="max-width:350px; max-height:200px; width:auto; height:auto;" />
+<img src="./assets/gifs/SystemTray_Demo.gif" alt="System Tray Demo" style="max-width:350px; max-height:200px; width:auto; height:auto;" />
 
 ## Features 
 

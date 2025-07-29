@@ -182,20 +182,21 @@ public partial class MainForm : Form
         Activate();
     }
 
+    private bool HasShownTrayTip { get; set; } = false;
+
     private void MinimizeToTray()
     {
         Hide();
 
         // Show balloon tip on first minimize
-        if (Properties.Settings.Default.HasShownTrayTip) return;
+        if (HasShownTrayTip) return;
         _trayIcon.BalloonTipTitle = @"Wallpaper Switcher";
         _trayIcon.BalloonTipText =
             @"Application minimized to system tray. Double-click the tray icon to restore.";
         _trayIcon.BalloonTipIcon = ToolTipIcon.Info;
         _trayIcon.ShowBalloonTip(3000);
 
-        Properties.Settings.Default.HasShownTrayTip = true;
-        SaveSettings();
+        HasShownTrayTip = true;
     }
 
     // **********************************

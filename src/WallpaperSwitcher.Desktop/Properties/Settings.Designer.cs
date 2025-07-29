@@ -45,17 +45,5 @@ namespace WallpaperSwitcher.Desktop.Properties {
                 this["LastSelectedFolder"] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool HasShownTrayTip {
-            get {
-                return ((bool)(this["HasShownTrayTip"]));
-            }
-            set {
-                this["HasShownTrayTip"] = value;
-            }
-        }
     }
 }
