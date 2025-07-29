@@ -186,7 +186,7 @@ public partial class MainForm : Form
         _trayIcon.BalloonTipText =
             @"Application minimized to system tray. Double-click the tray icon to restore.";
         _trayIcon.BalloonTipIcon = ToolTipIcon.Info;
-        _trayIcon.ShowBalloonTip(3000);
+        _trayIcon.ShowBalloonTip(1000);
 
         HasShownTrayTip = true;
     }
@@ -279,6 +279,7 @@ public partial class MainForm : Form
 
         if (isCurrentSelected)
         {
+            _desktopWallpaperManager.SetWallpaper(DesktopWallpaperManager.DefaultWallpaperPath);
             currentFolderComboBox_SelectedIndexChanged(currentFolderComboBox, EventArgs.Empty);
         }
 
@@ -299,11 +300,8 @@ public partial class MainForm : Form
     {
         nextWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
         var currentFolderPath = currentFolderComboBox.SelectedItem?.ToString();
-        if (currentFolderPath != _desktopWallpaperManager.GetSlideShowFolderPath())
-        {
-            _desktopWallpaperManager.SetSlideShow(currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty);
-        }
-
+        var restart = currentFolderPath != _desktopWallpaperManager.GetSlideShowFolderPath();
+        _desktopWallpaperManager.SetSlideShow(currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty, restart);
         SaveSettings(); // Save user selection promptly
     }
 

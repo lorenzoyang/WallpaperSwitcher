@@ -11,6 +11,10 @@ public sealed class DesktopWallpaperManager
         ".jpg", ".jpeg", ".png", ".bmp", "dib", ".gif", ".tif", ".tiff", "jfif"
     ];
 
+    public static readonly string DefaultWallpaperPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.Windows), @"Web\Wallpaper\Windows\img0.jpg"
+    );
+
     /// <summary>
     /// A wrapper class for the IDesktopWallpaper interface,
     /// generated via the 'CsWin32' source code generation tool.
@@ -19,14 +23,26 @@ public sealed class DesktopWallpaperManager
         // ReSharper disable once SuspiciousTypeConversion.Global
         new DesktopWallpaper() as IDesktopWallpaper ?? throw new InvalidOperationException();
 
-    public void SetSlideShow(string folder)
+    private string SlideShowFolder { get; set; } = string.Empty;
+
+    public void SetSlideShow(string folder, bool restart = true)
     {
-        _desktopWallpaper.SetSlideshow(DesktopWallpaperHelper.CreateShellItemArrayFromFolder(folder));
+        if (!DesktopWallpaperHelper.IsValidWallpaperFolderPath(folder, out _)) return;
+        SlideShowFolder = folder;
+        if (!restart) return;
+        _desktopWallpaper.SetSlideshow(DesktopWallpaperHelper.CreateShellItemArrayFromFolder(SlideShowFolder));
     }
 
     public void AdvanceForwardSlideshow()
     {
+        if (string.IsNullOrEmpty(SlideShowFolder)) return;
         _desktopWallpaper.AdvanceSlideshow(null, DESKTOP_SLIDESHOW_DIRECTION.DSD_FORWARD);
+    }
+
+    public void SetWallpaper(string wallpaperPath)
+    {
+        if (!DesktopWallpaperHelper.IsValidWallpaperPath(wallpaperPath)) return;
+        _desktopWallpaper.SetWallpaper(null, wallpaperPath);
     }
 
     public string GetSlideShowFolderPath()

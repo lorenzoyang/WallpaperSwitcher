@@ -71,11 +71,11 @@
             // 
             removeFolderComboBox.BackColor = SystemColors.ControlLightLight;
             removeFolderComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            removeFolderComboBox.Font = new Font("Segoe UI", 10.125F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            removeFolderComboBox.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             removeFolderComboBox.FormattingEnabled = true;
             removeFolderComboBox.Location = new Point(27, 431);
             removeFolderComboBox.Name = "removeFolderComboBox";
-            removeFolderComboBox.Size = new Size(460, 45);
+            removeFolderComboBox.Size = new Size(460, 40);
             removeFolderComboBox.TabIndex = 14;
             removeFolderComboBox.SelectedIndexChanged += removeFolderComboBox_SelectedIndexChanged;
             removeFolderComboBox.MouseEnter += removeFolderComboBox_MouseEnter;
@@ -87,7 +87,7 @@
             removeFolderButton.Font = new Font("Segoe UI", 10.125F, FontStyle.Regular, GraphicsUnit.Point, 0);
             removeFolderButton.Location = new Point(517, 430);
             removeFolderButton.Name = "removeFolderButton";
-            removeFolderButton.Size = new Size(134, 49);
+            removeFolderButton.Size = new Size(134, 41);
             removeFolderButton.TabIndex = 13;
             removeFolderButton.Text = "Remove";
             removeFolderButton.UseVisualStyleBackColor = false;
@@ -120,7 +120,7 @@
             addFolderButton.Font = new Font("Segoe UI", 10.125F, FontStyle.Regular, GraphicsUnit.Point, 0);
             addFolderButton.Location = new Point(517, 268);
             addFolderButton.Name = "addFolderButton";
-            addFolderButton.Size = new Size(134, 46);
+            addFolderButton.Size = new Size(134, 39);
             addFolderButton.TabIndex = 10;
             addFolderButton.Text = "Add";
             addFolderButton.UseVisualStyleBackColor = false;
@@ -141,11 +141,11 @@
             // addFolderTextBox
             // 
             addFolderTextBox.BackColor = SystemColors.ControlLightLight;
-            addFolderTextBox.Font = new Font("Segoe UI", 10.125F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            addFolderTextBox.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             addFolderTextBox.Location = new Point(27, 268);
             addFolderTextBox.Name = "addFolderTextBox";
             addFolderTextBox.ReadOnly = true;
-            addFolderTextBox.Size = new Size(460, 43);
+            addFolderTextBox.Size = new Size(460, 39);
             addFolderTextBox.TabIndex = 5;
             addFolderTextBox.TextChanged += addFolderTextBox_TextChanged;
             // 
@@ -161,11 +161,11 @@
             // 
             currentFolderComboBox.BackColor = SystemColors.ControlLightLight;
             currentFolderComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            currentFolderComboBox.Font = new Font("Segoe UI", 10.125F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            currentFolderComboBox.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             currentFolderComboBox.FormattingEnabled = true;
             currentFolderComboBox.Location = new Point(27, 115);
             currentFolderComboBox.Name = "currentFolderComboBox";
-            currentFolderComboBox.Size = new Size(624, 45);
+            currentFolderComboBox.Size = new Size(624, 40);
             currentFolderComboBox.TabIndex = 1;
             currentFolderComboBox.SelectedIndexChanged += currentFolderComboBox_SelectedIndexChanged;
             currentFolderComboBox.MouseEnter += currentFolderComboBox_MouseEnter;

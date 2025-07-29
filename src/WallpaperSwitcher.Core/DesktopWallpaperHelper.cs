@@ -14,8 +14,7 @@ public static class DesktopWallpaperHelper
 
         return Directory
             .GetFiles(folderPath, "*.*", SearchOption.TopDirectoryOnly)
-            .Count(file =>
-                DesktopWallpaperManager.SupportedExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()));
+            .Count(IsValidWallpaperFileExtension);
     }
 
     public static bool IsValidWallpaperFolderPath(string folderPath, out string errorMessage)
@@ -56,6 +55,12 @@ public static class DesktopWallpaperHelper
         return true;
     }
 
+    public static bool IsValidWallpaperPath(string wallpaperPath)
+    {
+        return !string.IsNullOrEmpty(wallpaperPath) && File.Exists(wallpaperPath) &&
+               IsValidWallpaperFileExtension(wallpaperPath);
+    }
+
     internal static IShellItemArray CreateShellItemArrayFromFolder(string folder)
     {
         // Create shell item from folder path
@@ -75,5 +80,11 @@ public static class DesktopWallpaperHelper
         hr.ThrowOnFailure();
 
         return (IShellItemArray)shellItemArrayObj;
+    }
+
+    private static bool IsValidWallpaperFileExtension(string wallpaperPath)
+    {
+        return DesktopWallpaperManager.SupportedExtensions.Contains(Path.GetExtension(wallpaperPath)
+            .ToLowerInvariant());
     }
 }
