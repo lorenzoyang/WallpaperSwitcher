@@ -31,8 +31,7 @@ public partial class MainForm : Form
     // When the user closes the form, if this is true the program will exit completely.
     // If false, it will minimize to the system tray.
     private bool IsExiting { get; set; }
-
-    [SupportedOSPlatform("windows8.0")]
+    
     public MainForm()
     {
         InitializeComponent();
@@ -99,8 +98,7 @@ public partial class MainForm : Form
         "Previous Wallpaper",
         "Exit"
     ];
-
-    [SupportedOSPlatform("windows8.0")]
+    
     private void InitializeSystemTray()
     {
         var trayMenu = new ContextMenuStrip();
@@ -262,8 +260,7 @@ public partial class MainForm : Form
         FormHelper.ShowSuccessMessage(
             $"Folder added successfully!\n\nPath: {newFolderPath}\nImages found: {imageCount}");
     }
-
-    [SupportedOSPlatform("windows8.0")]
+    
     private void removeFolderButton_Click(object sender, EventArgs e)
     {
         if (removeFolderComboBox.SelectedItem is not string folderToRemove) return;
@@ -293,14 +290,12 @@ public partial class MainForm : Form
 
         removeFolderComboBox_SelectedIndexChanged(removeFolderComboBox, EventArgs.Empty);
     }
-
-    [SupportedOSPlatform("windows8.0")]
+    
     private void nextWallpaperButton_Click(object? sender, EventArgs e)
     {
         _desktopWallpaperManager.AdvanceForwardSlideshow();
     }
-
-    [SupportedOSPlatform("windows8.0")]
+    
     private void prevWallpaperButton_Click(object? sender, EventArgs e)
     {
         _desktopWallpaperManager.AdvanceBackwardSlideshow();
@@ -310,8 +305,7 @@ public partial class MainForm : Form
     {
         removeFolderButton.Enabled = removeFolderComboBox.SelectedItem != null;
     }
-
-    [SupportedOSPlatform("windows8.0")]
+    
     private void currentFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
         prevWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;

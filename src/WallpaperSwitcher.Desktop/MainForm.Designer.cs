@@ -51,6 +51,7 @@
             // 
             // foldersManagementGroupBox
             // 
+            foldersManagementGroupBox.BackColor = SystemColors.Window;
             foldersManagementGroupBox.Controls.Add(removeFolderComboBox);
             foldersManagementGroupBox.Controls.Add(removeFolderButton);
             foldersManagementGroupBox.Controls.Add(removeFolderLabel);
@@ -70,24 +71,26 @@
             // 
             // removeFolderComboBox
             // 
+            removeFolderComboBox.BackColor = SystemColors.ControlLightLight;
             removeFolderComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             removeFolderComboBox.FormattingEnabled = true;
             removeFolderComboBox.Location = new Point(27, 431);
             removeFolderComboBox.Name = "removeFolderComboBox";
-            removeFolderComboBox.Size = new Size(624, 40);
+            removeFolderComboBox.Size = new Size(460, 40);
             removeFolderComboBox.TabIndex = 14;
             removeFolderComboBox.SelectedIndexChanged += removeFolderComboBox_SelectedIndexChanged;
             removeFolderComboBox.MouseEnter += removeFolderComboBox_MouseEnter;
             // 
             // removeFolderButton
             // 
+            removeFolderButton.BackColor = SystemColors.ControlLightLight;
             removeFolderButton.Enabled = false;
-            removeFolderButton.Location = new Point(353, 359);
+            removeFolderButton.Location = new Point(517, 430);
             removeFolderButton.Name = "removeFolderButton";
             removeFolderButton.Size = new Size(134, 40);
             removeFolderButton.TabIndex = 13;
             removeFolderButton.Text = "Remove";
-            removeFolderButton.UseVisualStyleBackColor = true;
+            removeFolderButton.UseVisualStyleBackColor = false;
             removeFolderButton.Click += removeFolderButton_Click;
             // 
             // removeFolderLabel
@@ -110,27 +113,30 @@
             // 
             // addFolderButton
             // 
+            addFolderButton.BackColor = SystemColors.ControlLightLight;
             addFolderButton.Enabled = false;
             addFolderButton.Location = new Point(517, 268);
             addFolderButton.Name = "addFolderButton";
             addFolderButton.Size = new Size(134, 40);
             addFolderButton.TabIndex = 10;
             addFolderButton.Text = "Add";
-            addFolderButton.UseVisualStyleBackColor = true;
+            addFolderButton.UseVisualStyleBackColor = false;
             addFolderButton.Click += addFolderButton_Click;
             // 
             // browseFolderButton
             // 
+            browseFolderButton.BackColor = SystemColors.ControlLightLight;
             browseFolderButton.Location = new Point(353, 203);
             browseFolderButton.Name = "browseFolderButton";
             browseFolderButton.Size = new Size(134, 39);
             browseFolderButton.TabIndex = 9;
             browseFolderButton.Text = "Browse...";
-            browseFolderButton.UseVisualStyleBackColor = true;
+            browseFolderButton.UseVisualStyleBackColor = false;
             browseFolderButton.Click += browseFolderButton_Click;
             // 
             // addFolderTextBox
             // 
+            addFolderTextBox.BackColor = SystemColors.ControlLightLight;
             addFolderTextBox.Location = new Point(27, 268);
             addFolderTextBox.Name = "addFolderTextBox";
             addFolderTextBox.ReadOnly = true;
@@ -148,6 +154,7 @@
             // 
             // currentFolderComboBox
             // 
+            currentFolderComboBox.BackColor = SystemColors.ControlLightLight;
             currentFolderComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             currentFolderComboBox.FormattingEnabled = true;
             currentFolderComboBox.Location = new Point(27, 115);
@@ -168,9 +175,10 @@
             // 
             // wallpaperSwitchingGroupBox
             // 
+            wallpaperSwitchingGroupBox.BackColor = SystemColors.Window;
             wallpaperSwitchingGroupBox.Controls.Add(prevWallpaperButton);
             wallpaperSwitchingGroupBox.Controls.Add(nextWallpaperButton);
-            wallpaperSwitchingGroupBox.Location = new Point(54, 639);
+            wallpaperSwitchingGroupBox.Location = new Point(54, 671);
             wallpaperSwitchingGroupBox.Name = "wallpaperSwitchingGroupBox";
             wallpaperSwitchingGroupBox.Size = new Size(705, 132);
             wallpaperSwitchingGroupBox.TabIndex = 1;
@@ -179,31 +187,34 @@
             // 
             // prevWallpaperButton
             // 
+            prevWallpaperButton.BackColor = SystemColors.ControlLightLight;
             prevWallpaperButton.Enabled = false;
             prevWallpaperButton.Location = new Point(27, 49);
             prevWallpaperButton.Name = "prevWallpaperButton";
             prevWallpaperButton.Size = new Size(260, 52);
             prevWallpaperButton.TabIndex = 3;
             prevWallpaperButton.Text = "Previous Wallpaper";
-            prevWallpaperButton.UseVisualStyleBackColor = true;
+            prevWallpaperButton.UseVisualStyleBackColor = false;
             prevWallpaperButton.Click += prevWallpaperButton_Click;
             // 
             // nextWallpaperButton
             // 
+            nextWallpaperButton.BackColor = SystemColors.ControlLightLight;
             nextWallpaperButton.Enabled = false;
             nextWallpaperButton.Location = new Point(391, 49);
             nextWallpaperButton.Name = "nextWallpaperButton";
             nextWallpaperButton.Size = new Size(260, 52);
             nextWallpaperButton.TabIndex = 0;
             nextWallpaperButton.Text = "Next Wallpaper";
-            nextWallpaperButton.UseVisualStyleBackColor = true;
+            nextWallpaperButton.UseVisualStyleBackColor = false;
             nextWallpaperButton.Click += nextWallpaperButton_Click;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(814, 883);
+            BackColor = SystemColors.Window;
+            ClientSize = new Size(814, 866);
             Controls.Add(wallpaperSwitchingGroupBox);
             Controls.Add(foldersManagementGroupBox);
             FormBorderStyle = FormBorderStyle.FixedSingle;

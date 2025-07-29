@@ -14,7 +14,6 @@ namespace WallpaperSwitcher.Desktop
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        [SupportedOSPlatform("windows8.0")]
         static void Main()
         {
             try

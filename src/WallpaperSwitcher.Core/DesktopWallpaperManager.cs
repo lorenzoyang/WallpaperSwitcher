@@ -20,25 +20,21 @@ public sealed class DesktopWallpaperManager
         // ReSharper disable once SuspiciousTypeConversion.Global
         new DesktopWallpaper() as IDesktopWallpaper ?? throw new InvalidOperationException();
 
-    [SupportedOSPlatform("windows8.0")]
     public void SetSlideShow(string folder)
     {
         _desktopWallpaper.SetSlideshow(DesktopWallpaperHelper.CreateShellItemArrayFromFolder(folder));
     }
 
-    [SupportedOSPlatform("windows8.0")]
     public void AdvanceForwardSlideshow()
     {
         _desktopWallpaper.AdvanceSlideshow(null, DESKTOP_SLIDESHOW_DIRECTION.DSD_FORWARD);
     }
 
-    [SupportedOSPlatform("windows8.0")]
     public void AdvanceBackwardSlideshow()
     {
         _desktopWallpaper.AdvanceSlideshow(null, DESKTOP_SLIDESHOW_DIRECTION.DSD_BACKWARD);
     }
 
-    [SupportedOSPlatform("windows8.0")]
     public string GetSlideShowFolderPath()
     {
         _desktopWallpaper.GetSlideshow(out var shellItemArray);
