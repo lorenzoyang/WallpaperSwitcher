@@ -1,5 +1,4 @@
 using System.Collections.Specialized;
-using System.Runtime.Versioning;
 using WallpaperSwitcher.Core;
 
 namespace WallpaperSwitcher.Desktop;
@@ -31,7 +30,7 @@ public partial class MainForm : Form
     // When the user closes the form, if this is true the program will exit completely.
     // If false, it will minimize to the system tray.
     private bool IsExiting { get; set; }
-    
+
     public MainForm()
     {
         InitializeComponent();
@@ -98,7 +97,7 @@ public partial class MainForm : Form
         "Previous Wallpaper",
         "Exit"
     ];
-    
+
     private void InitializeSystemTray()
     {
         var trayMenu = new ContextMenuStrip();
@@ -180,7 +179,7 @@ public partial class MainForm : Form
         Activate();
     }
 
-    private bool HasShownTrayTip { get; set; } = false;
+    private bool HasShownTrayTip { get; set; }
 
     private void MinimizeToTray()
     {
@@ -260,7 +259,7 @@ public partial class MainForm : Form
         FormHelper.ShowSuccessMessage(
             $"Folder added successfully!\n\nPath: {newFolderPath}\nImages found: {imageCount}");
     }
-    
+
     private void removeFolderButton_Click(object sender, EventArgs e)
     {
         if (removeFolderComboBox.SelectedItem is not string folderToRemove) return;
@@ -290,12 +289,12 @@ public partial class MainForm : Form
 
         removeFolderComboBox_SelectedIndexChanged(removeFolderComboBox, EventArgs.Empty);
     }
-    
+
     private void nextWallpaperButton_Click(object? sender, EventArgs e)
     {
         _desktopWallpaperManager.AdvanceForwardSlideshow();
     }
-    
+
     private void prevWallpaperButton_Click(object? sender, EventArgs e)
     {
         _desktopWallpaperManager.AdvanceBackwardSlideshow();
@@ -305,7 +304,7 @@ public partial class MainForm : Form
     {
         removeFolderButton.Enabled = removeFolderComboBox.SelectedItem != null;
     }
-    
+
     private void currentFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
         prevWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;

@@ -39,6 +39,8 @@ public sealed class DesktopWallpaperManager
     {
         _desktopWallpaper.GetSlideshow(out var shellItemArray);
         if (shellItemArray is null) return string.Empty;
+        shellItemArray.GetCount(out var count);
+        if (count == 0) return string.Empty; // No items in the slideshow or no slideshow set
         shellItemArray.GetItemAt(0, out var shellItem);
         if (shellItem is null) return string.Empty;
         shellItem.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out var pathPtr);
