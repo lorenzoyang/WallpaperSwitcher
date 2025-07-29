@@ -94,7 +94,6 @@ public partial class MainForm : Form
     [
         "Switch Folder",
         "Next Wallpaper",
-        "Previous Wallpaper",
         "Exit"
     ];
 
@@ -106,12 +105,10 @@ public partial class MainForm : Form
         trayMenu.Items.Add(new ToolStripSeparator());
         // Add wallpaper controls
         var nextWallpaperItem = new ToolStripMenuItem(TrayMenuItemNames[1], null, nextWallpaperButton_Click);
-        var prevWallpaperItem = new ToolStripMenuItem(TrayMenuItemNames[2], null, prevWallpaperButton_Click);
         trayMenu.Items.Add(nextWallpaperItem);
-        trayMenu.Items.Add(prevWallpaperItem);
         trayMenu.Items.Add(new ToolStripSeparator());
         // Add "Exit" option
-        trayMenu.Items.Add(new ToolStripMenuItem(TrayMenuItemNames[3], null, ExitApplication));
+        trayMenu.Items.Add(new ToolStripMenuItem(TrayMenuItemNames[2], null, ExitApplication));
         // Double-click to restore window
         _trayIcon.DoubleClick += ShowMainForm;
         trayMenu.Opening += (_, _) => UpdateTrayMenu();
@@ -149,10 +146,8 @@ public partial class MainForm : Form
 
         // Disable wallpaper controls if no folder is selected
         var nextWallpaperMenuItem = GetTrayMenuItemByName(TrayMenuItemNames[1]);
-        var prevWallpaperMenuItem = GetTrayMenuItemByName(TrayMenuItemNames[2]);
         var hasSelectedFolder = currentFolderComboBox.SelectedItem != null;
         nextWallpaperMenuItem.Enabled = hasSelectedFolder;
-        prevWallpaperMenuItem.Enabled = hasSelectedFolder;
 
         return;
 
@@ -295,11 +290,6 @@ public partial class MainForm : Form
         _desktopWallpaperManager.AdvanceForwardSlideshow();
     }
 
-    private void prevWallpaperButton_Click(object? sender, EventArgs e)
-    {
-        _desktopWallpaperManager.AdvanceBackwardSlideshow();
-    }
-
     private void removeFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
         removeFolderButton.Enabled = removeFolderComboBox.SelectedItem != null;
@@ -307,7 +297,6 @@ public partial class MainForm : Form
 
     private void currentFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
-        prevWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
         nextWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
         var currentFolderPath = currentFolderComboBox.SelectedItem?.ToString();
         if (currentFolderPath != _desktopWallpaperManager.GetSlideShowFolderPath())

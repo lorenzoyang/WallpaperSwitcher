@@ -2,18 +2,8 @@
 
 **Wallpaper Switcher** is a lightweight and user-friendly wallpaper manager for Windows. It allows users to manage multiple wallpaper folders and quickly switch between images with ease.
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="./assets/gifs/GUI_Demo.gif" alt="GUI Demo" width="350"/>
-      <br/><sub>GUI Demo</sub>
-    </td>
-    <td align="center">
-      <img src="./assets/gifs/SystemTray_Demo.gif" alt="System Tray Demo" width="350"/>
-      <br/><sub>System Tray Demo</sub>
-    </td>
-  </tr>
-</table>
+<img src="./assets/gifs/GUI_Demo.gif" alt="GUI Demo" width="350"/>
+<img src="./assets/gifs/SystemTray_Demo.gif" alt="System Tray Demo" width="350"/>
 
 ## Features 
 
@@ -23,14 +13,10 @@
   - Switch between wallpaper folders
 - [x] **Manual Wallpaper Switching:** 
   - Switch to the next wallpaper
-  - Switch to the previous wallpaper
 - [ ] **Global Hotkey Support**
   - Hotkey for "Next Wallpaper"
-  - Hotkey for "Previous Wallpaper"
   - Hotkey for switching wallpaper folders
-- [ ] **Dedicated Settings Interface**
-  - Manage hotkey configuration
-  - Configure auto-start on boot
+  - Configuration through a settings file
 - [x] **System Tray Integration**
   - Minimize to system tray
   - Right-click menu with options: Open, Exit
@@ -38,8 +24,6 @@
   - Option to launch automatically when Windows starts
 - [ ] **Automatic Wallpaper Switching**
   - Change wallpaper at user-defined intervals
-- [ ] **Real-Time Folder Monitoring**
-  - Automatically detect changes in wallpaper folders
 - [ ] **Startup Optimization**
   - Reduce application launch time
 

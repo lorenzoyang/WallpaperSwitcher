@@ -1,5 +1,4 @@
-﻿using System.Runtime.Versioning;
-using Windows.Win32;
+﻿using Windows.Win32;
 using Windows.Win32.UI.Shell;
 
 
@@ -28,11 +27,6 @@ public sealed class DesktopWallpaperManager
     public void AdvanceForwardSlideshow()
     {
         _desktopWallpaper.AdvanceSlideshow(null, DESKTOP_SLIDESHOW_DIRECTION.DSD_FORWARD);
-    }
-
-    public void AdvanceBackwardSlideshow()
-    {
-        _desktopWallpaper.AdvanceSlideshow(null, DESKTOP_SLIDESHOW_DIRECTION.DSD_BACKWARD);
     }
 
     public string GetSlideShowFolderPath()
