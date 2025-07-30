@@ -15,7 +15,7 @@ public partial class MainForm : Form
         base.WndProc(ref m);
     }
 
-    private readonly DesktopWallpaperManager _desktopWallpaperManager = new();
+    private readonly NativeWallpaperManager _nativeWallpaperManager = new();
 
     private readonly ToolTip _toolTip = new()
     {
@@ -228,7 +228,7 @@ public partial class MainForm : Form
     {
         var newFolderPath = addFolderTextBox.Text.Trim();
 
-        if (!DesktopWallpaperHelper.IsValidWallpaperFolderPath(newFolderPath, out var errorMessage))
+        if (!WallpaperHelper.IsValidWallpaperFolder(newFolderPath, out var errorMessage))
         {
             FormHelper.ShowErrorMessage(errorMessage);
             addFolderTextBox.Clear();
@@ -250,7 +250,7 @@ public partial class MainForm : Form
         // Clear the text box and show success message
         addFolderTextBox.Clear();
         // Get image count for user feedback
-        var imageCount = DesktopWallpaperHelper.GetImageCount(newFolderPath);
+        var imageCount = WallpaperHelper.GetImageCount(newFolderPath);
         FormHelper.ShowSuccessMessage(
             $"Folder added successfully!\n\nPath: {newFolderPath}\nImages found: {imageCount}");
     }
@@ -279,7 +279,7 @@ public partial class MainForm : Form
 
         if (isCurrentSelected)
         {
-            _desktopWallpaperManager.SetWallpaper(DesktopWallpaperManager.DefaultWallpaperPath);
+            _nativeWallpaperManager.SetWallpaper(WallpaperManager.DefaultWallpaper);
             currentFolderComboBox_SelectedIndexChanged(currentFolderComboBox, EventArgs.Empty);
         }
 
@@ -288,7 +288,7 @@ public partial class MainForm : Form
 
     private void nextWallpaperButton_Click(object? sender, EventArgs e)
     {
-        _desktopWallpaperManager.AdvanceForwardSlideshow();
+        _nativeWallpaperManager.AdvanceForwardSlideshow();
     }
 
     private void removeFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -299,9 +299,8 @@ public partial class MainForm : Form
     private void currentFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
         nextWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
-        var currentFolderPath = currentFolderComboBox.SelectedItem?.ToString();
-        var restart = currentFolderPath != _desktopWallpaperManager.GetSlideShowFolderPath();
-        _desktopWallpaperManager.SetSlideShow(currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty, restart);
+        var currentFolderPath = currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty;
+        _nativeWallpaperManager.SetSlideShow(currentFolderPath);
         SaveSettings(); // Save user selection promptly
     }
 
