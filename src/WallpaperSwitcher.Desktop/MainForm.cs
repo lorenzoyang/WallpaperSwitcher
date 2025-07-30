@@ -15,7 +15,13 @@ public partial class MainForm : Form
         base.WndProc(ref m);
     }
 
-    private readonly NativeWallpaperManager _nativeWallpaperManager = new();
+    // default wallpaper manager implementation
+    private readonly WallpaperManager _wallpaperManager = Properties.Settings.Default.SelectedModeIndex switch
+    {
+        0 => new NativeWallpaperManager(), // Native Windows implementation
+        1 => new CustomWallpaperManager(), // Custom implementation (if any)
+        _ => throw new NotSupportedException("Selected mode is not supported.")
+    };
 
     private readonly ToolTip _toolTip = new()
     {
@@ -47,6 +53,7 @@ public partial class MainForm : Form
 
     private void LoadSettings()
     {
+        // Load the wallpaper folders from settings
         currentFolderComboBox.Items.Clear();
         removeFolderComboBox.Items.Clear();
 
@@ -59,6 +66,14 @@ public partial class MainForm : Form
             removeFolderComboBox.Items.Add(folderPath);
         }
 
+        // Load the selected mode index from settings
+        // Selected mode: 0 = Native, 1 = Custom, 0 is the default
+        // disable temporarily the event handler to prevent unnecessary message box reminder
+        modeComboBox.SelectedIndexChanged -= modeComboBox_SelectedIndexChanged;
+        modeComboBox.SelectedIndex = Properties.Settings.Default.SelectedModeIndex;
+        modeComboBox.SelectedIndexChanged += modeComboBox_SelectedIndexChanged;
+
+        // Load the last selected folder from settings
         var lastSelectedFolder = Properties.Settings.Default.LastSelectedFolder;
         if (string.IsNullOrEmpty(lastSelectedFolder)) return;
         // User might have deleted the last selected folder, so we check if it still exists
@@ -68,6 +83,7 @@ public partial class MainForm : Form
 
     private void SaveSettings()
     {
+        // Save the wallpaper folders to settings
         var wallpaperFolders = new StringCollection();
         foreach (string? item in currentFolderComboBox.Items)
         {
@@ -79,10 +95,16 @@ public partial class MainForm : Form
 
         Properties.Settings.Default.WallpaperFolders = wallpaperFolders;
 
+        // Save the last selected folder to settings
         if (currentFolderComboBox.SelectedItem != null)
         {
             Properties.Settings.Default.LastSelectedFolder = currentFolderComboBox.SelectedItem.ToString();
         }
+
+        // Save the selected mode index
+        // If an unsupported mode is selected, default to Native (0)
+        Properties.Settings.Default.SelectedModeIndex =
+            modeComboBox.SelectedIndex is 0 or 1 ? modeComboBox.SelectedIndex : 0;
 
         Properties.Settings.Default.Save();
     }
@@ -279,7 +301,7 @@ public partial class MainForm : Form
 
         if (isCurrentSelected)
         {
-            _nativeWallpaperManager.SetWallpaper(WallpaperManager.DefaultWallpaper);
+            _wallpaperManager.SetWallpaper(WallpaperManager.DefaultWallpaper);
             currentFolderComboBox_SelectedIndexChanged(currentFolderComboBox, EventArgs.Empty);
         }
 
@@ -288,7 +310,7 @@ public partial class MainForm : Form
 
     private void nextWallpaperButton_Click(object? sender, EventArgs e)
     {
-        _nativeWallpaperManager.AdvanceForwardSlideshow();
+        _wallpaperManager.AdvanceForwardSlideshow();
     }
 
     private void removeFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -300,7 +322,7 @@ public partial class MainForm : Form
     {
         nextWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
         var currentFolderPath = currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty;
-        _nativeWallpaperManager.SetSlideShow(currentFolderPath);
+        _wallpaperManager.SetSlideShow(currentFolderPath);
         SaveSettings(); // Save user selection promptly
     }
 
@@ -320,5 +342,21 @@ public partial class MainForm : Form
     {
         var comboBox = sender as ComboBox;
         FormHelper.ShowToolTipForComboBox(_toolTip, comboBox);
+    }
+
+    private void modeComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+    {
+        // _wallpaperManager = modeComboBox.SelectedIndex switch
+        // {
+        //     0 => new NativeWallpaperManager(), // Native Windows implementation
+        //     1 => new CustomWallpaperManager(), // Custom implementation (if any)
+        //     _ => throw new NotSupportedException("Selected mode is not supported.")
+        // };
+        FormHelper.ShowSuccessMessage(
+            "You have changed the wallpaper mode.\n\n" +
+            "The change will take effect after restarting the application.",
+            "Restart Required"
+        );
+        SaveSettings();
     }
 }

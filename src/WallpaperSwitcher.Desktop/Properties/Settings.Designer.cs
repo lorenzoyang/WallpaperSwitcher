@@ -45,5 +45,17 @@ namespace WallpaperSwitcher.Desktop.Properties {
                 this["LastSelectedFolder"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SelectedModeIndex {
+            get {
+                return ((int)(this["SelectedModeIndex"]));
+            }
+            set {
+                this["SelectedModeIndex"] = value;
+            }
+        }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Windows.Win32;
-using Windows.Win32.UI.Shell;
+﻿using Windows.Win32.UI.Shell;
 
 
 namespace WallpaperSwitcher.Core;

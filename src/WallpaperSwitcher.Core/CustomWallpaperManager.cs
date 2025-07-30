@@ -1,5 +1,4 @@
 ﻿using Windows.Win32.Foundation;
-using Windows.Win32;
 
 namespace WallpaperSwitcher.Core;
 
@@ -36,10 +35,14 @@ public sealed class CustomWallpaperManager : WallpaperManager
         // If the folder is the same as the current "slideshow folder", do nothing
         // this happens only if the current wallpaper is contained in the slideshow folder.
         var currentWallpaper = GetCurrentWallpaper();
-        CurrentIndex = _slideShowWallpapers.IndexOf(currentWallpaper);
+        var index = _slideShowWallpapers.IndexOf(currentWallpaper);
         // the current wallpaper is already in the slideshow folder,
         // so we don't need to set the slideshow again.
-        if (CurrentIndex >= 0) return;
+        if (index >= 0)
+        {
+            CurrentIndex = index;
+            return;
+        }
 
         CurrentIndex = 0;
         SetWallpaper(_slideShowWallpapers[CurrentIndex]);

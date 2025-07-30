@@ -43,6 +43,7 @@
             currentFolderComboBox = new ComboBox();
             currentFolderLabel = new Label();
             nextWallpaperButton = new Button();
+            modeComboBox = new ComboBox();
             foldersManagementGroupBox.SuspendLayout();
             SuspendLayout();
             // 
@@ -69,11 +70,11 @@
             // 
             // removeFolderComboBox
             // 
-            removeFolderComboBox.BackColor = SystemColors.ControlLightLight;
+            removeFolderComboBox.BackColor = SystemColors.ControlLight;
             removeFolderComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             removeFolderComboBox.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             removeFolderComboBox.FormattingEnabled = true;
-            removeFolderComboBox.Location = new Point(27, 431);
+            removeFolderComboBox.Location = new Point(27, 426);
             removeFolderComboBox.Name = "removeFolderComboBox";
             removeFolderComboBox.Size = new Size(460, 40);
             removeFolderComboBox.TabIndex = 14;
@@ -85,7 +86,7 @@
             removeFolderButton.BackColor = SystemColors.ControlLightLight;
             removeFolderButton.Enabled = false;
             removeFolderButton.Font = new Font("Segoe UI", 10.125F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            removeFolderButton.Location = new Point(517, 430);
+            removeFolderButton.Location = new Point(517, 425);
             removeFolderButton.Name = "removeFolderButton";
             removeFolderButton.Size = new Size(134, 41);
             removeFolderButton.TabIndex = 13;
@@ -159,7 +160,7 @@
             // 
             // currentFolderComboBox
             // 
-            currentFolderComboBox.BackColor = SystemColors.ControlLightLight;
+            currentFolderComboBox.BackColor = SystemColors.ControlLight;
             currentFolderComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             currentFolderComboBox.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             currentFolderComboBox.FormattingEnabled = true;
@@ -185,13 +186,26 @@
             nextWallpaperButton.BackColor = SystemColors.ControlLightLight;
             nextWallpaperButton.Enabled = false;
             nextWallpaperButton.Font = new Font("Segoe UI Semibold", 10.125F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            nextWallpaperButton.Location = new Point(281, 637);
+            nextWallpaperButton.Location = new Point(522, 637);
             nextWallpaperButton.Name = "nextWallpaperButton";
-            nextWallpaperButton.Size = new Size(260, 52);
+            nextWallpaperButton.Size = new Size(237, 52);
             nextWallpaperButton.TabIndex = 0;
             nextWallpaperButton.Text = "Next Wallpaper";
             nextWallpaperButton.UseVisualStyleBackColor = false;
             nextWallpaperButton.Click += nextWallpaperButton_Click;
+            // 
+            // modeComboBox
+            // 
+            modeComboBox.BackColor = SystemColors.ControlLight;
+            modeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            modeComboBox.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            modeComboBox.FormattingEnabled = true;
+            modeComboBox.Items.AddRange(new object[] { "Native Mode (System SlideShow)", "Custom Mode (Fast Switching)" });
+            modeComboBox.Location = new Point(54, 644);
+            modeComboBox.Name = "modeComboBox";
+            modeComboBox.Size = new Size(394, 40);
+            modeComboBox.TabIndex = 1;
+            modeComboBox.SelectedIndexChanged += modeComboBox_SelectedIndexChanged;
             // 
             // MainForm
             // 
@@ -199,6 +213,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Window;
             ClientSize = new Size(814, 762);
+            Controls.Add(modeComboBox);
             Controls.Add(nextWallpaperButton);
             Controls.Add(foldersManagementGroupBox);
             FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -228,5 +243,6 @@
         private ComboBox removeFolderComboBox;
         private Button removeFolderButton;
         private TextBox addFolderTextBox;
+        private ComboBox modeComboBox;
     }
 }
