@@ -1,5 +1,7 @@
 using System.Collections.Specialized;
 using WallpaperSwitcher.Core;
+using WallpaperSwitcher.Core.GlobalHotKey;
+using ModKeys = WallpaperSwitcher.Core.GlobalHotKey.ModifierKeys;
 
 namespace WallpaperSwitcher.Desktop;
 
@@ -7,13 +9,26 @@ public partial class MainForm : Form
 {
     protected override void WndProc(ref Message m)
     {
-        if (m.Msg == FormHelper.WmShowFirstInstance)
+        // Handle custom message to show the first instance of the application
+        if (m.Msg == FormHelper.WmShowFirstInstanceMessage)
         {
             ShowMainForm(null, EventArgs.Empty);
         }
 
         base.WndProc(ref m);
+
+        // Handle global hotkey messages
+        if (m.Msg == GlobalHotkeyManager.WmHotkeyMessage)
+        {
+            var id = m.WParam.ToInt32();
+            if (_globalHotkeyManager.TryGetHotkeyInfo(id, out var hotkeyInfo))
+            {
+                _globalHotkeyManager.ProcessWindowMessage(hotkeyInfo);
+            }
+        }
     }
+
+    private readonly GlobalHotkeyManager _globalHotkeyManager;
 
     // default wallpaper manager implementation
     private readonly WallpaperManager _wallpaperManager = Properties.Settings.Default.SelectedModeIndex switch
@@ -49,6 +64,20 @@ public partial class MainForm : Form
             Text = @"Wallpaper Switcher"
         };
         InitializeSystemTray();
+
+        _globalHotkeyManager = new GlobalHotkeyManager(this.Handle);
+        var nextWallpaperHotkeyId = _globalHotkeyManager.RegisterHotkey(
+            ModKeys.Control | ModKeys.Shift, VirtualKeys.N, "Next Wallpaper"
+        );
+        _globalHotkeyManager.HotkeyPressed += (_, e) =>
+        {
+            if (e.HotkeyInfo.Id == nextWallpaperHotkeyId)
+            {
+                nextWallpaperButton_Click(this, EventArgs.Empty);
+            }
+
+            // add more hotkeys here if needed
+        };
     }
 
     private void LoadSettings()

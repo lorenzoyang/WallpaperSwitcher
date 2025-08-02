@@ -11,3 +11,7 @@ SHCreateShellItemArrayFromShellItem
 IShellItem
 IShellItemArray
 SIGDN
+
+// Methods for global hotkeys binding
+RegisterHotKey
+UnregisterHotKey

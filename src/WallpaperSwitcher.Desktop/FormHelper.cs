@@ -48,7 +48,7 @@ internal static class FormHelper
     /// Windows reserves WM_USER (which is 0x0400) and higher for custom application-defined messages.
     /// 0x0401 is simply the next available value (like WM_USER + 1).
     /// </summary>
-    public const int WmShowFirstInstance = 0x0401;
+    public const int WmShowFirstInstanceMessage = 0x0401;
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern IntPtr FindWindow(string? lpClassName, string? lpWindowName);
@@ -76,7 +76,7 @@ internal static class FormHelper
             if (hWnd == IntPtr.Zero) continue;
 
             // Send custom message to show the form
-            var result = PostMessage(hWnd, WmShowFirstInstance, IntPtr.Zero, IntPtr.Zero);
+            var result = PostMessage(hWnd, WmShowFirstInstanceMessage, IntPtr.Zero, IntPtr.Zero);
             if (!result)
             {
                 throw new InvalidOperationException(
