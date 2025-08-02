@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Windows.Win32;
+using Windows.Win32.Foundation;
 
 namespace WallpaperSwitcher.Desktop;
 
@@ -50,12 +52,6 @@ internal static class FormHelper
     /// </summary>
     public const int WmShowFirstInstanceMessage = 0x0401;
 
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern IntPtr FindWindow(string? lpClassName, string? lpWindowName);
-
-    [DllImport("user32.dll")]
-    private static extern bool PostMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
-
     public static bool TryActivateExistingInstance(string appName)
     {
         // Try multiple approaches for robustness
@@ -70,13 +66,15 @@ internal static class FormHelper
             if (hWnd == IntPtr.Zero)
             {
                 // Fallback to FindWindow if MainWindowHandle is zero (minimized/hidden)
-                hWnd = FindWindow(null, appName);
+                hWnd = PInvoke.FindWindow(null, appName);
             }
 
             if (hWnd == IntPtr.Zero) continue;
 
             // Send custom message to show the form
-            var result = PostMessage(hWnd, WmShowFirstInstanceMessage, IntPtr.Zero, IntPtr.Zero);
+            var result = PInvoke.PostMessage(
+                (HWND)hWnd, WmShowFirstInstanceMessage, new WPARAM(UIntPtr.Zero), IntPtr.Zero
+            );
             if (!result)
             {
                 throw new InvalidOperationException(
