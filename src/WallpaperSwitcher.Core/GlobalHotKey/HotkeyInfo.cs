@@ -30,7 +30,7 @@ public class HotkeyInfo
     /// <summary>
     /// Gets the human-readable name or description for this hotkey.
     /// </summary>
-    public required string Name { get; init; }
+    public required string Description { get; init; }
 
-    public override string ToString() => Name;
+    public override string ToString() => Description;
 }

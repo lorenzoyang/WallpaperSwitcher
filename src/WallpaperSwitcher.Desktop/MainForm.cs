@@ -21,10 +21,7 @@ public partial class MainForm : Form
         if (m.Msg == GlobalHotkeyManager.WmHotkeyMessage)
         {
             var id = m.WParam.ToInt32();
-            if (_globalHotkeyManager.TryGetHotkeyInfo(id, out var hotkeyInfo))
-            {
-                _globalHotkeyManager.ProcessWindowMessage(hotkeyInfo);
-            }
+            _globalHotkeyManager.ProcessWindowMessage(id);
         }
     }
 
@@ -65,6 +62,7 @@ public partial class MainForm : Form
         };
         InitializeSystemTray();
 
+        // Global Hotkey Initialization
         _globalHotkeyManager = new GlobalHotkeyManager(this.Handle);
         var nextWallpaperHotkeyId = _globalHotkeyManager.RegisterHotkey(
             ModKeys.Control | ModKeys.Shift, VirtualKeys.N, "Next Wallpaper"

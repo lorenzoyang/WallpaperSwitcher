@@ -18,6 +18,7 @@
                 components.Dispose();
                 _toolTip.Dispose();
                 _trayIcon.Dispose();
+                _globalHotkeyManager.Dispose();
             }
             base.Dispose(disposing);
         }
