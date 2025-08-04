@@ -1,7 +1,6 @@
 using System.Collections.Specialized;
 using WallpaperSwitcher.Core;
 using WallpaperSwitcher.Core.GlobalHotKey;
-using ModKeys = WallpaperSwitcher.Core.GlobalHotKey.ModifierKeys;
 
 namespace WallpaperSwitcher.Desktop;
 
@@ -64,12 +63,9 @@ public partial class MainForm : Form
 
         // Global Hotkey Initialization
         _globalHotkeyManager = new GlobalHotkeyManager(this.Handle);
-        var nextWallpaperHotkeyId = _globalHotkeyManager.RegisterHotkey(
-            ModKeys.Control | ModKeys.Shift, VirtualKeys.N, "Next Wallpaper"
-        );
         _globalHotkeyManager.HotkeyPressed += (_, e) =>
         {
-            if (e.HotkeyInfo.Id == nextWallpaperHotkeyId)
+            if (e.HotkeyInfo.Name == GlobalHotkeyManager.DefaultNextWallpaperHotkeyName)
             {
                 nextWallpaperButton_Click(this, EventArgs.Empty);
             }
@@ -78,7 +74,7 @@ public partial class MainForm : Form
         };
     }
 
-    private void LoadSettings()
+    private async Task LoadSettings()
     {
         // Load the wallpaper folders from settings
         currentFolderComboBox.Items.Clear();
@@ -106,6 +102,9 @@ public partial class MainForm : Form
         // User might have deleted the last selected folder, so we check if it still exists
         if (!currentFolderComboBox.Items.Contains(lastSelectedFolder)) return;
         currentFolderComboBox.SelectedItem = lastSelectedFolder;
+
+        // Load hotkeys from user settings
+        await _globalHotkeyManager.LoadingHotkeysAsync();
     }
 
     private void SaveSettings()
@@ -248,7 +247,22 @@ public partial class MainForm : Form
     // Event handlers for Form events  *
     // *********************************
 
-    private void MainForm_Load(object sender, EventArgs e) => LoadSettings();
+    private async void MainForm_Load(object sender, EventArgs e)
+    {
+        try
+        {
+            await LoadSettings();
+        }
+        catch (Exception exception)
+        {
+            FormHelper.ShowErrorMessage(
+                $"An error occurred while loading settings: {exception.Message}\n\n" +
+                "The application will now exit.");
+            IsExiting = true; // Set to true to exit application completely
+            _trayIcon.Visible = false;
+            Application.Exit();
+        }
+    }
 
     private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
@@ -398,7 +412,8 @@ public partial class MainForm : Form
 
     private void settingsButton_Click(object sender, EventArgs e)
     {
-        using var settingsForm = new SettingsForm(currentFolderComboBox.Items.Cast<string>().ToList());
+        using var settingsForm =
+            new SettingsForm(_globalHotkeyManager, currentFolderComboBox.Items.Cast<string>().ToList());
         if (settingsForm.ShowDialog(this) == DialogResult.OK)
         {
             FormHelper.ShowSuccessMessage("Settings updated successfully!");

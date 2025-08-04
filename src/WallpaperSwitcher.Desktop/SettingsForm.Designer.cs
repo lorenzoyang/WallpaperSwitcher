@@ -78,7 +78,6 @@
             nextWallpaperHkSaveButton.TabIndex = 3;
             nextWallpaperHkSaveButton.Text = "Save";
             nextWallpaperHkSaveButton.UseVisualStyleBackColor = true;
-            nextWallpaperHkSaveButton.Click += button2_Click;
             // 
             // folderHkComboBox
             // 
@@ -113,7 +112,6 @@
             folderHkSaveButton.TabIndex = 7;
             folderHkSaveButton.Text = "Save";
             folderHkSaveButton.UseVisualStyleBackColor = true;
-            folderHkSaveButton.Click += button2_Click_1;
             // 
             // folderHkLabel
             // 

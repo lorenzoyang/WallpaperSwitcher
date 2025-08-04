@@ -28,7 +28,7 @@ public enum ModifierKeys : uint
     /// The CTRL (Control) key modifier. When combined with other keys, creates Ctrl+Key combinations
     /// (e.g., Ctrl+C, Ctrl+V, Ctrl+Alt+Delete).
     /// </summary>
-    Control = 0x0002,
+    Ctrl = 0x0002,
 
     /// <summary>
     /// The SHIFT key modifier. When combined with other keys, creates Shift+Key combinations

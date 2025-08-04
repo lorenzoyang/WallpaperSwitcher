@@ -1,23 +1,27 @@
-﻿namespace WallpaperSwitcher.Desktop;
+﻿using WallpaperSwitcher.Core.GlobalHotKey;
+
+namespace WallpaperSwitcher.Desktop;
 
 public partial class SettingsForm : Form
 {
+    private readonly GlobalHotkeyManager _globalHotkeyManager;
     private List<string> _folders = [];
+    private readonly string DefaultNextWallpaperHotkey = "CTRL+SHIFT+N";
 
-    public SettingsForm(List<string> folders)
+    public SettingsForm(GlobalHotkeyManager globalHotkeyManager, List<string> folders)
     {
         InitializeComponent();
 
+        _globalHotkeyManager = globalHotkeyManager;
         _folders = folders;
     }
 
-    private void button2_Click(object sender, EventArgs e)
+    private void LoadSettings()
     {
-
+        // Load the Next Wallpaper Hotkey
     }
 
-    private void button2_Click_1(object sender, EventArgs e)
-    {
-
-    }
+    // *********************************
+    // Event handlers for Form events  *
+    // *********************************
 }

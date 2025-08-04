@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Windows.Win32;
+﻿using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
 
@@ -27,6 +26,8 @@ public class GlobalHotkeyManager
     private readonly Dictionary<int, HotkeyInfo> _registeredHotkeys = new();
 
     private bool _disposed;
+
+    private readonly HotkeyPersistenceManager _hotkeyPersistenceManager = new();
 
     /// <summary>
     /// The Windows message identifier for a registered hotkey being pressed.
@@ -70,9 +71,9 @@ public class GlobalHotkeyManager
     /// <summary>
     /// Registers a new global hotkey with the system.
     /// </summary>
-    /// <param name="modifiers">The modifier keys (e.g., Ctrl, Alt) for the hotkey.</param>
+    /// <param name="modifierKeys">The modifier keys (e.g., Ctrl, Alt) for the hotkey.</param>
     /// <param name="key">The primary virtual key for the hotkey.</param>
-    /// <param name="description">
+    /// <param name="name">
     /// An optional human-readable description for the hotkey. Defaults to a string representation of the key combination.
     /// </param>
     /// <param name="id">An optional specific unique ID for the hotkey. If not provided, a new one is generated.</param>
@@ -82,26 +83,70 @@ public class GlobalHotkeyManager
     /// <exception cref="ObjectDisposedException">
     /// Thrown if the <see cref="GlobalHotkeyManager"/> instance has been disposed.
     /// </exception>
-    public int RegisterHotkey(ModifierKeys modifiers, VirtualKeys key, string? description = null, int? id = null)
+    public int RegisterHotkey(ModifierKeys modifierKeys, VirtualKeys key, string name, int? id = null)
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(GlobalHotkeyManager));
 
         var hotkeyId = id ?? NextHotkeyId++;
-        if (PInvoke.RegisterHotKey(_windowHandle, hotkeyId, (HOT_KEY_MODIFIERS)modifiers, (uint)key))
+        if (PInvoke.RegisterHotKey(_windowHandle, hotkeyId, (HOT_KEY_MODIFIERS)modifierKeys, (uint)key))
         {
             _registeredHotkeys[hotkeyId] = new HotkeyInfo
             {
                 Id = hotkeyId,
-                Modifiers = modifiers,
+                ModifierKeys = modifierKeys,
                 Key = key,
-                Description = description ?? $"{modifiers} + {key}"
+                Name = name,
             };
             return hotkeyId;
         }
 
         NextHotkeyId--;
         return -1;
+    }
+
+    private const string DefaultNextWallpaperHotkey = "CTRL+SHIFT+N";
+    public const string DefaultNextWallpaperHotkeyName = "Next Wallpaper";
+
+    public async Task LoadingHotkeysAsync()
+    {
+        if (_disposed)
+            throw new ObjectDisposedException(nameof(GlobalHotkeyManager));
+
+        var hotkeyInfos = await _hotkeyPersistenceManager.LoadHotkeysAsync();
+        if (hotkeyInfos.Length == 0)
+        {
+            if (HotkeyInfo.TryParseFromString(DefaultNextWallpaperHotkey, out var modifierKeys, out var virtualKey,
+                    out var errorMessage))
+            {
+                var nextWallpaperHotkeyId = RegisterHotkey(modifierKeys, virtualKey, DefaultNextWallpaperHotkeyName);
+                if (nextWallpaperHotkeyId == -1)
+                {
+                    throw new InvalidOperationException(
+                        $"Failed to register default hotkey: {DefaultNextWallpaperHotkeyName} (Modifier: {modifierKeys}, Key: {virtualKey})."
+                    );
+                }
+
+                await _hotkeyPersistenceManager.SaveHotkeysAsync(_registeredHotkeys.Values.ToArray());
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    $"Failed to parse default hotkey: {DefaultNextWallpaperHotkey}. Error: {errorMessage}");
+            }
+        }
+        else
+        {
+            foreach (var (id, modifierKeys, key, name) in hotkeyInfos)
+            {
+                if (RegisterHotkey(modifierKeys, key, name, id) == -1)
+                {
+                    throw new InvalidOperationException(
+                        $"Failed to register hotkey: {name} with ID: {id} (Modifier: {modifierKeys}, Key: {key})."
+                    );
+                }
+            }
+        }
     }
 
     /// <summary>
