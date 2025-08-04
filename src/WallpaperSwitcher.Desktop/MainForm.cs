@@ -273,8 +273,17 @@ public partial class MainForm : Form
         }
     }
 
+    private const int MaxFolderNumber = 5;
+
     private void addFolderButton_Click(object sender, EventArgs e)
     {
+        if (currentFolderComboBox.Items.Count >= MaxFolderNumber)
+        {
+            FormHelper.ShowWarningMessage("Max folders reached (10). Cannot add more.");
+            addFolderTextBox.Clear();
+            return;
+        }
+
         var newFolderPath = addFolderTextBox.Text.Trim();
 
         if (!WallpaperHelper.IsValidWallpaperFolder(newFolderPath, out var errorMessage))
@@ -362,13 +371,13 @@ public partial class MainForm : Form
     private void currentFolderComboBox_MouseEnter(object sender, EventArgs e)
     {
         var comboBox = sender as ComboBox;
-        FormHelper.ShowToolTipForComboBox(_toolTip, comboBox);
+        FormHelper.ShowFolderToolTipForComboBox(_toolTip, comboBox);
     }
 
     private void removeFolderComboBox_MouseEnter(object sender, EventArgs e)
     {
         var comboBox = sender as ComboBox;
-        FormHelper.ShowToolTipForComboBox(_toolTip, comboBox);
+        FormHelper.ShowFolderToolTipForComboBox(_toolTip, comboBox);
     }
 
     private void modeComboBox_SelectedIndexChanged(object? sender, EventArgs e)
@@ -385,5 +394,14 @@ public partial class MainForm : Form
             "Restart Required"
         );
         SaveSettings();
+    }
+
+    private void settingsButton_Click(object sender, EventArgs e)
+    {
+        using var settingsForm = new SettingsForm(currentFolderComboBox.Items.Cast<string>().ToList());
+        if (settingsForm.ShowDialog(this) == DialogResult.OK)
+        {
+            FormHelper.ShowSuccessMessage("Settings updated successfully!");
+        }
     }
 }

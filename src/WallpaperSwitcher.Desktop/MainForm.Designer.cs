@@ -45,6 +45,7 @@
             currentFolderLabel = new Label();
             nextWallpaperButton = new Button();
             modeComboBox = new ComboBox();
+            settingsButton = new Button();
             foldersManagementGroupBox.SuspendLayout();
             SuspendLayout();
             // 
@@ -187,9 +188,9 @@
             nextWallpaperButton.BackColor = SystemColors.ControlLightLight;
             nextWallpaperButton.Enabled = false;
             nextWallpaperButton.Font = new Font("Segoe UI Semibold", 10.125F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            nextWallpaperButton.Location = new Point(522, 637);
+            nextWallpaperButton.Location = new Point(522, 624);
             nextWallpaperButton.Name = "nextWallpaperButton";
-            nextWallpaperButton.Size = new Size(237, 52);
+            nextWallpaperButton.Size = new Size(237, 116);
             nextWallpaperButton.TabIndex = 0;
             nextWallpaperButton.Text = "Next Wallpaper";
             nextWallpaperButton.UseVisualStyleBackColor = false;
@@ -202,18 +203,30 @@
             modeComboBox.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             modeComboBox.FormattingEnabled = true;
             modeComboBox.Items.AddRange(new object[] { "Native Mode (System SlideShow)", "Custom Mode (Fast Switching)" });
-            modeComboBox.Location = new Point(54, 644);
+            modeComboBox.Location = new Point(54, 624);
             modeComboBox.Name = "modeComboBox";
-            modeComboBox.Size = new Size(394, 40);
+            modeComboBox.Size = new Size(402, 40);
             modeComboBox.TabIndex = 1;
             modeComboBox.SelectedIndexChanged += modeComboBox_SelectedIndexChanged;
+            // 
+            // settingsButton
+            // 
+            settingsButton.Font = new Font("Segoe UI Semibold", 10.125F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            settingsButton.Location = new Point(54, 694);
+            settingsButton.Name = "settingsButton";
+            settingsButton.Size = new Size(402, 46);
+            settingsButton.TabIndex = 2;
+            settingsButton.Text = "Settings";
+            settingsButton.UseVisualStyleBackColor = true;
+            settingsButton.Click += settingsButton_Click;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Window;
-            ClientSize = new Size(814, 762);
+            ClientSize = new Size(814, 798);
+            Controls.Add(settingsButton);
             Controls.Add(modeComboBox);
             Controls.Add(nextWallpaperButton);
             Controls.Add(foldersManagementGroupBox);
@@ -245,5 +258,6 @@
         private Button removeFolderButton;
         private TextBox addFolderTextBox;
         private ComboBox modeComboBox;
+        private Button settingsButton;
     }
 }

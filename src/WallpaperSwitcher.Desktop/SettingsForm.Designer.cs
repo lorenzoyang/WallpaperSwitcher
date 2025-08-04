@@ -39,7 +39,6 @@
             folderHkSaveButton = new Button();
             folderHkLabel = new Label();
             settingsFormSaveButton = new Button();
-            settingsFormCancelButton = new Button();
             showNotificationCheckBox = new CheckBox();
             launchStartupCheckBox = new CheckBox();
             SuspendLayout();
@@ -129,27 +128,17 @@
             // settingsFormSaveButton
             // 
             settingsFormSaveButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            settingsFormSaveButton.Location = new Point(669, 318);
+            settingsFormSaveButton.Location = new Point(843, 270);
             settingsFormSaveButton.Name = "settingsFormSaveButton";
-            settingsFormSaveButton.Size = new Size(146, 46);
+            settingsFormSaveButton.Size = new Size(134, 57);
             settingsFormSaveButton.TabIndex = 9;
             settingsFormSaveButton.Text = "Save All";
             settingsFormSaveButton.UseVisualStyleBackColor = true;
             // 
-            // settingsFormCancelButton
-            // 
-            settingsFormCancelButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            settingsFormCancelButton.Location = new Point(831, 318);
-            settingsFormCancelButton.Name = "settingsFormCancelButton";
-            settingsFormCancelButton.Size = new Size(146, 46);
-            settingsFormCancelButton.TabIndex = 10;
-            settingsFormCancelButton.Text = "Cancel";
-            settingsFormCancelButton.UseVisualStyleBackColor = true;
-            // 
             // showNotificationCheckBox
             // 
             showNotificationCheckBox.AutoSize = true;
-            showNotificationCheckBox.Location = new Point(37, 368);
+            showNotificationCheckBox.Location = new Point(320, 281);
             showNotificationCheckBox.Name = "showNotificationCheckBox";
             showNotificationCheckBox.Size = new Size(495, 36);
             showNotificationCheckBox.TabIndex = 11;
@@ -170,10 +159,9 @@
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1029, 450);
+            ClientSize = new Size(1029, 368);
             Controls.Add(launchStartupCheckBox);
             Controls.Add(showNotificationCheckBox);
-            Controls.Add(settingsFormCancelButton);
             Controls.Add(settingsFormSaveButton);
             Controls.Add(folderHkLabel);
             Controls.Add(folderHkSaveButton);
@@ -208,7 +196,6 @@
         private Button folderHkSaveButton;
         private Label folderHkLabel;
         private Button settingsFormSaveButton;
-        private Button settingsFormCancelButton;
         private CheckBox showNotificationCheckBox;
         private CheckBox launchStartupCheckBox;
     }

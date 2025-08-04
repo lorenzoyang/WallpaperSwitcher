@@ -31,7 +31,7 @@ internal static class FormHelper
             MessageBoxIcon.Warning);
     }
 
-    public static void ShowToolTipForComboBox(ToolTip toolTip, ComboBox? comboBox)
+    public static void ShowFolderToolTipForComboBox(ToolTip toolTip, ComboBox? comboBox)
     {
         if (comboBox is { SelectedItem: not null })
         {
@@ -39,7 +39,8 @@ internal static class FormHelper
 
             // Only show tooltip if text is longer than what can be displayed
             // -20: to account for padding and dropdown arrow
-            toolTip.SetToolTip(comboBox,
+            toolTip.SetToolTip(
+                comboBox,
                 (TextRenderer.MeasureText(fullText, comboBox.Font).Width > comboBox.Width - 20)
                     ? fullText
                     : ""); // Clear tooltip for short text
