@@ -3,14 +3,13 @@
 namespace WallpaperSwitcher.Core.GlobalHotKey;
 
 /// <summary>
-/// Represents a global hotkey configuration containing all the information needed to register
-/// and identify a hotkey combination in the system.
+/// Represents a global hotkey configuration, containing all the information required to
+/// register and identify a hotkey combination at the system level.
 /// </summary>
 /// <remarks>
-/// This class encapsulates the complete definition of a global hotkey, including its unique identifier,
-/// the key combination (modifier keys + virtual key), and a human-readable name for identification.
-/// Global hotkeys registered with this information will trigger system-wide, regardless of which
-/// application currently has focus.
+/// This class encapsulates the full definition of a global hotkey, including its unique ID,
+/// the modifier keys, the virtual key, and a human-readable name. Hotkeys defined with this
+/// class can trigger system-wide actions, even when the application is not in focus.
 /// </remarks>
 public class HotkeyInfo
 {
@@ -106,6 +105,13 @@ public class HotkeyInfo
         return true;
     }
 
+    /// <summary>
+    /// Deconstructs the hotkey information into its component properties.
+    /// </summary>
+    /// <param name="id">The unique identifier of the hotkey.</param>
+    /// <param name="modifierKeys">The modifier keys of the hotkey.</param>
+    /// <param name="key">The main virtual key of the hotkey.</param>
+    /// <param name="name">The name of the hotkey.</param>
     public void Deconstruct(out int id, out ModifierKeys modifierKeys, out VirtualKeys key, out string name)
     {
         id = Id;
@@ -113,11 +119,4 @@ public class HotkeyInfo
         key = Key;
         name = Name;
     }
-}
-
-[JsonSourceGenerationOptions(WriteIndented = true)]
-[JsonSerializable(typeof(HotkeyInfo))]
-[JsonSerializable(typeof(HotkeyInfo[]))]
-internal partial class SourceGenerationContext : JsonSerializerContext
-{
 }

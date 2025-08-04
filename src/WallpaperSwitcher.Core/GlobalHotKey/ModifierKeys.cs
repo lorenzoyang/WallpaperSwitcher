@@ -42,3 +42,25 @@ public enum ModifierKeys : uint
     /// </summary>
     Win = 0x0008
 }
+
+internal static class ModifierKeysExtensions
+{
+    public static string ToFormattedString(this ModifierKeys modifierKeys)
+    {
+        if (modifierKeys == ModifierKeys.None)
+            return "None";
+
+        var parts = new List<string>();
+
+        if (modifierKeys.HasFlag(ModifierKeys.Ctrl))
+            parts.Add("Ctrl");
+        if (modifierKeys.HasFlag(ModifierKeys.Alt))
+            parts.Add("Alt");
+        if (modifierKeys.HasFlag(ModifierKeys.Shift))
+            parts.Add("Shift");
+        if (modifierKeys.HasFlag(ModifierKeys.Win))
+            parts.Add("Win");
+
+        return string.Join("+", parts);
+    }
+}

@@ -1,6 +1,7 @@
 ﻿using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
+using WallpaperSwitcher.Core.GlobalHotKey.Persistence;
 
 namespace WallpaperSwitcher.Core.GlobalHotKey;
 
@@ -27,6 +28,9 @@ public class GlobalHotkeyManager
 
     private bool _disposed;
 
+    /// <summary>
+    /// Handles the persistence of registered hotkeys (e.g., saving and loading from disk).
+    /// </summary>
     private readonly HotkeyPersistenceManager _hotkeyPersistenceManager = new();
 
     /// <summary>
@@ -105,9 +109,27 @@ public class GlobalHotkeyManager
         return -1;
     }
 
-    private const string DefaultNextWallpaperHotkey = "CTRL+SHIFT+N";
+    /// <summary>
+    /// The default name used for the "Next Wallpaper" hotkey.
+    /// </summary>
     public const string DefaultNextWallpaperHotkeyName = "Next Wallpaper";
 
+    /// <summary>
+    /// The default key combination string for the "Next Wallpaper" hotkey.
+    /// </summary>
+    private const string DefaultNextWallpaperHotkey = "CTRL+SHIFT+N";
+
+    /// <summary>
+    /// Asynchronously loads and registers previously saved global hotkeys from persistent storage.
+    /// If no hotkeys are found (e.g., on first application run), a default "Next Wallpaper" hotkey is registered and saved.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous loading and registration operation.</returns>
+    /// <exception cref="ObjectDisposedException">
+    /// Thrown if the <see cref="GlobalHotkeyManager"/> instance has been disposed.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if the default hotkey cannot be parsed or registered, or if a saved hotkey fails to register.
+    /// </exception>
     public async Task LoadingHotkeysAsync()
     {
         if (_disposed)
@@ -123,7 +145,7 @@ public class GlobalHotkeyManager
                 if (nextWallpaperHotkeyId == -1)
                 {
                     throw new InvalidOperationException(
-                        $"Failed to register default hotkey: {DefaultNextWallpaperHotkeyName} (Modifier: {modifierKeys}, Key: {virtualKey})."
+                        $"Failed to register default hotkey: {DefaultNextWallpaperHotkey} for {DefaultNextWallpaperHotkeyName}."
                     );
                 }
 
@@ -132,7 +154,8 @@ public class GlobalHotkeyManager
             else
             {
                 throw new InvalidOperationException(
-                    $"Failed to parse default hotkey: {DefaultNextWallpaperHotkey}. Error: {errorMessage}");
+                    $"Failed to parse default hotkey string: {DefaultNextWallpaperHotkey}. Error: {errorMessage}"
+                );
             }
         }
         else
@@ -142,7 +165,7 @@ public class GlobalHotkeyManager
                 if (RegisterHotkey(modifierKeys, key, name, id) == -1)
                 {
                     throw new InvalidOperationException(
-                        $"Failed to register hotkey: {name} with ID: {id} (Modifier: {modifierKeys}, Key: {key})."
+                        $"Failed to register hotkey: {modifierKeys.ToFormattedString()} + {key} for {name}."
                     );
                 }
             }

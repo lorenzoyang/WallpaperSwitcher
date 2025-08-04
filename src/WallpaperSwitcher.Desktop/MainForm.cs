@@ -61,7 +61,7 @@ public partial class MainForm : Form
         };
         InitializeSystemTray();
 
-        // Global Hotkey Initialization
+        // GlobalHotkeyManager initialization and event subscription
         _globalHotkeyManager = new GlobalHotkeyManager(this.Handle);
         _globalHotkeyManager.HotkeyPressed += (_, e) =>
         {
@@ -396,12 +396,6 @@ public partial class MainForm : Form
 
     private void modeComboBox_SelectedIndexChanged(object? sender, EventArgs e)
     {
-        // _wallpaperManager = modeComboBox.SelectedIndex switch
-        // {
-        //     0 => new NativeWallpaperManager(), // Native Windows implementation
-        //     1 => new CustomWallpaperManager(), // Custom implementation (if any)
-        //     _ => throw new NotSupportedException("Selected mode is not supported.")
-        // };
         FormHelper.ShowSuccessMessage(
             "You have changed the wallpaper mode.\n\n" +
             "The change will take effect after restarting the application.",
