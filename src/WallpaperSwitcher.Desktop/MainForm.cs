@@ -68,8 +68,16 @@ public partial class MainForm : Form
             if (e.HotkeyInfo.Name == GlobalHotkeyManager.DefaultNextWallpaperHotkeyName)
             {
                 nextWallpaperButton_Click(this, EventArgs.Empty);
+                return;
             }
 
+            if (currentFolderComboBox.Items
+                    .Cast<string>()
+                    .FirstOrDefault(folder => folder == e.HotkeyInfo.Name) is { } selectedFolder)
+            {
+                currentFolderComboBox.SelectedItem = selectedFolder;
+            }
+            // add return to the last if statement to avoid unnecessary processing
             // add more hotkeys here if needed
         };
     }

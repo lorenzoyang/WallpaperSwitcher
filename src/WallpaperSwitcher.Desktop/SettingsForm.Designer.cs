@@ -101,6 +101,7 @@
             // 
             // folderHkModifyButton
             // 
+            folderHkModifyButton.Enabled = false;
             folderHkModifyButton.Location = new Point(697, 193);
             folderHkModifyButton.Name = "folderHkModifyButton";
             folderHkModifyButton.Size = new Size(118, 42);
