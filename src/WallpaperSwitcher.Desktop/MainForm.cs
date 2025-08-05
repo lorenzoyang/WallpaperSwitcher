@@ -112,7 +112,7 @@ public partial class MainForm : Form
         currentFolderComboBox.SelectedItem = lastSelectedFolder;
 
         // Load hotkeys from user settings
-        await _globalHotkeyManager.LoadingHotkeysAsync();
+        await _globalHotkeyManager.LoadHotkeysAsync();
     }
 
     private void SaveSettings()

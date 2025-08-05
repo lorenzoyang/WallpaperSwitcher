@@ -43,8 +43,18 @@ public enum ModifierKeys : uint
     Win = 0x0008
 }
 
+/// <summary>
+/// Provides extension methods for the <see cref="ModifierKeys"/> enumeration.
+/// </summary>
 internal static class ModifierKeysExtensions
 {
+    /// <summary>
+    /// Converts the specified <see cref="ModifierKeys"/> value to a human-readable string.
+    /// </summary>
+    /// <param name="modifierKeys">The modifier keys to convert.</param>
+    /// <returns>
+    /// A string representation of the modifier keys (e.g., "Ctrl+Alt"), or "None" if no modifiers are set.
+    /// </returns>
     public static string ToFormattedString(this ModifierKeys modifierKeys)
     {
         if (modifierKeys == ModifierKeys.None)

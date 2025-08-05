@@ -38,7 +38,6 @@
             folderHkModifyButton = new Button();
             folderHkSaveButton = new Button();
             folderHkLabel = new Label();
-            showNotificationCheckBox = new CheckBox();
             launchStartupCheckBox = new CheckBox();
             SuspendLayout();
             // 
@@ -131,20 +130,10 @@
             folderHkLabel.TabIndex = 8;
             folderHkLabel.Text = "Folder Hotkey\r\n";
             // 
-            // showNotificationCheckBox
-            // 
-            showNotificationCheckBox.AutoSize = true;
-            showNotificationCheckBox.Location = new Point(482, 281);
-            showNotificationCheckBox.Name = "showNotificationCheckBox";
-            showNotificationCheckBox.Size = new Size(495, 36);
-            showNotificationCheckBox.TabIndex = 11;
-            showNotificationCheckBox.Text = "Show notification on first minimize to tray";
-            showNotificationCheckBox.UseVisualStyleBackColor = true;
-            // 
             // launchStartupCheckBox
             // 
             launchStartupCheckBox.AutoSize = true;
-            launchStartupCheckBox.Location = new Point(37, 281);
+            launchStartupCheckBox.Location = new Point(37, 288);
             launchStartupCheckBox.Name = "launchStartupCheckBox";
             launchStartupCheckBox.Size = new Size(230, 36);
             launchStartupCheckBox.TabIndex = 12;
@@ -157,7 +146,6 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1029, 368);
             Controls.Add(launchStartupCheckBox);
-            Controls.Add(showNotificationCheckBox);
             Controls.Add(folderHkLabel);
             Controls.Add(folderHkSaveButton);
             Controls.Add(folderHkModifyButton);
@@ -191,7 +179,6 @@
         private Button folderHkModifyButton;
         private Button folderHkSaveButton;
         private Label folderHkLabel;
-        private CheckBox showNotificationCheckBox;
         private CheckBox launchStartupCheckBox;
     }
 }

@@ -32,9 +32,9 @@ public class HotkeyInfo : IEquatable<HotkeyInfo>
     public required string Name { get; init; }
 
     /// <summary>
-    /// Returns the name of the hotkey.
+    /// Returns a string representation of the hotkey, formatted as a combination of modifier keys and the main key.
     /// </summary>
-    /// <returns>The name of the hotkey.</returns>
+    /// <returns>The formatted hotkey string.</returns>
     public override string ToString()
     {
         return ModifierKeys == ModifierKeys.None ? Key.ToString() : $"{ModifierKeys.ToFormattedString()}+{Key}";

@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using Windows.Win32;
+﻿using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
 using WallpaperSwitcher.Core.GlobalHotKey.Exceptions;
@@ -62,10 +61,10 @@ public class GlobalHotkeyManager
     }
 
     /// <summary>
-    /// 
+    /// Gets an array of all currently registered hotkeys.
     /// </summary>
-    /// <returns></returns>
-    /// <exception cref="ObjectDisposedException"></exception>
+    /// <returns>An array of <see cref="HotkeyInfo"/> representing registered hotkeys.</returns>
+    /// <exception cref="ObjectDisposedException">Thrown if the manager has been disposed.</exception>
     public HotkeyInfo[] GetRegisteredHotkeys()
     {
         if (_disposed)
@@ -75,11 +74,11 @@ public class GlobalHotkeyManager
     }
 
     /// <summary>
-    /// 
+    /// Gets the hotkey information associated with the specified name.
     /// </summary>
-    /// <param name="name"></param>
-    /// <returns></returns>
-    /// <exception cref="ObjectDisposedException"></exception>
+    /// <param name="name">The name of the hotkey to retrieve.</param>
+    /// <returns>The matching <see cref="HotkeyInfo"/>, or <c>null</c> if not found.</returns>
+    /// <exception cref="ObjectDisposedException">Thrown if the manager has been disposed.</exception>
     public HotkeyInfo? GetHotKeyInfo(string name)
     {
         if (_disposed)
@@ -103,17 +102,17 @@ public class GlobalHotkeyManager
 
 
     /// <summary>
-    /// 
+    /// Registers a hotkey using modifier and virtual key values.
     /// </summary>
-    /// <param name="modifierKeys"></param>
-    /// <param name="key"></param>
-    /// <param name="name"></param>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="HotkeyDuplicateBindingException"></exception>
-    /// <exception cref="HotkeyBindingException"></exception>
-    public int RegisterHotkey(ModifierKeys modifierKeys, VirtualKeys key, string name, int? id = null)
+    /// <param name="modifierKeys">The modifier keys (e.g., Ctrl, Alt).</param>
+    /// <param name="key">The virtual key to register.</param>
+    /// <param name="name">The name associated with the hotkey.</param>
+    /// <param name="id">Optional ID to assign to the hotkey. If null, an ID is auto-generated.</param>
+    /// <returns>The ID assigned to the registered hotkey.</returns>
+    /// <exception cref="ObjectDisposedException">Thrown if the manager has been disposed.</exception>
+    /// <exception cref="HotkeyDuplicateBindingException">Thrown if the hotkey combination is already registered.</exception>
+    /// <exception cref="HotkeyBindingException">Thrown if registration with the Windows API fails.</exception>
+    private int RegisterHotkey(ModifierKeys modifierKeys, VirtualKeys key, string name, int? id = null)
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(GlobalHotkeyManager));
@@ -146,14 +145,14 @@ public class GlobalHotkeyManager
     }
 
     /// <summary>
-    /// 
+    /// Registers a hotkey using a hotkey string (e.g., "Ctrl+Shift+N") and associates it with a name.
     /// </summary>
-    /// <param name="hotkeyText"></param>
-    /// <param name="name"></param>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="HotkeyParsingException"></exception>
+    /// <param name="hotkeyText">The hotkey string to register.</param>
+    /// <param name="name">The unique name to associate with the hotkey.</param>
+    /// <param name="id">An optional ID to assign to the hotkey. If null, an ID is auto-generated.</param>
+    /// <returns>The ID of the registered hotkey.</returns>
+    /// <exception cref="ObjectDisposedException">Thrown if the manager has been disposed.</exception>
+    /// <exception cref="HotkeyParsingException">Thrown if the hotkey string could not be parsed.</exception>
     public int RegisterHotkey(string hotkeyText, string name, int? id = null)
     {
         if (_disposed)
@@ -167,11 +166,11 @@ public class GlobalHotkeyManager
     }
 
     /// <summary>
-    /// 
+    /// Determines whether a hotkey with the specified modifier and key combination is already registered.
     /// </summary>
-    /// <param name="modifierKeys"></param>
-    /// <param name="key"></param>
-    /// <returns></returns>
+    /// <param name="modifierKeys">The modifier keys.</param>
+    /// <param name="key">The virtual key.</param>
+    /// <returns>The matching <see cref="HotkeyInfo"/>, or <c>null</c> if no match is found.</returns>
     private HotkeyInfo? IsHotkeyDuplicate(ModifierKeys modifierKeys, VirtualKeys key)
     {
         return _registeredHotkeys.Values
@@ -179,12 +178,12 @@ public class GlobalHotkeyManager
     }
 
     /// <summary>
-    /// 
+    /// Unregisters a hotkey using its unique identifier.
     /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    /// <exception cref="ObjectDisposedException"></exception>
-    public bool UnregisterHotkey(int id)
+    /// <param name="id">The ID of the hotkey to unregister.</param>
+    /// <returns><c>true</c> if the hotkey was successfully unregistered; otherwise, <c>false</c>.</returns>
+    /// <exception cref="ObjectDisposedException">Thrown if the manager has been disposed.</exception>
+    private bool UnregisterHotkey(int id)
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(GlobalHotkeyManager));
@@ -202,12 +201,12 @@ public class GlobalHotkeyManager
     }
 
     /// <summary>
-    /// 
+    /// Changes the key combination bound to an existing hotkey name.
     /// </summary>
-    /// <param name="name"></param>
-    /// <param name="newHotkeyText"></param>
-    /// <exception cref="ObjectDisposedException"></exception>
-    /// <exception cref="HotkeyBindingException"></exception>
+    /// <param name="name">The name of the hotkey to change.</param>
+    /// <param name="newHotkeyText">The new hotkey string to assign, or whitespace to remove the hotkey.</param>
+    /// <exception cref="ObjectDisposedException">Thrown if the manager has been disposed.</exception>
+    /// <exception cref="HotkeyBindingException">Thrown if the hotkey could not be unregistered or re-bound.</exception>
     public void ChangeHotkeyBinding(string name, string newHotkeyText)
     {
         if (_disposed)
@@ -232,11 +231,11 @@ public class GlobalHotkeyManager
     }
 
     /// <summary>
-    /// 
+    /// Unregisters the hotkey with the specified name.
     /// </summary>
-    /// <param name="name"></param>
-    /// <returns></returns>
-    /// <exception cref="ObjectDisposedException"></exception>
+    /// <param name="name">The name of the hotkey to unregister.</param>
+    /// <returns><c>true</c> if the hotkey was successfully unregistered; otherwise, <c>false</c>.</returns>
+    /// <exception cref="ObjectDisposedException">Thrown if the manager has been disposed.</exception>
     public bool UnregisterHotkey(string name)
     {
         if (_disposed)
@@ -258,10 +257,12 @@ public class GlobalHotkeyManager
     private const string DefaultNextWallpaperHotkey = "CTRL+SHIFT+N";
 
     /// <summary>
-    /// 
+    /// Loads saved hotkeys from persistent storage and registers them.
+    /// If the hotkeys data file does not exist, it initializes with a default hotkey.
     /// </summary>
-    /// <exception cref="ObjectDisposedException"></exception>
-    public async Task LoadingHotkeysAsync()
+    /// <returns>A task that represents the asynchronous load operation.</returns>
+    /// <exception cref="ObjectDisposedException">Thrown if the manager has been disposed.</exception>
+    public async Task LoadHotkeysAsync()
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(GlobalHotkeyManager));
@@ -285,8 +286,9 @@ public class GlobalHotkeyManager
     }
 
     /// <summary>
-    /// 
+    /// Saves all currently registered hotkeys to persistent storage.
     /// </summary>
+    /// <returns>A task that represents the asynchronous save operation.</returns>
     public async Task SaveHotkeysAsync()
     {
         await _hotkeyPersistenceManager.SaveHotkeysAsync(_registeredHotkeys.Values.ToArray());
