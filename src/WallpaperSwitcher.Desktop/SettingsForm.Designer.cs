@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
-            nextWallpaperHk = new Label();
+            nextWallpaperHkLabel = new Label();
             nextWallpaperHkTextBox = new TextBox();
             nextWallpaperHkModifyButton = new Button();
             nextWallpaperHkSaveButton = new Button();
@@ -38,20 +38,19 @@
             folderHkModifyButton = new Button();
             folderHkSaveButton = new Button();
             folderHkLabel = new Label();
-            settingsFormSaveButton = new Button();
             showNotificationCheckBox = new CheckBox();
             launchStartupCheckBox = new CheckBox();
             SuspendLayout();
             // 
-            // nextWallpaperHk
+            // nextWallpaperHkLabel
             // 
-            nextWallpaperHk.AutoSize = true;
-            nextWallpaperHk.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            nextWallpaperHk.Location = new Point(37, 37);
-            nextWallpaperHk.Name = "nextWallpaperHk";
-            nextWallpaperHk.Size = new Size(269, 32);
-            nextWallpaperHk.TabIndex = 0;
-            nextWallpaperHk.Text = "Next Wallpaper Hotkey";
+            nextWallpaperHkLabel.AutoSize = true;
+            nextWallpaperHkLabel.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            nextWallpaperHkLabel.Location = new Point(37, 37);
+            nextWallpaperHkLabel.Name = "nextWallpaperHkLabel";
+            nextWallpaperHkLabel.Size = new Size(269, 32);
+            nextWallpaperHkLabel.TabIndex = 0;
+            nextWallpaperHkLabel.Text = "Next Wallpaper Hotkey";
             // 
             // nextWallpaperHkTextBox
             // 
@@ -69,23 +68,28 @@
             nextWallpaperHkModifyButton.TabIndex = 2;
             nextWallpaperHkModifyButton.Text = "Modify";
             nextWallpaperHkModifyButton.UseVisualStyleBackColor = true;
+            nextWallpaperHkModifyButton.Click += nextWallpaperHkModifyButton_Click;
             // 
             // nextWallpaperHkSaveButton
             // 
+            nextWallpaperHkSaveButton.Enabled = false;
             nextWallpaperHkSaveButton.Location = new Point(859, 37);
             nextWallpaperHkSaveButton.Name = "nextWallpaperHkSaveButton";
             nextWallpaperHkSaveButton.Size = new Size(118, 42);
             nextWallpaperHkSaveButton.TabIndex = 3;
             nextWallpaperHkSaveButton.Text = "Save";
             nextWallpaperHkSaveButton.UseVisualStyleBackColor = true;
+            nextWallpaperHkSaveButton.Click += nextWallpaperHkSaveButton_Click;
             // 
             // folderHkComboBox
             // 
+            folderHkComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             folderHkComboBox.FormattingEnabled = true;
             folderHkComboBox.Location = new Point(235, 123);
             folderHkComboBox.Name = "folderHkComboBox";
             folderHkComboBox.Size = new Size(742, 40);
             folderHkComboBox.TabIndex = 4;
+            folderHkComboBox.SelectedIndexChanged += folderHkComboBox_SelectedIndexChanged;
             // 
             // folderHkTextBox
             // 
@@ -103,15 +107,18 @@
             folderHkModifyButton.TabIndex = 6;
             folderHkModifyButton.Text = "Modify";
             folderHkModifyButton.UseVisualStyleBackColor = true;
+            folderHkModifyButton.Click += folderHkModifyButton_Click;
             // 
             // folderHkSaveButton
             // 
+            folderHkSaveButton.Enabled = false;
             folderHkSaveButton.Location = new Point(859, 191);
             folderHkSaveButton.Name = "folderHkSaveButton";
             folderHkSaveButton.Size = new Size(118, 42);
             folderHkSaveButton.TabIndex = 7;
             folderHkSaveButton.Text = "Save";
             folderHkSaveButton.UseVisualStyleBackColor = true;
+            folderHkSaveButton.Click += folderHkSaveButton_Click;
             // 
             // folderHkLabel
             // 
@@ -123,20 +130,10 @@
             folderHkLabel.TabIndex = 8;
             folderHkLabel.Text = "Folder Hotkey\r\n";
             // 
-            // settingsFormSaveButton
-            // 
-            settingsFormSaveButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            settingsFormSaveButton.Location = new Point(843, 270);
-            settingsFormSaveButton.Name = "settingsFormSaveButton";
-            settingsFormSaveButton.Size = new Size(134, 57);
-            settingsFormSaveButton.TabIndex = 9;
-            settingsFormSaveButton.Text = "Save All";
-            settingsFormSaveButton.UseVisualStyleBackColor = true;
-            // 
             // showNotificationCheckBox
             // 
             showNotificationCheckBox.AutoSize = true;
-            showNotificationCheckBox.Location = new Point(320, 281);
+            showNotificationCheckBox.Location = new Point(482, 281);
             showNotificationCheckBox.Name = "showNotificationCheckBox";
             showNotificationCheckBox.Size = new Size(495, 36);
             showNotificationCheckBox.TabIndex = 11;
@@ -160,7 +157,6 @@
             ClientSize = new Size(1029, 368);
             Controls.Add(launchStartupCheckBox);
             Controls.Add(showNotificationCheckBox);
-            Controls.Add(settingsFormSaveButton);
             Controls.Add(folderHkLabel);
             Controls.Add(folderHkSaveButton);
             Controls.Add(folderHkModifyButton);
@@ -169,7 +165,7 @@
             Controls.Add(nextWallpaperHkSaveButton);
             Controls.Add(nextWallpaperHkModifyButton);
             Controls.Add(nextWallpaperHkTextBox);
-            Controls.Add(nextWallpaperHk);
+            Controls.Add(nextWallpaperHkLabel);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
@@ -178,13 +174,14 @@
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
             Text = "Wallpaper Switcher Settings";
+            Load += SettingsForm_Load;
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
 
-        private Label nextWallpaperHk;
+        private Label nextWallpaperHkLabel;
         private TextBox nextWallpaperHkTextBox;
         private Button nextWallpaperHkModifyButton;
         private Button nextWallpaperHkSaveButton;
@@ -193,7 +190,6 @@
         private Button folderHkModifyButton;
         private Button folderHkSaveButton;
         private Label folderHkLabel;
-        private Button settingsFormSaveButton;
         private CheckBox showNotificationCheckBox;
         private CheckBox launchStartupCheckBox;
     }

@@ -19,7 +19,7 @@ internal class HotkeyPersistenceManager
     /// <summary>
     /// Gets the file path where hotkeys are stored.
     /// </summary>
-    private string Location { get; }
+    public string Location { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HotkeyPersistenceManager"/> class
@@ -55,7 +55,7 @@ internal class HotkeyPersistenceManager
 
         await using var fileStream = File.Create(Location);
         await JsonSerializer.SerializeAsync(fileStream, hotkeys,
-            Persistence.SourceGenerationContext.Default.HotkeyInfoArray);
+            SourceGenerationContext.Default.HotkeyInfoArray);
     }
 
     /// <summary>
@@ -78,7 +78,7 @@ internal class HotkeyPersistenceManager
             await using var fileStream = File.OpenRead(Location);
             var hotkeys =
                 await JsonSerializer.DeserializeAsync(fileStream,
-                    Persistence.SourceGenerationContext.Default.HotkeyInfoArray);
+                    SourceGenerationContext.Default.HotkeyInfoArray);
             return hotkeys ?? [];
         }
         catch (JsonException)

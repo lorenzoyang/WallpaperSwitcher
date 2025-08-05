@@ -1,6 +1,8 @@
-﻿using Windows.Win32;
+﻿using System.Runtime.InteropServices;
+using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
+using WallpaperSwitcher.Core.GlobalHotKey.Exceptions;
 using WallpaperSwitcher.Core.GlobalHotKey.Persistence;
 
 namespace WallpaperSwitcher.Core.GlobalHotKey;
@@ -60,6 +62,33 @@ public class GlobalHotkeyManager
     }
 
     /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="ObjectDisposedException"></exception>
+    public HotkeyInfo[] GetRegisteredHotkeys()
+    {
+        if (_disposed)
+            throw new ObjectDisposedException(nameof(GlobalHotkeyManager));
+
+        return _registeredHotkeys.Values.ToArray();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    /// <exception cref="ObjectDisposedException"></exception>
+    public HotkeyInfo? GetHotKeyInfo(string name)
+    {
+        if (_disposed)
+            throw new ObjectDisposedException(nameof(GlobalHotkeyManager));
+        return _registeredHotkeys.Values
+            .FirstOrDefault(hotkeyInfo => hotkeyInfo.Name == name);
+    }
+
+    /// <summary>
     /// Processes a window message to check if it's a hotkey press event.
     /// If the message is a hotkey press, it raises the <see cref="HotkeyPressed"/> event.
     /// </summary>
@@ -72,25 +101,31 @@ public class GlobalHotkeyManager
         }
     }
 
+
     /// <summary>
-    /// Registers a new global hotkey with the system.
+    /// 
     /// </summary>
-    /// <param name="modifierKeys">The modifier keys (e.g., Ctrl, Alt) for the hotkey.</param>
-    /// <param name="key">The primary virtual key for the hotkey.</param>
-    /// <param name="name">
-    /// An optional human-readable description for the hotkey. Defaults to a string representation of the key combination.
-    /// </param>
-    /// <param name="id">An optional specific unique ID for the hotkey. If not provided, a new one is generated.</param>
-    /// <returns>
-    /// The unique ID of the registered hotkey if successful; otherwise, returns -1.
-    /// </returns>
-    /// <exception cref="ObjectDisposedException">
-    /// Thrown if the <see cref="GlobalHotkeyManager"/> instance has been disposed.
-    /// </exception>
+    /// <param name="modifierKeys"></param>
+    /// <param name="key"></param>
+    /// <param name="name"></param>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="ObjectDisposedException"></exception>
+    /// <exception cref="HotkeyDuplicateBindingException"></exception>
+    /// <exception cref="HotkeyBindingException"></exception>
     public int RegisterHotkey(ModifierKeys modifierKeys, VirtualKeys key, string name, int? id = null)
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(GlobalHotkeyManager));
+
+        var existingHotkeyInfo = IsHotkeyDuplicate(modifierKeys, key);
+        if (existingHotkeyInfo is not null)
+        {
+            throw new HotkeyDuplicateBindingException(
+                "A hotkey with the same combination is already registered.",
+                existingHotkeyInfo
+            );
+        }
 
         var hotkeyId = id ?? NextHotkeyId++;
         if (PInvoke.RegisterHotKey(_windowHandle, hotkeyId, (HOT_KEY_MODIFIERS)modifierKeys, (uint)key))
@@ -105,9 +140,112 @@ public class GlobalHotkeyManager
             return hotkeyId;
         }
 
-        NextHotkeyId--;
-        return -1;
+        throw new HotkeyBindingException(
+            $"Failed to register hotkey: {modifierKeys.ToFormattedString()} + {key} for {name}."
+        );
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="hotkeyText"></param>
+    /// <param name="name"></param>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="ObjectDisposedException"></exception>
+    /// <exception cref="HotkeyParsingException"></exception>
+    public int RegisterHotkey(string hotkeyText, string name, int? id = null)
+    {
+        if (_disposed)
+            throw new ObjectDisposedException(nameof(GlobalHotkeyManager));
+        if (HotkeyInfo.TryParseFromString(hotkeyText, out var modifierKeys, out var virtualKey, out var errorMessage))
+        {
+            return RegisterHotkey(modifierKeys, virtualKey, name);
+        }
+
+        throw new HotkeyParsingException($"Failed to parse hotkey text '{hotkeyText}': {errorMessage}", hotkeyText);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="modifierKeys"></param>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    private HotkeyInfo? IsHotkeyDuplicate(ModifierKeys modifierKeys, VirtualKeys key)
+    {
+        return _registeredHotkeys.Values
+            .FirstOrDefault(hotkeyInfo => hotkeyInfo.ModifierKeys == modifierKeys && hotkeyInfo.Key == key);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="ObjectDisposedException"></exception>
+    public bool UnregisterHotkey(int id)
+    {
+        if (_disposed)
+            throw new ObjectDisposedException(nameof(GlobalHotkeyManager));
+
+        if (!_registeredHotkeys.ContainsKey(id))
+            return false;
+
+        if (PInvoke.UnregisterHotKey(_windowHandle, id))
+        {
+            _registeredHotkeys.Remove(id);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="newHotkeyText"></param>
+    /// <exception cref="ObjectDisposedException"></exception>
+    /// <exception cref="HotkeyBindingException"></exception>
+    public void ChangeHotkeyBinding(string name, string newHotkeyText)
+    {
+        if (_disposed)
+            throw new ObjectDisposedException(nameof(GlobalHotkeyManager));
+
+        var existingHkInfo = GetHotKeyInfo(name);
+        if (existingHkInfo is null)
+        {
+            throw new HotkeyBindingException($"No hotkey registered with the name '{name}'.");
+        }
+
+        if (!UnregisterHotkey(existingHkInfo.Id))
+        {
+            throw new HotkeyBindingException($"Failed to unregister hotkey '{name}' during re-binding.");
+        }
+
+        // If the new hotkey text is empty or whitespace, we do not register a new hotkey
+        // and simply remove the existing hotkey.
+        if (string.IsNullOrWhiteSpace(newHotkeyText)) return;
+
+        _ = RegisterHotkey(newHotkeyText, name, existingHkInfo.Id);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    /// <exception cref="ObjectDisposedException"></exception>
+    public bool UnregisterHotkey(string name)
+    {
+        if (_disposed)
+            throw new ObjectDisposedException(nameof(GlobalHotkeyManager));
+        var hotkeyInfo = _registeredHotkeys.Values
+            .FirstOrDefault(hotkeyInfo => hotkeyInfo.Name == name);
+        return hotkeyInfo is not null && UnregisterHotkey(hotkeyInfo.Id);
+    }
+
 
     /// <summary>
     /// The default name used for the "Next Wallpaper" hotkey.
@@ -120,56 +258,38 @@ public class GlobalHotkeyManager
     private const string DefaultNextWallpaperHotkey = "CTRL+SHIFT+N";
 
     /// <summary>
-    /// Asynchronously loads and registers previously saved global hotkeys from persistent storage.
-    /// If no hotkeys are found (e.g., on first application run), a default "Next Wallpaper" hotkey is registered and saved.
+    /// 
     /// </summary>
-    /// <returns>A task that represents the asynchronous loading and registration operation.</returns>
-    /// <exception cref="ObjectDisposedException">
-    /// Thrown if the <see cref="GlobalHotkeyManager"/> instance has been disposed.
-    /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown if the default hotkey cannot be parsed or registered, or if a saved hotkey fails to register.
-    /// </exception>
+    /// <exception cref="ObjectDisposedException"></exception>
     public async Task LoadingHotkeysAsync()
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(GlobalHotkeyManager));
 
+        var isFirstLoad = !File.Exists(_hotkeyPersistenceManager.Location);
         var hotkeyInfos = await _hotkeyPersistenceManager.LoadHotkeysAsync();
-        if (hotkeyInfos.Length == 0)
+        if (isFirstLoad)
         {
-            if (HotkeyInfo.TryParseFromString(DefaultNextWallpaperHotkey, out var modifierKeys, out var virtualKey,
-                    out var errorMessage))
-            {
-                var nextWallpaperHotkeyId = RegisterHotkey(modifierKeys, virtualKey, DefaultNextWallpaperHotkeyName);
-                if (nextWallpaperHotkeyId == -1)
-                {
-                    throw new InvalidOperationException(
-                        $"Failed to register default hotkey: {DefaultNextWallpaperHotkey} for {DefaultNextWallpaperHotkeyName}."
-                    );
-                }
-
-                await _hotkeyPersistenceManager.SaveHotkeysAsync(_registeredHotkeys.Values.ToArray());
-            }
-            else
-            {
-                throw new InvalidOperationException(
-                    $"Failed to parse default hotkey string: {DefaultNextWallpaperHotkey}. Error: {errorMessage}"
-                );
-            }
+            // initialize with default hotkey: Next Wallpaper CTRL+SHIFT+N
+            _ = RegisterHotkey(DefaultNextWallpaperHotkey, DefaultNextWallpaperHotkeyName);
+            await _hotkeyPersistenceManager.SaveHotkeysAsync(_registeredHotkeys.Values.ToArray());
         }
         else
         {
+            // otherwise, register all loaded hotkeys
             foreach (var (id, modifierKeys, key, name) in hotkeyInfos)
             {
-                if (RegisterHotkey(modifierKeys, key, name, id) == -1)
-                {
-                    throw new InvalidOperationException(
-                        $"Failed to register hotkey: {modifierKeys.ToFormattedString()} + {key} for {name}."
-                    );
-                }
+                _ = RegisterHotkey(modifierKeys, key, name, id);
             }
         }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public async Task SaveHotkeysAsync()
+    {
+        await _hotkeyPersistenceManager.SaveHotkeysAsync(_registeredHotkeys.Values.ToArray());
     }
 
     /// <summary>

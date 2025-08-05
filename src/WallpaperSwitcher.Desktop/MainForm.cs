@@ -356,6 +356,8 @@ public partial class MainForm : Form
         }
 
         removeFolderComboBox_SelectedIndexChanged(removeFolderComboBox, EventArgs.Empty);
+
+        _ = _globalHotkeyManager.UnregisterHotkey(folderToRemove);
     }
 
     private void nextWallpaperButton_Click(object? sender, EventArgs e)

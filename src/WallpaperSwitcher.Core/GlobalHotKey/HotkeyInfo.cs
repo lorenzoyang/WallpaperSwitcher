@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace WallpaperSwitcher.Core.GlobalHotKey;
+﻿namespace WallpaperSwitcher.Core.GlobalHotKey;
 
 /// <summary>
 /// Represents a global hotkey configuration, containing all the information required to
@@ -11,7 +9,7 @@ namespace WallpaperSwitcher.Core.GlobalHotKey;
 /// the modifier keys, the virtual key, and a human-readable name. Hotkeys defined with this
 /// class can trigger system-wide actions, even when the application is not in focus.
 /// </remarks>
-public class HotkeyInfo
+public class HotkeyInfo : IEquatable<HotkeyInfo>
 {
     /// <summary>
     /// Gets the unique identifier for this hotkey registration.
@@ -37,7 +35,10 @@ public class HotkeyInfo
     /// Returns the name of the hotkey.
     /// </summary>
     /// <returns>The name of the hotkey.</returns>
-    public override string ToString() => Name;
+    public override string ToString()
+    {
+        return ModifierKeys == ModifierKeys.None ? Key.ToString() : $"{ModifierKeys.ToFormattedString()}+{Key}";
+    }
 
     /// <summary>
     /// Attempts to parse a hotkey string into its corresponding modifier and virtual key components.
@@ -119,4 +120,35 @@ public class HotkeyInfo
         key = Key;
         name = Name;
     }
+
+    #region Equality Members
+
+    public bool Equals(HotkeyInfo? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return ModifierKeys == other.ModifierKeys && Key == other.Key;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as HotkeyInfo);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(ModifierKeys, Key);
+    }
+
+    public static bool operator ==(HotkeyInfo? left, HotkeyInfo? right)
+    {
+        return Equals(left, right);
+    }
+
+    public static bool operator !=(HotkeyInfo? left, HotkeyInfo? right)
+    {
+        return !Equals(left, right);
+    }
+
+    #endregion
 }
