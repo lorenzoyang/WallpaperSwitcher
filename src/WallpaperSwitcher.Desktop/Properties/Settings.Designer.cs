@@ -57,5 +57,17 @@ namespace WallpaperSwitcher.Desktop.Properties {
                 this["SelectedModeIndex"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool HasShownTrayTip {
+            get {
+                return ((bool)(this["HasShownTrayTip"]));
+            }
+            set {
+                this["HasShownTrayTip"] = value;
+            }
+        }
     }
 }
