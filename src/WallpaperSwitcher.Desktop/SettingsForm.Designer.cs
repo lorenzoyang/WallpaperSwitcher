@@ -140,6 +140,7 @@
             launchStartupCheckBox.TabIndex = 12;
             launchStartupCheckBox.Text = "Launch at startup";
             launchStartupCheckBox.UseVisualStyleBackColor = true;
+            launchStartupCheckBox.CheckedChanged += launchStartupCheckBox_CheckedChanged;
             // 
             // settingsFormOkButton
             // 

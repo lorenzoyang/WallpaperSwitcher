@@ -1,4 +1,5 @@
-﻿using WallpaperSwitcher.Core.GlobalHotKey;
+﻿using WallpaperSwitcher.Core;
+using WallpaperSwitcher.Core.GlobalHotKey;
 using static WallpaperSwitcher.Core.GlobalHotKey.GlobalHotkeyManager;
 
 namespace WallpaperSwitcher.Desktop;
@@ -18,7 +19,10 @@ public partial class SettingsForm : Form
         _globalHotkeyManager = globalHotkeyManager;
         // Initialize the folder hotkeys dictionary with the provided folders
         _folderHotkeys = folders.ToDictionary(folder => folder, HotkeyInfo? (_) => null);
+    }
 
+    private void LoadInitialSettings()
+    {
         // Display Next Wallpaper Hotkey
         nextWallpaperHkTextBox.Text =
             _globalHotkeyManager.GetHotKeyInfo(DefaultNextWallpaperHotkeyName)?.ToString() ??
@@ -40,6 +44,8 @@ public partial class SettingsForm : Form
         {
             folderHkComboBox.Items.Add(folder);
         }
+
+        launchStartupCheckBox.Checked = Properties.Settings.Default.LaunchAtStartup;
     }
 
     private void SetNextWallpaperHkEditMode(bool isEditing)
@@ -72,6 +78,13 @@ public partial class SettingsForm : Form
         settingsFormOkButton.Enabled = !isEditing;
     }
 
+    private void SaveSettings()
+    {
+        Properties.Settings.Default.LaunchAtStartup = launchStartupCheckBox.Checked;
+
+        Properties.Settings.Default.Save();
+    }
+
     // *********************************
     // Event handlers for Form events  *
     // *********************************
@@ -81,6 +94,7 @@ public partial class SettingsForm : Form
     {
         // To prevent any control from being focused when the form loads
         ActiveControl = nextWallpaperHkLabel;
+        LoadInitialSettings();
     }
 
     //
@@ -208,5 +222,44 @@ public partial class SettingsForm : Form
     private void settingsFormOkButton_Click(object sender, EventArgs e)
     {
         DialogResult = DialogResult.OK;
+    }
+
+    private void launchStartupCheckBox_CheckedChanged(object? sender, EventArgs e)
+    {
+        try
+        {
+            var success = StartupManager.SetStartupEnabled(
+                launchStartupCheckBox.Checked,
+                startMinimized: true // Always start minimized to system tray
+            );
+            if (!success)
+            {
+                RevertCheckboxState();
+                var actionMessage = launchStartupCheckBox.Checked ? "disable" : "enable";
+                FormHelper.ShowErrorMessage(
+                    $"Failed to {actionMessage} launch at startup. Please check your permissions and try again.",
+                    "Startup Registration Error"
+                );
+            }
+
+            SaveSettings();
+        }
+        catch (Exception exception)
+        {
+            RevertCheckboxState();
+            FormHelper.ShowErrorMessage(
+                $"An error occurred while updating startup settings: {exception.Message}",
+                "Startup Registration Error"
+            );
+        }
+
+        return;
+
+        void RevertCheckboxState()
+        {
+            launchStartupCheckBox.CheckedChanged -= launchStartupCheckBox_CheckedChanged;
+            launchStartupCheckBox.Checked = !launchStartupCheckBox.Checked;
+            launchStartupCheckBox.CheckedChanged += launchStartupCheckBox_CheckedChanged;
+        }
     }
 }

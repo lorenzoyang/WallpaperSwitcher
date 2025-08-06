@@ -30,6 +30,8 @@ public partial class MainForm : Form
     // If false, it will minimize to the system tray.
     private bool IsExiting { get; set; }
 
+    private bool StartMinimized { get; }
+
     protected override void WndProc(ref Message m)
     {
         // Handle custom message to show the first instance of the application
@@ -48,9 +50,11 @@ public partial class MainForm : Form
         }
     }
 
-    public MainForm()
+    public MainForm(bool startMinimized = false)
     {
         InitializeComponent();
+
+        StartMinimized = startMinimized;
 
         // ********************************
         // System Tray Icon Initialization
@@ -84,7 +88,7 @@ public partial class MainForm : Form
         };
     }
 
-    private async Task LoadSettings()
+    private async Task LoadInitialSettings()
     {
         // ****************************************
         // Load the wallpaper folders from settings
@@ -274,7 +278,12 @@ public partial class MainForm : Form
     {
         try
         {
-            await LoadSettings();
+            await LoadInitialSettings();
+            if (StartMinimized)
+            {
+                WindowState = FormWindowState.Minimized;
+                ShowInTaskbar = false;
+            }
         }
         catch (Exception exception)
         {
