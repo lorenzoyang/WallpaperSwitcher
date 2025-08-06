@@ -39,6 +39,7 @@
             folderHkSaveButton = new Button();
             folderHkLabel = new Label();
             launchStartupCheckBox = new CheckBox();
+            settingsFormOkButton = new Button();
             SuspendLayout();
             // 
             // nextWallpaperHkLabel
@@ -140,11 +141,23 @@
             launchStartupCheckBox.Text = "Launch at startup";
             launchStartupCheckBox.UseVisualStyleBackColor = true;
             // 
+            // settingsFormOkButton
+            // 
+            settingsFormOkButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            settingsFormOkButton.Location = new Point(827, 278);
+            settingsFormOkButton.Name = "settingsFormOkButton";
+            settingsFormOkButton.Size = new Size(150, 46);
+            settingsFormOkButton.TabIndex = 13;
+            settingsFormOkButton.Text = "Ok";
+            settingsFormOkButton.UseVisualStyleBackColor = true;
+            settingsFormOkButton.Click += settingsFormOkButton_Click;
+            // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1029, 368);
+            Controls.Add(settingsFormOkButton);
             Controls.Add(launchStartupCheckBox);
             Controls.Add(folderHkLabel);
             Controls.Add(folderHkSaveButton);
@@ -180,5 +193,6 @@
         private Button folderHkSaveButton;
         private Label folderHkLabel;
         private CheckBox launchStartupCheckBox;
+        private Button settingsFormOkButton;
     }
 }

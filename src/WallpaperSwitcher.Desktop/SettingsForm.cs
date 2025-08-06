@@ -53,6 +53,8 @@ public partial class SettingsForm : Form
         nextWallpaperHkModifyButton.Enabled = !isEditing;
         // Clean the original value if we are exiting edit mode
         OriginalValue = isEditing ? OriginalValue : string.Empty;
+        // Settings Form Ok button is disabled while editing hotkeys
+        settingsFormOkButton.Enabled = !isEditing;
     }
 
     private void SetFolderHkEditMode(bool isEditing)
@@ -66,6 +68,8 @@ public partial class SettingsForm : Form
         folderHkModifyButton.Enabled = !isEditing;
         // Clean the original value if we are exiting edit mode
         OriginalValue = isEditing ? OriginalValue : string.Empty;
+        // Settings Form Ok button is disabled while editing hotkeys
+        settingsFormOkButton.Enabled = !isEditing;
     }
 
     // *********************************
@@ -200,4 +204,9 @@ public partial class SettingsForm : Form
         }
     }
     // End of Event handlers for Folder Hotkeys
+
+    private void settingsFormOkButton_Click(object sender, EventArgs e)
+    {
+        DialogResult = DialogResult.OK;
+    }
 }

@@ -9,26 +9,32 @@ internal static class FormHelper
 {
     public static void ShowSuccessMessage(string message, string caption = "Success")
     {
-        MessageBox.Show(message,
+        MessageBox.Show(
+            message,
             caption,
             MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
+            MessageBoxIcon.Information
+        );
     }
 
     public static void ShowErrorMessage(string message, string caption = "Error")
     {
-        MessageBox.Show(message,
+        MessageBox.Show(
+            message,
             caption,
             MessageBoxButtons.OK,
-            MessageBoxIcon.Error);
+            MessageBoxIcon.Error
+        );
     }
 
     public static void ShowWarningMessage(string message, string caption = "Warning")
     {
-        MessageBox.Show(message,
+        MessageBox.Show(
+            message,
             caption,
             MessageBoxButtons.OK,
-            MessageBoxIcon.Warning);
+            MessageBoxIcon.Warning
+        );
     }
 
     public static void ShowFolderToolTipForComboBox(ToolTip toolTip, ComboBox? comboBox)

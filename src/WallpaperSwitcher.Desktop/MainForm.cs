@@ -6,24 +6,6 @@ namespace WallpaperSwitcher.Desktop;
 
 public partial class MainForm : Form
 {
-    protected override void WndProc(ref Message m)
-    {
-        // Handle custom message to show the first instance of the application
-        if (m.Msg == FormHelper.WmShowFirstInstanceMessage)
-        {
-            ShowMainForm(null, EventArgs.Empty);
-        }
-
-        base.WndProc(ref m);
-
-        // Handle global hotkey messages
-        if (m.Msg == GlobalHotkeyManager.WmHotkeyMessage)
-        {
-            var id = m.WParam.ToInt32();
-            _globalHotkeyManager.ProcessWindowMessage(id);
-        }
-    }
-
     private readonly GlobalHotkeyManager _globalHotkeyManager;
 
     // default wallpaper manager implementation
@@ -48,10 +30,29 @@ public partial class MainForm : Form
     // If false, it will minimize to the system tray.
     private bool IsExiting { get; set; }
 
+    protected override void WndProc(ref Message m)
+    {
+        // Handle custom message to show the first instance of the application
+        if (m.Msg == FormHelper.WmShowFirstInstanceMessage)
+        {
+            ShowMainForm();
+        }
+
+        base.WndProc(ref m);
+
+        // Handle global hotkey messages
+        if (m.Msg == GlobalHotkeyManager.WmHotkeyMessage)
+        {
+            var id = m.WParam.ToInt32();
+            _globalHotkeyManager.ProcessWindowMessage(id);
+        }
+    }
+
     public MainForm()
     {
         InitializeComponent();
 
+        // ********************************
         // System Tray Icon Initialization
         _trayIcon = new NotifyIcon()
         {
@@ -61,6 +62,7 @@ public partial class MainForm : Form
         };
         InitializeSystemTray();
 
+        // *********************************************************
         // GlobalHotkeyManager initialization and event subscription
         _globalHotkeyManager = new GlobalHotkeyManager(this.Handle);
         _globalHotkeyManager.HotkeyPressed += (_, e) =>
@@ -84,10 +86,10 @@ public partial class MainForm : Form
 
     private async Task LoadSettings()
     {
+        // ****************************************
         // Load the wallpaper folders from settings
         currentFolderComboBox.Items.Clear();
         removeFolderComboBox.Items.Clear();
-
         var wallpaperFolders = Properties.Settings.Default.WallpaperFolders ?? [];
         foreach (var folderPath in wallpaperFolders)
         {
@@ -97,13 +99,16 @@ public partial class MainForm : Form
             removeFolderComboBox.Items.Add(folderPath);
         }
 
+        // ******************************************
         // Load the selected mode index from settings
+        // This loading must be done before loading the last selected folder
         // Selected mode: 0 = Native, 1 = Custom, 0 is the default
         // disable temporarily the event handler to prevent unnecessary message box reminder
         modeComboBox.SelectedIndexChanged -= modeComboBox_SelectedIndexChanged;
         modeComboBox.SelectedIndex = Properties.Settings.Default.SelectedModeIndex;
         modeComboBox.SelectedIndexChanged += modeComboBox_SelectedIndexChanged;
 
+        // *******************************************
         // Load the last selected folder from settings
         var lastSelectedFolder = Properties.Settings.Default.LastSelectedFolder;
         if (string.IsNullOrEmpty(lastSelectedFolder)) return;
@@ -111,12 +116,14 @@ public partial class MainForm : Form
         if (!currentFolderComboBox.Items.Contains(lastSelectedFolder)) return;
         currentFolderComboBox.SelectedItem = lastSelectedFolder;
 
+        // ********************************
         // Load hotkeys from user settings
         await _globalHotkeyManager.LoadHotkeysAsync();
     }
 
     private void SaveSettings()
     {
+        // **************************************
         // Save the wallpaper folders to settings
         var wallpaperFolders = new StringCollection();
         foreach (string? item in currentFolderComboBox.Items)
@@ -129,12 +136,14 @@ public partial class MainForm : Form
 
         Properties.Settings.Default.WallpaperFolders = wallpaperFolders;
 
+        // *****************************************
         // Save the last selected folder to settings
         if (currentFolderComboBox.SelectedItem != null)
         {
             Properties.Settings.Default.LastSelectedFolder = currentFolderComboBox.SelectedItem.ToString();
         }
 
+        // *****************************
         // Save the selected mode index
         // If an unsupported mode is selected, default to Native (0)
         Properties.Settings.Default.SelectedModeIndex =
@@ -150,6 +159,7 @@ public partial class MainForm : Form
     [
         "Switch Folder",
         "Next Wallpaper",
+        "Settings",
         "Exit"
     ];
 
@@ -163,10 +173,16 @@ public partial class MainForm : Form
         var nextWallpaperItem = new ToolStripMenuItem(TrayMenuItemNames[1], null, nextWallpaperButton_Click);
         trayMenu.Items.Add(nextWallpaperItem);
         trayMenu.Items.Add(new ToolStripSeparator());
+        // Add settings option
+        trayMenu.Items.Add(new ToolStripMenuItem(TrayMenuItemNames[2], null, settingsButton_Click));
+        trayMenu.Items.Add(new ToolStripSeparator());
         // Add "Exit" option
-        trayMenu.Items.Add(new ToolStripMenuItem(TrayMenuItemNames[2], null, ExitApplication));
-        // Double-click to restore window
-        _trayIcon.DoubleClick += ShowMainForm;
+        trayMenu.Items.Add(new ToolStripMenuItem(TrayMenuItemNames[3], null, ExitApplication));
+        // Left-click to restore the main form
+        _trayIcon.MouseClick += (_, e) =>
+        {
+            if (e.Button == MouseButtons.Left) ShowMainForm();
+        };
         trayMenu.Opening += (_, _) => UpdateTrayMenu();
 
         _trayIcon.ContextMenuStrip = trayMenu;
@@ -212,7 +228,7 @@ public partial class MainForm : Form
             return _trayIcon.ContextMenuStrip?.Items
                        .Cast<ToolStripItem>()
                        .FirstOrDefault(item => item.Text == name) ??
-                   throw new InvalidOperationException($"Menu item '{name}' not found.");
+                   throw new InvalidOperationException($"System tray menu item '{name}' not found.");
         }
     }
 
@@ -223,7 +239,7 @@ public partial class MainForm : Form
         Application.Exit();
     }
 
-    private void ShowMainForm(object? sender, EventArgs e)
+    private void ShowMainForm()
     {
         Show();
         WindowState = FormWindowState.Normal;
@@ -240,7 +256,7 @@ public partial class MainForm : Form
         _trayIcon.BalloonTipText =
             @"Application minimized to system tray. Double-click the tray icon to restore.";
         _trayIcon.BalloonTipIcon = ToolTipIcon.Info;
-        _trayIcon.ShowBalloonTip(1000);
+        _trayIcon.ShowBalloonTip(10000);
 
         Properties.Settings.Default.HasShownTrayTip = true;
         SaveSettings();
@@ -332,39 +348,53 @@ public partial class MainForm : Form
         var imageCount = WallpaperHelper.GetImageCount(newFolderPath);
         FormHelper.ShowSuccessMessage(
             $"Folder added successfully!\n\nPath: {newFolderPath}\nImages found: {imageCount}");
+
+        SaveSettings();
     }
 
-    private void removeFolderButton_Click(object sender, EventArgs e)
+    private async void removeFolderButton_Click(object sender, EventArgs e)
     {
-        if (removeFolderComboBox.SelectedItem is not string folderToRemove) return;
-
-        // Confirm removal
-        var result = MessageBox.Show(
-            $"""
-             Are you sure you want to remove this folder from the list?
-
-             {folderToRemove}
-             """,
-            @"Confirm Removal",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Question);
-
-        if (result != DialogResult.Yes) return;
-
-        var isCurrentSelected = (currentFolderComboBox.SelectedItem?.ToString() == folderToRemove);
-
-        currentFolderComboBox.Items.Remove(folderToRemove);
-        removeFolderComboBox.Items.Remove(folderToRemove);
-
-        if (isCurrentSelected)
+        try
         {
-            _wallpaperManager.SetWallpaper(WallpaperManager.DefaultWallpaper);
-            currentFolderComboBox_SelectedIndexChanged(currentFolderComboBox, EventArgs.Empty);
+            if (removeFolderComboBox.SelectedItem is not string folderToRemove) return;
+
+            // Confirm removal
+            var result = MessageBox.Show(
+                $"""
+                 Are you sure you want to remove this folder from the list?
+
+                 {folderToRemove}
+                 """,
+                @"Confirm Removal",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (result != DialogResult.Yes) return;
+
+            var isCurrentSelected = (currentFolderComboBox.SelectedItem?.ToString() == folderToRemove);
+
+            currentFolderComboBox.Items.Remove(folderToRemove);
+            removeFolderComboBox.Items.Remove(folderToRemove);
+
+            if (isCurrentSelected)
+            {
+                _wallpaperManager.SetWallpaper(WallpaperManager.DefaultWallpaper);
+                currentFolderComboBox_SelectedIndexChanged(currentFolderComboBox, EventArgs.Empty);
+            }
+
+            removeFolderComboBox_SelectedIndexChanged(removeFolderComboBox, EventArgs.Empty);
+
+            _ = _globalHotkeyManager.UnregisterHotkey(folderToRemove);
+            await _globalHotkeyManager.SaveHotkeysAsync();
+
+            SaveSettings();
         }
-
-        removeFolderComboBox_SelectedIndexChanged(removeFolderComboBox, EventArgs.Empty);
-
-        _ = _globalHotkeyManager.UnregisterHotkey(folderToRemove);
+        catch (Exception exception)
+        {
+            FormHelper.ShowErrorMessage(
+                $"An error occurred while removing the folder: {exception.Message}\n\n" +
+                "Please try again.");
+        }
     }
 
     private void nextWallpaperButton_Click(object? sender, EventArgs e)
@@ -382,7 +412,6 @@ public partial class MainForm : Form
         nextWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
         var currentFolderPath = currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty;
         _wallpaperManager.SetSlideShow(currentFolderPath);
-        SaveSettings(); // Save user selection promptly
     }
 
     private void addFolderTextBox_TextChanged(object sender, EventArgs e)
@@ -413,13 +442,22 @@ public partial class MainForm : Form
         SaveSettings();
     }
 
-    private void settingsButton_Click(object sender, EventArgs e)
+    private void settingsButton_Click(object? sender, EventArgs e)
     {
-        using var settingsForm =
-            new SettingsForm(_globalHotkeyManager, currentFolderComboBox.Items.Cast<string>().ToList());
-        if (settingsForm.ShowDialog(this) == DialogResult.OK)
+        using var settingsForm = new SettingsForm(
+            _globalHotkeyManager,
+            currentFolderComboBox.Items.Cast<string>().ToList()
+        );
+        var result = settingsForm.ShowDialog(this);
+        switch (result)
         {
-            FormHelper.ShowSuccessMessage("Settings updated successfully!");
+            case DialogResult.OK:
+                FormHelper.ShowSuccessMessage("Settings saved successfully.");
+                break;
+            case DialogResult.Cancel:
+                FormHelper.ShowWarningMessage(
+                    "Settings window was closed without confirming. Any unsaved changes may have been discarded.");
+                break;
         }
     }
 }
