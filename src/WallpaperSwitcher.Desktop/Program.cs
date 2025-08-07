@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace WallpaperSwitcher.Desktop;
 
 internal static class Program
@@ -44,17 +42,15 @@ internal static class Program
         catch (UnauthorizedAccessException ex)
         {
             // Handle case where mutex exists, but we can't access it
-            Debug.WriteLine($"Mutex access denied: {ex.Message}");
             FormHelper.ShowWarningMessage(
-                "Another instance of the application is running with different permissions.",
+                $"Another instance of the application is running with different permissions: {ex.Message}",
                 "Access Denied"
             );
         }
         catch (Exception ex)
         {
             // Handle any other startup exceptions
-            Debug.WriteLine($"Startup error: {ex}");
-            FormHelper.ShowErrorMessage(
+            FormHelper.ShowErrorMessageWithLink(
                 $"Failed to start application: {ex.Message}",
                 "Startup Error"
             );

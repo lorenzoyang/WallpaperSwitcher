@@ -236,7 +236,7 @@ public partial class SettingsForm : Form
             {
                 RevertCheckboxState();
                 var actionMessage = launchStartupCheckBox.Checked ? "disable" : "enable";
-                FormHelper.ShowErrorMessage(
+                FormHelper.ShowErrorMessageWithLink(
                     $"Failed to {actionMessage} launch at startup. Please check your permissions and try again.",
                     "Startup Registration Error"
                 );
@@ -247,7 +247,7 @@ public partial class SettingsForm : Form
         catch (Exception exception)
         {
             RevertCheckboxState();
-            FormHelper.ShowErrorMessage(
+            FormHelper.ShowErrorMessageWithLink(
                 $"An error occurred while updating startup settings: {exception.Message}",
                 "Startup Registration Error"
             );

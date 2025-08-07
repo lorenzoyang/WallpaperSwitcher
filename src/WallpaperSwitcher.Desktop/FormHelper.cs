@@ -7,6 +7,8 @@ namespace WallpaperSwitcher.Desktop;
 
 internal static class FormHelper
 {
+    private const string GitHubIssuesUrl = "https://github.com/lorenzoyang/WallpaperSwitcher/issues";
+
     public static void ShowSuccessMessage(string message, string caption = "Success")
     {
         MessageBox.Show(
@@ -21,6 +23,19 @@ internal static class FormHelper
     {
         MessageBox.Show(
             message,
+            caption,
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error
+        );
+    }
+
+    public static void ShowErrorMessageWithLink(string message, string caption = "Error")
+    {
+        // Include the GitHub link in the message
+        var fullMessage = $"{message}\n\nPlease report this bug on GitHub: {GitHubIssuesUrl}";
+
+        MessageBox.Show(
+            fullMessage,
             caption,
             MessageBoxButtons.OK,
             MessageBoxIcon.Error

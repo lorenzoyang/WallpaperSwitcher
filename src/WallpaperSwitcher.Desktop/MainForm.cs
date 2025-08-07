@@ -32,7 +32,7 @@ public partial class MainForm : Form
 
     // Allow the form to be visible when SetVisibleCore is called
     // Used to implement minimizing to tray functionality at application startup
-    private bool AllowVisible { get; set; }
+    private bool AllowVisible { get; set; } = true; // Important: initially allow visibility
 
     // Flag to indicate if initial settings have been loaded
     private bool HasLoadedInitialSettings { get; set; }
@@ -316,7 +316,7 @@ public partial class MainForm : Form
         }
         catch (Exception exception)
         {
-            FormHelper.ShowErrorMessage(
+            FormHelper.ShowErrorMessageWithLink(
                 $"An error occurred while loading settings: {exception.Message}\n\n" +
                 "The application will now exit.");
             IsExiting = true; // Set to true to exit application completely
@@ -429,7 +429,7 @@ public partial class MainForm : Form
         }
         catch (Exception exception)
         {
-            FormHelper.ShowErrorMessage(
+            FormHelper.ShowErrorMessageWithLink(
                 $"An error occurred while removing the folder: {exception.Message}\n\n" +
                 "Please try again.");
         }
