@@ -257,8 +257,8 @@ public class GlobalHotkeyManager
     private const string DefaultNextWallpaperHotkey = "CTRL+SHIFT+N";
 
     /// <summary>
-    /// Loads saved hotkeys from persistent storage and registers them.
-    /// If the hotkeys data file does not exist, it initializes with a default hotkey.
+    /// Asynchronously loads previously saved hotkeys from persistent storage. 
+    /// If no hotkeys are found, registers the default "Next Wallpaper" hotkey and saves it.
     /// </summary>
     /// <returns>A task that represents the asynchronous load operation.</returns>
     /// <exception cref="ObjectDisposedException">Thrown if the manager has been disposed.</exception>
@@ -274,6 +274,34 @@ public class GlobalHotkeyManager
             // initialize with default hotkey: Next Wallpaper CTRL+SHIFT+N
             _ = RegisterHotkey(DefaultNextWallpaperHotkey, DefaultNextWallpaperHotkeyName);
             await _hotkeyPersistenceManager.SaveHotkeysAsync(_registeredHotkeys.Values.ToArray());
+        }
+        else
+        {
+            // otherwise, register all loaded hotkeys
+            foreach (var (id, modifierKeys, key, name) in hotkeyInfos)
+            {
+                _ = RegisterHotkey(modifierKeys, key, name, id);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Synchronously loads previously saved hotkeys from persistent storage. 
+    /// If no hotkeys are found, registers the default "Next Wallpaper" hotkey and saves it.
+    /// </summary>
+    /// <exception cref="ObjectDisposedException">Thrown if the manager has been disposed.</exception>
+    public void LoadHotkeys()
+    {
+        if (_disposed)
+            throw new ObjectDisposedException(nameof(GlobalHotkeyManager));
+
+        var isFirstLoad = !File.Exists(_hotkeyPersistenceManager.Location);
+        var hotkeyInfos = _hotkeyPersistenceManager.LoadHotkeys();
+        if (isFirstLoad)
+        {
+            // initialize with default hotkey: Next Wallpaper CTRL+SHIFT+N
+            _ = RegisterHotkey(DefaultNextWallpaperHotkey, DefaultNextWallpaperHotkeyName);
+            _hotkeyPersistenceManager.SaveHotkeys(_registeredHotkeys.Values.ToArray());
         }
         else
         {

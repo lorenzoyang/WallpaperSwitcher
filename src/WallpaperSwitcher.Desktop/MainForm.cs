@@ -30,7 +30,18 @@ public partial class MainForm : Form
     // If false, it will minimize to the system tray.
     private bool IsExiting { get; set; }
 
-    private bool StartMinimized { get; }
+    // Allow the form to be visible when SetVisibleCore is called
+    // Used to implement minimizing to tray functionality at application startup
+    private bool AllowVisible { get; set; }
+
+    // Flag to indicate if initial settings have been loaded
+    private bool HasLoadedInitialSettings { get; set; }
+
+    // Override SetVisibleCore to control initial visibility without affecting other properties
+    protected override void SetVisibleCore(bool value)
+    {
+        base.SetVisibleCore(AllowVisible && value);
+    }
 
     protected override void WndProc(ref Message m)
     {
@@ -53,8 +64,6 @@ public partial class MainForm : Form
     public MainForm(bool startMinimized = false)
     {
         InitializeComponent();
-
-        StartMinimized = startMinimized;
 
         // ********************************
         // System Tray Icon Initialization
@@ -86,9 +95,37 @@ public partial class MainForm : Form
             // add return to the last if statement to avoid unnecessary processing
             // add more hotkeys here if needed
         };
+
+        // If starting minimized, prevent initial visibility
+        // And load initial settings synchronously
+        if (startMinimized)
+        {
+            AllowVisible = false;
+            LoadInitialSettings();
+        }
     }
 
-    private async Task LoadInitialSettings()
+    private async Task LoadInitialSettingsAsync()
+    {
+        if (HasLoadedInitialSettings) return;
+        HasLoadedInitialSettings = true;
+        PopulateComponentsFromInitialSettings();
+        // ********************************
+        // Load hotkeys from user settings
+        await _globalHotkeyManager.LoadHotkeysAsync();
+    }
+
+    private void LoadInitialSettings()
+    {
+        if (HasLoadedInitialSettings) return;
+        HasLoadedInitialSettings = true;
+        PopulateComponentsFromInitialSettings();
+        // ********************************
+        // Load hotkeys from user settings
+        _globalHotkeyManager.LoadHotkeys();
+    }
+
+    private void PopulateComponentsFromInitialSettings()
     {
         // ****************************************
         // Load the wallpaper folders from settings
@@ -119,10 +156,6 @@ public partial class MainForm : Form
         // User might have deleted the last selected folder, so we check if it still exists
         if (!currentFolderComboBox.Items.Contains(lastSelectedFolder)) return;
         currentFolderComboBox.SelectedItem = lastSelectedFolder;
-
-        // ********************************
-        // Load hotkeys from user settings
-        await _globalHotkeyManager.LoadHotkeysAsync();
     }
 
     private void SaveSettings()
@@ -245,6 +278,7 @@ public partial class MainForm : Form
 
     private void ShowMainForm()
     {
+        AllowVisible = true;
         Show();
         WindowState = FormWindowState.Normal;
         Activate();
@@ -278,12 +312,7 @@ public partial class MainForm : Form
     {
         try
         {
-            await LoadInitialSettings();
-            if (StartMinimized)
-            {
-                WindowState = FormWindowState.Minimized;
-                ShowInTaskbar = false;
-            }
+            await LoadInitialSettingsAsync();
         }
         catch (Exception exception)
         {

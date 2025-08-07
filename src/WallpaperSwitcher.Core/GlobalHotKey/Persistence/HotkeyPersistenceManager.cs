@@ -41,10 +41,10 @@ internal class HotkeyPersistenceManager
     }
 
     /// <summary>
-    /// Saves an array of <see cref="HotkeyInfo"/> instances to the JSON file asynchronously.
+    /// Asynchronously saves the specified array of hotkeys to the JSON file.
     /// </summary>
-    /// <param name="hotkeys">The array of hotkey information to save.</param>
-    /// <returns>A task that represents the asynchronous save operation.</returns>
+    /// <param name="hotkeys">An array of <see cref="HotkeyInfo"/> objects to be saved.</param>
+    /// <returns>A task representing the asynchronous save operation.</returns>
     public async Task SaveHotkeysAsync(HotkeyInfo[] hotkeys)
     {
         var directory = Path.GetDirectoryName(Location);
@@ -54,17 +54,32 @@ internal class HotkeyPersistenceManager
         }
 
         await using var fileStream = File.Create(Location);
-        await JsonSerializer.SerializeAsync(fileStream, hotkeys,
-            SourceGenerationContext.Default.HotkeyInfoArray);
+        await JsonSerializer.SerializeAsync(fileStream, hotkeys, SourceGenerationContext.Default.HotkeyInfoArray);
     }
 
     /// <summary>
-    /// Loads an array of <see cref="HotkeyInfo"/> instances from the JSON file asynchronously.
+    /// Synchronously saves the specified array of hotkeys to the JSON file.
+    /// </summary>
+    /// <param name="hotkeys">An array of <see cref="HotkeyInfo"/> objects to be saved.</param>
+    public void SaveHotkeys(HotkeyInfo[] hotkeys)
+    {
+        var directory = Path.GetDirectoryName(Location);
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        using var fileStream = File.Create(Location);
+        JsonSerializer.Serialize(fileStream, hotkeys, SourceGenerationContext.Default.HotkeyInfoArray);
+    }
+
+    /// <summary>
+    /// Asynchronously loads hotkeys from the JSON file.
     /// </summary>
     /// <returns>
-    /// A task that represents the asynchronous load operation. 
-    /// The task result contains the array of loaded hotkey information. 
-    /// Returns an empty array if the file does not exist or is invalid.
+    /// A task representing the asynchronous load operation. The task result contains
+    /// an array of <see cref="HotkeyInfo"/> objects loaded from the file, or an empty
+    /// array if the file does not exist or is invalid.
     /// </returns>
     public async Task<HotkeyInfo[]> LoadHotkeysAsync()
     {
@@ -79,6 +94,33 @@ internal class HotkeyPersistenceManager
             var hotkeys =
                 await JsonSerializer.DeserializeAsync(fileStream,
                     SourceGenerationContext.Default.HotkeyInfoArray);
+            return hotkeys ?? [];
+        }
+        catch (JsonException)
+        {
+            return [];
+        }
+    }
+
+    /// <summary>
+    /// Synchronously loads hotkeys from the JSON file.
+    /// </summary>
+    /// <returns>
+    /// An array of <see cref="HotkeyInfo"/> objects loaded from the file, or an empty
+    /// array if the file does not exist or is invalid.
+    /// </returns>
+    public HotkeyInfo[] LoadHotkeys()
+    {
+        if (!File.Exists(Location))
+        {
+            return [];
+        }
+
+        try
+        {
+            using var fileStream = File.OpenRead(Location);
+            var hotkeys =
+                JsonSerializer.Deserialize(fileStream, SourceGenerationContext.Default.HotkeyInfoArray);
             return hotkeys ?? [];
         }
         catch (JsonException)
