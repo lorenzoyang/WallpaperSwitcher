@@ -2,78 +2,130 @@
 
 **Wallpaper Switcher** is a lightweight and user-friendly wallpaper manager for Windows. It allows users to manage multiple wallpaper folders and quickly switch between images with ease.
 
-<img src="./assets/gifs/GuiDemo.gif" alt="GUI Demo" width="350"/>
-<img src="./assets/gifs/SystemTrayDemo.gif" alt="System Tray Demo" width="350"/>
+<img src="./assets/gifs/Gui_Demo.gif" alt="GUI Demo" width="350"/>
+<img src="./assets/gifs/SystemTray_Demo.gif" alt="System Tray Demo" width="350"/>
+<img src="./assets/gifs/Settings_Demo.gif" alt="Settings Demo" width="350"/>
+
 
 ## Features 
 
 - [x] **Folder Management:** 
-  - Add new wallpaper folders
-  - Remove existing wallpaper folders
-  - Switch between wallpaper folders
+  - Add and remove wallpaper folders
+  - Easily switch between folders
 - [x] **Manual Wallpaper Switching:** 
-  - Switch to the next wallpaper
-- [x] **System Tray Integration**
-  - Minimize to system tray
-  - Right-click menu with options: Open, Exit
+  - Instantly switch to the next wallpaper
 - [x] **Two Wallpaper Switching Modes**
   - Native Mode (System Slideshow): Uses Windows' built-in wallpaper SlideShow feature.
   - Custom Mode (Fast Switching): Uses the `SetWallpaper` API to simulate the SlideShow feature for faster transitions.
-- [ ] **Global Hotkey Support**
+- [x] **System Tray Integration**
+  - Automatically minimizes to the system tray when closed via the "X" button
+  - Right-click tray menu options: Switch Folder, Next Wallpaper, Settings, Exit
+  - Left-click to reopen the main window
+- [x] **Global Hotkey Support**
   - Hotkey for "Next Wallpaper"
   - Hotkey for switching wallpaper folders
-  - Configuration through a settings file
-- [ ] **Auto Start on Boot**
-  - Option to launch automatically when Windows starts
+- [x] **Auto Start on Boot**
+  - Optional setting to launch automatically on Windows startup
+- [x] **Settings Interface**
+  - Clean and intuitive UI for configuring hotkeys and preferences
 
 ## Installation & Usage
 
-You can run **Wallpaper Switcher** without needing to install anything. Choose from two deployment options based on your preference:
+**Wallpaper Switcher** is portable and requires no installation. Choose from two deployment methods:
 
-### Download
 
-Visit the [Releases](https://github.com/lorenzoyang/WallpaperSwitcher/releases) page on GitHub and choose one of the following options:
+### 🔹 Option 1: Single Executable (Simplest)
 
-#### Option 1: Single Executable (Simplest)
+1. Download `WallpaperSwitcher.exe` from the [Releases](https://github.com/lorenzoyang/WallpaperSwitcher/releases) page.
+2. Save it to any folder (e.g., Desktop or `C:\Programs`).
+3. Double-click to run.
 
-1. Download `WallpaperSwitcher.exe`
-2. Save it to any location you prefer (e.g., Desktop, `C:\Programs`, etc.)
+> ⚠️ **Note:** The first launch may be slightly slower due to self-extraction.
 
-> **Note:** The single executable may have a slightly slower startup time as it needs to extract required files on first launch.
+### 🔹 Option 2: Full Package (Recommended)
 
-#### Option 2: Full Package (Recommended)
+1. Download the `WallpaperSwitcher.zip` file from the [Releases](https://github.com/lorenzoyang/WallpaperSwitcher/releases) page.
+2. Extract the contents to a directory of your choice (e.g., `C:\Programs\WallpaperSwitcher`).
+3. Inside the extracted folder, go to the `bin` directory and run `WallpaperSwitcher.exe`.
 
-1. Download the `WallpaperSwitcher.zip` file
-2. Extract the contents of the .zip file. You will get a folder containing:
-   - A `bin` folder with all application files
-   - The main `WallpaperSwitcher.exe` inside the `bin` folder
-3. Move the extracted folder to your preferred location (e.g., `C:\Programs\WallpaperSwitcher`, `D:\Apps\WallpaperSwitcher`, or Desktop)
+> ⚠️ **Important:**
+>
+> - Do **not** move or delete files inside the `bin` folder.
+> - The `WallpaperSwitcher.exe` **must remain** inside the `bin` directory to function correctly.
 
-> **⚠️ Important for Full Package:**
-> - **Do not modify, move, or delete any contents inside the `bin` folder**
-> - Always keep all files in the `bin` folder together
-> - The `WallpaperSwitcher.exe` must remain inside the `bin` folder to function properly
+## Running the App
 
-### Run
+### ▶️ Launching
 
-#### For Single Executable (Option 1):
+* **Single Executable:** Double-click `WallpaperSwitcher.exe`.
+* **Full Package:** Navigate to `bin/` and run `WallpaperSwitcher.exe`.
 
-1. Navigate to where you saved `WallpaperSwitcher.exe`
-2. Double-click the file to launch the application
+### 📌 Create Shortcut (Optional)
 
-#### For Full Package (Option 2):
+* Right-click `WallpaperSwitcher.exe` → **Create shortcut**
+* Move the shortcut to Desktop or Pin it to Start
 
-1. Open the extracted WallpaperSwitcher folder
-2. Navigate to the `bin` folder
-3. Double-click `WallpaperSwitcher.exe` to launch the application
-4. Optionally, create a desktop shortcut or pin to Start Menu for easier access:
-   - Right-click `WallpaperSwitcher.exe` → **Create shortcut**
-   - Move the shortcut to your Desktop or right-click it → **Pin to Start**
+## 💡 Usage Tips
 
-#### Usage Tips:
-- When running, a main window will appear. You can close this window to minimize the application to the system tray—it will keep running in the background.
-- To exit the application, right-click the tray icon and select **Exit**.
+Here are some helpful tips and details to get the most out of **Wallpaper Switcher**:
 
+### 🖥️ General Behavior
+
+- When you close the main window (via the "X" button), the application minimizes to the **system tray** and continues running in the background.
+- To **completely exit**, right-click the tray icon and choose **Exit**.
+- From the tray icon, you can quickly:
+  - Switch to the next wallpaper
+  - Change wallpaper folders
+  - Open the settings window
+  - Exit the application
+
+### ⚙️ User Data & Configuration
+
+All user data is stored in:
+
+```
+C:\Users\<YourUsername>\AppData\Local\WallpaperSwitcher
+```
+
+This folder includes:
+
+* `hotkeys.json`: Stores your custom global hotkey mappings
+* A folder prefixed with `WallpaperSwitcher*` containing `user.config.xml`, which holds other settings
+
+### 🔄 How to Reset the App
+
+To fully reset Wallpaper Switcher to its default state:
+1. **Delete the user data folder:**
+   ```
+   C:\Users\<YourUsername>\AppData\Local\WallpaperSwitcher
+   ```
+2. **Remove the app from Windows startup (optional):**
+   - Press `Win + R`, type `regedit`, and hit Enter
+   - Navigate to:
+     ```
+     HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
+     ```
+   - Delete the `WallpaperSwitcher` entry
+3. **Alternative method:**
+   - You can reset settings and remove hotkeys from within the app via the **Settings** window
+
+> ⚠️ **Note:** The app will regenerate default settings and hotkeys on next launch.
+
+### ⌨️ Hotkey Usage & Format
+
+- **Default hotkey**: `Ctrl + Alt + N` (for switching to the next wallpaper)
+- You can change hotkeys via the **Settings** window
+- **Hotkey rules:**
+  - Use `+` as a separator (spaces and case are ignored)
+  - Only **one letter key** (e.g., `N`) is allowed
+  - Combine it with one or more of the following modifiers:
+    - `Ctrl`
+    - `Alt`
+    - `Shift`
+- **Examples:**
+  - `Ctrl + Alt + N`
+  - `Ctrl + Shift + N`
+  - `Ctrl + Alt + Shift + N`
 
 ## License
 
