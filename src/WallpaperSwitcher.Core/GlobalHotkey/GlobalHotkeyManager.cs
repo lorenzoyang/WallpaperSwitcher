@@ -4,7 +4,7 @@ using Windows.Win32.UI.Input.KeyboardAndMouse;
 using WallpaperSwitcher.Core.GlobalHotKey.Exceptions;
 using WallpaperSwitcher.Core.GlobalHotKey.Persistence;
 
-namespace WallpaperSwitcher.Core.GlobalHotKey;
+namespace WallpaperSwitcher.Core.GlobalHotkey;
 
 /// <summary>
 /// Manages the registration and handling of global hotkeys for a Windows application.
@@ -157,9 +157,10 @@ public class GlobalHotkeyManager
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(GlobalHotkeyManager));
-        if (HotkeyInfo.TryParseFromString(hotkeyText, out var modifierKeys, out var virtualKey, out var errorMessage))
+        if (Hotkey.TryParseFrom(hotkeyText, out var hotkey,
+                out var errorMessage))
         {
-            return RegisterHotkey(modifierKeys, virtualKey, name);
+            return RegisterHotkey(hotkey.ModifierKeys, hotkey.VirtualKeys, name);
         }
 
         throw new HotkeyParsingException($"Failed to parse hotkey text '{hotkeyText}': {errorMessage}", hotkeyText);

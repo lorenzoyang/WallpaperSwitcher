@@ -1,6 +1,7 @@
 ﻿using WallpaperSwitcher.Core;
+using WallpaperSwitcher.Core.GlobalHotkey;
 using WallpaperSwitcher.Core.GlobalHotKey;
-using static WallpaperSwitcher.Core.GlobalHotKey.GlobalHotkeyManager;
+using static WallpaperSwitcher.Core.GlobalHotkey.GlobalHotkeyManager;
 
 namespace WallpaperSwitcher.Desktop;
 

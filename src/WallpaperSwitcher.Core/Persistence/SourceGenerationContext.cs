@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using WallpaperSwitcher.Core.GlobalHotkey;
 
 namespace WallpaperSwitcher.Core.GlobalHotKey.Persistence;
 
