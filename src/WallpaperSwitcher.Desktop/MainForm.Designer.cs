@@ -20,7 +20,7 @@ namespace WallpaperSwitcher.Desktop
                 components.Dispose();
                 _toolTip.Dispose();
                 _trayIcon.Dispose();
-                _globalHotkeyManager.Dispose();
+                _hotkeyService.Dispose();
             }
             base.Dispose(disposing);
         }

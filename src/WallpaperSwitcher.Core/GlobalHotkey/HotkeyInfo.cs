@@ -1,88 +1,90 @@
 ﻿namespace WallpaperSwitcher.Core.GlobalHotkey;
 
 /// <summary>
-/// Represents a global hotkey configuration, containing all the information required to
-/// register and identify a hotkey combination at the system level.
+/// Represents information about a registered global hotkey, including its identifier, key combination, and display name.
 /// </summary>
-/// <remarks>
-/// This class encapsulates the full definition of a global hotkey, including its unique ID,
-/// the modifier keys, the virtual key, and a human-readable name. Hotkeys defined with this
-/// class can trigger system-wide actions, even when the application is not in focus.
-/// </remarks>
-public class HotkeyInfo : IEquatable<HotkeyInfo>
+public sealed class HotkeyInfo : IEquatable<HotkeyInfo>
 {
     /// <summary>
-    /// Gets the unique identifier for this hotkey registration.
+    /// Gets the unique identifier for the hotkey.
     /// </summary>
     public required int Id { get; init; }
 
     /// <summary>
-    /// Gets the modifier keys that must be pressed in combination with the main key.
+    /// Gets the hotkey combination associated with this instance.
     /// </summary>
-    public required ModifierKeys ModifierKeys { get; init; }
+    public required Hotkey Hotkey { get; init; }
 
     /// <summary>
-    /// Gets the primary virtual key that triggers the hotkey when pressed with the specified modifiers.
-    /// </summary>
-    public required VirtualKeys Key { get; init; }
-
-    /// <summary>
-    /// Gets the name associated with this hotkey, typically representing the item or action it is bound to.
+    /// Gets the display name of the hotkey.
     /// </summary>
     public required string Name { get; init; }
 
     /// <summary>
-    /// Returns a string representation of the hotkey, formatted as a combination of modifier keys and the main key.
+    /// Returns a string representation of the hotkey.
     /// </summary>
-    /// <returns>The formatted hotkey string.</returns>
-    public override string ToString()
-    {
-        return ModifierKeys == ModifierKeys.None ? Key.ToString() : $"{ModifierKeys.ToFormattedString()}+{Key}";
-    }
+    /// <returns>A string that represents the <see cref="Hotkey"/>.</returns>
+    public override string ToString() => Hotkey.ToString();
 
     /// <summary>
-    /// Deconstructs the hotkey information into its component properties.
+    /// Deconstructs the current instance into its component values.
     /// </summary>
     /// <param name="id">The unique identifier of the hotkey.</param>
-    /// <param name="modifierKeys">The modifier keys of the hotkey.</param>
-    /// <param name="key">The main virtual key of the hotkey.</param>
-    /// <param name="name">The name of the hotkey.</param>
-    public void Deconstruct(out int id, out ModifierKeys modifierKeys, out VirtualKeys key, out string name)
+    /// <param name="hotkey">The hotkey combination.</param>
+    /// <param name="name">The display name of the hotkey.</param>
+    public void Deconstruct(out int id, out Hotkey hotkey, out string name)
     {
         id = Id;
-        modifierKeys = ModifierKeys;
-        key = Key;
+        hotkey = Hotkey;
         name = Name;
     }
 
     #region Equality Members
 
+    /// <summary>
+    /// Determines whether the specified <see cref="HotkeyInfo"/> is equal to the current instance.
+    /// </summary>
+    /// <param name="other">The <see cref="HotkeyInfo"/> to compare with the current instance.</param>
+    /// <returns><c>true</c> if the hotkey combinations are equal; otherwise, <c>false</c>.</returns>
     public bool Equals(HotkeyInfo? other)
     {
         if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return ModifierKeys == other.ModifierKeys && Key == other.Key;
+        return ReferenceEquals(this, other) || Hotkey.Equals(other.Hotkey);
     }
 
+    /// <inheritdoc/>
     public override bool Equals(object? obj)
     {
         return Equals(obj as HotkeyInfo);
     }
 
+    /// <inheritdoc/>
     public override int GetHashCode()
     {
-        return HashCode.Combine(ModifierKeys, Key);
+        return Hotkey.GetHashCode();
     }
 
+    /// <summary>
+    /// Determines whether two specified <see cref="HotkeyInfo"/> objects are equal.
+    /// </summary>
+    /// <param name="left">The first <see cref="HotkeyInfo"/> to compare.</param>
+    /// <param name="right">The second <see cref="HotkeyInfo"/> to compare.</param>
+    /// <returns><c>true</c> if the objects are equal; otherwise, <c>false</c>.</returns>
     public static bool operator ==(HotkeyInfo? left, HotkeyInfo? right)
     {
         return Equals(left, right);
     }
 
+    /// <summary>
+    /// Determines whether two specified <see cref="HotkeyInfo"/> objects are not equal.
+    /// </summary>
+    /// <param name="left">The first <see cref="HotkeyInfo"/> to compare.</param>
+    /// <param name="right">The second <see cref="HotkeyInfo"/> to compare.</param>
+    /// <returns><c>true</c> if the objects are not equal; otherwise, <c>false</c>.</returns>
     public static bool operator !=(HotkeyInfo? left, HotkeyInfo? right)
     {
         return !Equals(left, right);
     }
 
-    #endregion
+    #endregion Equality Members
 }
