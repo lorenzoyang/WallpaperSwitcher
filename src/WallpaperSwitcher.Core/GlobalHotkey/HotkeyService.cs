@@ -1,83 +1,90 @@
-﻿using Windows.Win32;
-using Windows.Win32.Foundation;
-using Windows.Win32.UI.Input.KeyboardAndMouse;
-using WallpaperSwitcher.Core.Exceptions;
+﻿using WallpaperSwitcher.Core.Exceptions;
 using WallpaperSwitcher.Core.Persistence;
+using WallpaperSwitcher.Core.Win32Api;
 
 namespace WallpaperSwitcher.Core.GlobalHotkey;
 
 /// <summary>
-/// 
+/// Provides services for registering, managing, and handling global hotkeys.
 /// </summary>
+/// <remarks>
+/// This service encapsulates registration, persistence, and event handling for
+/// global hotkeys. It works with a <see cref="HotkeyRegistrar"/> to communicate
+/// with the Windows API and an <see cref="IHotkeyStorage"/> implementation for
+/// saving and loading hotkey configurations.
+/// </remarks>
 public sealed class HotkeyService
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    private readonly HWND _hWnd;
+    private readonly HotkeyRegistrar _hotkeyRegistrar;
+    private readonly IHotkeyStorage _hotkeyStorage;
 
-    /// <summary>
-    /// 
-    /// </summary>
+    // Registered hotkeys should be released when the service is disposed.
+    // Any usage of this field should check for disposal.
     private readonly Dictionary<int, HotkeyInfo> _registeredHotkeys = new();
-
-    /// <summary>
-    /// 
-    /// </summary>
-    private readonly HotkeyStorage _hotkeyStorage = new();
 
     private bool _disposed;
 
-    /// <summary>
-    /// 
-    /// </summary>
     private int NextHotkeyId { get; set; } = 1000;
 
-    // The Windows message identifier for a registered hotkey being pressed.
-    // Used in message processing to identify hotkey notifications.
+    /// <summary>
+    /// The Windows message identifier for a registered hotkey being pressed.
+    /// Used in message processing to identify hotkey notifications.
+    /// </summary>
     public const int WmHotkey = 0x0312;
 
     /// <summary>
-    /// The default name used for the "Next Wallpaper" hotkey.
+    /// Initializes a new instance of the <see cref="HotkeyService"/> class.
     /// </summary>
-    public const string DefaultNextWallpaperHotkeyName = "Next Wallpaper";
+    /// <param name="hotkeyRegistrar">
+    /// The component responsible for registering and unregistering hotkeys with the operating system.
+    /// </param>
+    /// <param name="hotkeyStorage">
+    /// The storage provider used for loading and saving hotkey configurations.
+    /// </param>
+    public HotkeyService(HotkeyRegistrar hotkeyRegistrar, IHotkeyStorage hotkeyStorage)
+    {
+        _hotkeyRegistrar = hotkeyRegistrar;
+        _hotkeyStorage = hotkeyStorage;
+    }
 
     /// <summary>
-    /// The default key combination string for the "Next Wallpaper" hotkey.
-    /// </summary>
-    private const string DefaultNextWallpaperHotkey = "CTRL+SHIFT+N";
-
-    /// <summary>
-    /// 
+    /// Occurs when a registered hotkey is pressed.
     /// </summary>
     public event EventHandler<HotkeyPressedEventArgs>? HotkeyPressed;
 
-    public HotkeyService(IntPtr hWnd)
+    /// <summary>
+    /// Gets all currently registered hotkeys.
+    /// </summary>
+    /// <returns>
+    /// An immutable collection of <see cref="HotkeyInfo"/> representing the currently registered hotkeys.
+    /// </returns>
+    /// <exception cref="ObjectDisposedException">Thrown if the service has been disposed.</exception>
+    public IEnumerable<HotkeyInfo> GetRegisteredHotkeys()
     {
-        if (hWnd == IntPtr.Zero)
-            throw new ArgumentException("Window handle cannot be null.", nameof(hWnd));
-        _hWnd = (HWND)hWnd;
-    }
-    
-    public HotkeyInfo[] GetRegisteredHotkeys()
-    {
-        if (_disposed)
-            throw new ObjectDisposedException(nameof(HotkeyService));
-
-        return _registeredHotkeys.Values.ToArray();
-    }
-    
-    public HotkeyInfo? GetHotKeyInfo(string name)
-    {
-        if (_disposed)
-            throw new ObjectDisposedException(nameof(HotkeyService));
-        return _registeredHotkeys.Values
-            .FirstOrDefault(hotkeyInfo => hotkeyInfo.Name == name);
+        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
+        return _registeredHotkeys.Values;
     }
 
     /// <summary>
-    /// Processes a window message to check if it's a hotkey press event.
-    /// If the message is a hotkey press, it raises the <see cref="HotkeyPressed"/> event.
+    /// Finds a registered hotkey by a property value.
+    /// </summary>
+    /// <typeparam name="T">The type of the property being searched.</typeparam>
+    /// <param name="propertySelector">A function that selects the property to compare.</param>
+    /// <param name="value">The value to compare against.</param>
+    /// <returns>
+    /// The matching <see cref="HotkeyInfo"/> if found; otherwise, <c>null</c>.
+    /// </returns>
+    /// <exception cref="ObjectDisposedException">Thrown if the service has been disposed.</exception>
+    public HotkeyInfo? GetHotKeyInfoBy<T>(Func<HotkeyInfo, T> propertySelector, T value)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
+        return _registeredHotkeys.Values
+            .FirstOrDefault(h => EqualityComparer<T>.Default.Equals(propertySelector(h), value));
+    }
+
+    /// <summary>
+    /// Processes a Windows message to detect hotkey presses.
+    /// If the message corresponds to a registered hotkey, the <see cref="HotkeyPressed"/> event is raised.
     /// </summary>
     /// <param name="id">The identifier of the hotkey that was pressed.</param>
     public void ProcessWindowMessage(int id)
@@ -89,14 +96,33 @@ public sealed class HotkeyService
     }
 
     /// <summary>
-    /// 
+    /// Registers a hotkey from its string representation.
     /// </summary>
-    /// <param name="hotkey"></param>
-    /// <param name="name"></param>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    /// <exception cref="HotkeyDuplicateBindingException"></exception>
-    /// <exception cref="HotkeyBindingException"></exception>
+    /// <param name="hotkeyString">The string representation of the hotkey (e.g., "Ctrl+Shift+N").</param>
+    /// <param name="name">The descriptive name of the hotkey.</param>
+    /// <param name="id">An optional identifier to assign to the hotkey.</param>
+    /// <returns>The identifier assigned to the registered hotkey.</returns>
+    /// <exception cref="HotkeyParsingException">
+    /// Thrown if the hotkey string could not be parsed.
+    /// </exception>
+    /// <exception cref="HotkeyDuplicateBindingException">
+    /// Thrown if a hotkey with the same combination is already registered.
+    /// </exception>
+    /// <exception cref="HotkeyBindingException">
+    /// Thrown if registration with the OS fails.
+    /// </exception>
+    public int RegisterHotkey(string hotkeyString, string name, int? id = null)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
+        if (Hotkey.TryParseFrom(hotkeyString, out var hotkey, out var errorMessage))
+        {
+            return RegisterHotkey(hotkey, name);
+        }
+
+        throw new HotkeyParsingException($"Failed to parse hotkey string '{hotkeyString}': {errorMessage}",
+            hotkeyString);
+    }
+
     private int RegisterHotkey(Hotkey hotkey, string name, int? id = null)
     {
         ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
@@ -116,7 +142,7 @@ public sealed class HotkeyService
         }
 
         var hotkeyId = id ?? NextHotkeyId++;
-        if (PInvoke.RegisterHotKey(_hWnd, hotkeyId, (HOT_KEY_MODIFIERS)hotkey.ModifierKeys, (uint)hotkey.VirtualKeys))
+        if (_hotkeyRegistrar.RegisterHotKey(hotkeyId, hotkey.ModifierKeys, hotkey.VirtualKeys))
         {
             _registeredHotkeys[hotkeyId] = new HotkeyInfo
             {
@@ -132,42 +158,25 @@ public sealed class HotkeyService
         );
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="hotkeyString"></param>
-    /// <param name="name"></param>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    /// <exception cref="HotkeyParsingException"></exception>
-    public int RegisterHotkey(string hotkeyString, string name, int? id = null)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
-        if (Hotkey.TryParseFrom(hotkeyString, out var hotkey, out var errorMessage))
-        {
-            return RegisterHotkey(hotkey, name);
-        }
-
-        throw new HotkeyParsingException($"Failed to parse hotkey string '{hotkeyString}': {errorMessage}",
-            hotkeyString);
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="hotkey"></param>
-    /// <returns></returns>
     private HotkeyInfo? IsHotkeyDuplicate(Hotkey hotkey)
     {
         return _registeredHotkeys.Values.FirstOrDefault(hotkeyInfo => hotkeyInfo.Hotkey == hotkey);
     }
 
-
     /// <summary>
-    /// 
+    /// Unregisters a hotkey by name.
     /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
+    /// <param name="name">The name of the hotkey to unregister.</param>
+    /// <returns><c>true</c> if the hotkey was successfully unregistered; otherwise, <c>false</c>.</returns>
+    /// <exception cref="ObjectDisposedException">Thrown if the service has been disposed.</exception>
+    public bool UnregisterHotkey(string name)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
+
+        var existingHkInfo = GetHotKeyInfoBy(h => h.Name, name);
+        return existingHkInfo is not null && UnregisterHotkey(existingHkInfo.Id);
+    }
+
     private bool UnregisterHotkey(int id)
     {
         ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
@@ -175,23 +184,25 @@ public sealed class HotkeyService
         if (!_registeredHotkeys.ContainsKey(id))
             return false;
 
-        if (!PInvoke.UnregisterHotKey(_hWnd, id)) return false;
+        if (_hotkeyRegistrar.UnregisterHotKey(id)) return false;
 
         _registeredHotkeys.Remove(id);
         return true;
     }
 
     /// <summary>
-    /// 
+    /// Changes the hotkey binding for the specified name.
     /// </summary>
-    /// <param name="name"></param>
-    /// <param name="newHotkeyString"></param>
-    /// <exception cref="HotkeyBindingException"></exception>
+    /// <param name="name">The name of the existing hotkey binding.</param>
+    /// <param name="newHotkeyString">The new hotkey string. If null or whitespace, the hotkey is removed.</param>
+    /// <exception cref="HotkeyBindingException">
+    /// Thrown if no hotkey with the specified name exists or if re-binding fails.
+    /// </exception>
     public void ChangeHotkeyBinding(string name, string newHotkeyString)
     {
         ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
 
-        var existingHkInfo = GetHotKeyInfo(name);
+        var existingHkInfo = GetHotKeyInfoBy(h => h.Name, name);
         if (existingHkInfo is null)
         {
             throw new HotkeyBindingException($"No hotkey registered with the name '{name}'.");
@@ -210,31 +221,19 @@ public sealed class HotkeyService
     }
 
     /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="name"></param>
-    /// <returns></returns>
-    public bool UnregisterHotkey(string name)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
-
-        var existingHkInfo = GetHotKeyInfo(name);
-        return existingHkInfo is not null && UnregisterHotkey(existingHkInfo.Id);
-    }
-
-    /// <summary>
-    /// 
+    /// Loads hotkeys asynchronously from persistent storage and registers them.
+    /// If no hotkeys are found, a default hotkey is registered and saved.
     /// </summary>
     public async Task LoadHotkeysAsync()
     {
         ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
 
-        var hotkeyInfos = await _hotkeyStorage.LoadAsync();
+        var hotkeyInfos = (await _hotkeyStorage.LoadAsync()).ToArray();
         // If is the first load
         if (hotkeyInfos.Length == 0)
         {
             // initialize with default hotkey: Next Wallpaper CTRL+SHIFT+N
-            _ = RegisterHotkey(DefaultNextWallpaperHotkey, DefaultNextWallpaperHotkeyName);
+            _ = RegisterHotkey(Default.NextWallpaperHotkeyString, Default.NextWallpaperHotkeyName);
             await _hotkeyStorage.SaveAsync(_registeredHotkeys.Values.ToArray());
         }
         else
@@ -248,18 +247,19 @@ public sealed class HotkeyService
     }
 
     /// <summary>
-    /// 
+    /// Loads hotkeys from persistent storage and registers them.
+    /// If no hotkeys are found, a default hotkey is registered and saved.
     /// </summary>
     public void LoadHotkeys()
     {
         ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
 
-        var hotkeyInfos = _hotkeyStorage.Load();
+        var hotkeyInfos = _hotkeyStorage.Load().ToArray();
         // If is the first load
         if (hotkeyInfos.Length == 0)
         {
             // initialize with default hotkey: Next Wallpaper CTRL+SHIFT+N
-            _ = RegisterHotkey(DefaultNextWallpaperHotkey, DefaultNextWallpaperHotkeyName);
+            _ = RegisterHotkey(Default.NextWallpaperHotkeyString, Default.NextWallpaperHotkeyName);
             _hotkeyStorage.Save(_registeredHotkeys.Values.ToArray());
         }
         else
@@ -273,7 +273,7 @@ public sealed class HotkeyService
     }
 
     /// <summary>
-    /// 
+    /// Saves the currently registered hotkeys asynchronously to persistent storage.
     /// </summary>
     public async Task SaveHotkeysAsync()
     {
@@ -299,12 +299,6 @@ public sealed class HotkeyService
         Dispose(false);
     }
 
-    /// <summary>
-    /// Disposes of the managed and unmanaged resources.
-    /// </summary>
-    /// <param name="disposing">
-    /// A value indicating whether to dispose of managed resources.
-    /// </param>
     private void Dispose(bool disposing)
     {
         if (_disposed) return;
@@ -313,7 +307,7 @@ public sealed class HotkeyService
         var ids = new List<int>(_registeredHotkeys.Keys);
         foreach (var id in ids)
         {
-            PInvoke.UnregisterHotKey(_hWnd, id);
+            _hotkeyRegistrar.UnregisterHotKey(id);
             _registeredHotkeys.Remove(id);
         }
 
@@ -332,5 +326,8 @@ public sealed class HotkeyService
 /// <param name="hotkeyInfo">The information about the hotkey that was pressed.</param>
 public class HotkeyPressedEventArgs(HotkeyInfo hotkeyInfo) : EventArgs
 {
+    /// <summary>
+    /// Gets the information about the hotkey that was pressed.
+    /// </summary>
     public HotkeyInfo HotkeyInfo { get; } = hotkeyInfo;
 }

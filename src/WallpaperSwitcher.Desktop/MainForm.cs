@@ -1,6 +1,9 @@
 using System.Collections.Specialized;
 using WallpaperSwitcher.Core;
 using WallpaperSwitcher.Core.GlobalHotkey;
+using WallpaperSwitcher.Core.Persistence;
+using WallpaperSwitcher.Core.Wallpaper;
+using WallpaperSwitcher.Core.Win32Api;
 
 namespace WallpaperSwitcher.Desktop;
 
@@ -77,10 +80,13 @@ public partial class MainForm : Form
 
         // *********************************************************
         // GlobalHotkeyManager initialization and event subscription
-        _hotkeyService = new HotkeyService(this.Handle);
+        _hotkeyService = new HotkeyService(
+            new Win32HotkeyRegistrar(this.Handle),
+            new JsonHotkeyStorage()
+        );
         _hotkeyService.HotkeyPressed += (_, e) =>
         {
-            if (e.HotkeyInfo.Name == HotkeyService.DefaultNextWallpaperHotkeyName)
+            if (e.HotkeyInfo.Name == Default.NextWallpaperHotkeyName)
             {
                 nextWallpaperButton_Click(this, EventArgs.Empty);
                 return;

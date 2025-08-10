@@ -1,7 +1,7 @@
 ﻿using Windows.Win32;
 using Windows.Win32.UI.Shell;
 
-namespace WallpaperSwitcher.Core;
+namespace WallpaperSwitcher.Core.Wallpaper;
 
 /// <summary>
 /// Provides helper methods for managing wallpapers and wallpaper folders,
@@ -123,14 +123,7 @@ public static class WallpaperHelper
 
         return (IShellItemArray)shellItemArrayObj;
     }
-
-    /// <summary>
-    /// Checks whether the specified file has a supported wallpaper file extension.
-    /// </summary>
-    /// <param name="wallpaper">The full path or filename of the image file.</param>
-    /// <returns>
-    /// <c>true</c> if the file has a supported extension (e.g., <c>.jpg</c>, <c>.png</c>); otherwise, <c>false</c>.
-    /// </returns>
+    
     private static bool IsValidWallpaperExtension(string wallpaper)
     {
         return WallpaperManager.SupportedExtensions.Contains(Path.GetExtension(wallpaper)

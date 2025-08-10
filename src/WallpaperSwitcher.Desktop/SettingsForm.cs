@@ -1,6 +1,5 @@
 ﻿using WallpaperSwitcher.Core;
 using WallpaperSwitcher.Core.GlobalHotkey;
-using static WallpaperSwitcher.Core.GlobalHotkey.HotkeyService;
 
 namespace WallpaperSwitcher.Desktop;
 
@@ -25,12 +24,12 @@ public partial class SettingsForm : Form
     {
         // Display Next Wallpaper Hotkey
         nextWallpaperHkTextBox.Text =
-            _hotkeyService.GetHotKeyInfo(DefaultNextWallpaperHotkeyName)?.ToString() ??
+            _hotkeyService.GetHotKeyInfoBy(h => h.Name, Default.NextWallpaperHotkeyName)?.ToString() ??
             string.Empty;
 
         var hotkeyInfosWithoutNextWallpaper = _hotkeyService
             .GetRegisteredHotkeys()
-            .Where(hotkeyInfo => hotkeyInfo.Name != DefaultNextWallpaperHotkeyName)
+            .Where(hotkeyInfo => hotkeyInfo.Name != Default.NextWallpaperHotkeyName)
             .ToList();
         // Populate the folder hotkeys dictionary with existing hotkeys, excluding the next wallpaper hotkey
         foreach (var hotkeyInfo in hotkeyInfosWithoutNextWallpaper.Where(hotkeyInfo =>
@@ -121,17 +120,17 @@ public partial class SettingsForm : Form
             if (string.IsNullOrEmpty(newHotkeyText))
             {
                 // this is equivalent to unregistering the hotkey
-                _hotkeyService.UnregisterHotkey(DefaultNextWallpaperHotkeyName);
+                _hotkeyService.UnregisterHotkey(Default.NextWallpaperHotkeyName);
             }
             else if (string.IsNullOrEmpty(OriginalValue))
             {
                 // this is equivalent to registering a new hotkey
-                _hotkeyService.RegisterHotkey(newHotkeyText, DefaultNextWallpaperHotkeyName);
+                _hotkeyService.RegisterHotkey(newHotkeyText, Default.NextWallpaperHotkeyName);
             }
             else
             {
                 // this is equivalent to changing the hotkey binding
-                _hotkeyService.ChangeHotkeyBinding(DefaultNextWallpaperHotkeyName, newHotkeyText);
+                _hotkeyService.ChangeHotkeyBinding(Default.NextWallpaperHotkeyName, newHotkeyText);
             }
 
             await _hotkeyService.SaveHotkeysAsync();
@@ -143,7 +142,7 @@ public partial class SettingsForm : Form
             SetNextWallpaperHkEditMode(false);
             nextWallpaperHkTextBox.Text = string.Empty;
             FormHelper.ShowErrorMessage(
-                $"Failed to save the hotkey for '{DefaultNextWallpaperHotkeyName}': {exception.Message}, please try again.",
+                $"Failed to save the hotkey for '{Default.NextWallpaperHotkeyName}': {exception.Message}, please try again.",
                 "Error Saving Hotkey"
             );
         }

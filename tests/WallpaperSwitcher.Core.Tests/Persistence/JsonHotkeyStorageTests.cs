@@ -3,11 +3,11 @@ using WallpaperSwitcher.Core.Persistence;
 
 namespace WallpaperSwitcher.Core.Tests.Persistence;
 
-public class HotkeyStorageTests
+public class JsonHotkeyStorageTests
 {
     private string _testDirectory;
     private string _testFilePath;
-    private HotkeyStorage _hotkeyStorage;
+    private JsonHotkeyStorage _jsonHotkeyStorage;
 
     [SetUp]
     public void SetUp()
@@ -15,7 +15,7 @@ public class HotkeyStorageTests
         // Create a unique test directory for each test
         _testDirectory = Path.Combine(Path.GetTempPath(), "HotkeyStorageTests", Guid.NewGuid().ToString());
         _testFilePath = Path.Combine(_testDirectory, "test-hotkeys.json");
-        _hotkeyStorage = new HotkeyStorage(_testFilePath);
+        _jsonHotkeyStorage = new JsonHotkeyStorage(_testFilePath);
     }
 
     [TearDown]
@@ -31,7 +31,7 @@ public class HotkeyStorageTests
     [Test]
     public void Constructor_WithDefaultLocation_SetsLocationCorrectly()
     {
-        var storage = new HotkeyStorage();
+        var storage = new JsonHotkeyStorage();
         var expectedPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "WallpaperSwitcher",
@@ -45,7 +45,7 @@ public class HotkeyStorageTests
     {
         const string customPath = "/custom/path/hotkeys.json";
 
-        var storage = new HotkeyStorage(customPath);
+        var storage = new JsonHotkeyStorage(customPath);
 
         Assert.That(storage.Location, Is.EqualTo(customPath));
     }
@@ -70,12 +70,12 @@ public class HotkeyStorageTests
         };
 
         // Act
-        await _hotkeyStorage.SaveAsync(hotkeys);
+        await _jsonHotkeyStorage.SaveAsync(hotkeys);
 
         Assert.That(File.Exists(_testFilePath), Is.True);
 
         // Verify content can be read back
-        var loadedHotkeys = await _hotkeyStorage.LoadAsync();
+        var loadedHotkeys = (await _jsonHotkeyStorage.LoadAsync()).ToArray();
         using (Assert.EnterMultipleScope())
         {
             Assert.That(loadedHotkeys, Has.Length.EqualTo(hotkeys.Length));
@@ -103,12 +103,12 @@ public class HotkeyStorageTests
             }
         };
 
-        _hotkeyStorage.Save(hotkeys);
+        _jsonHotkeyStorage.Save(hotkeys);
 
         Assert.That(File.Exists(_testFilePath), Is.True);
 
         // Verify content can be read back
-        var loadedHotkeys = _hotkeyStorage.Load();
+        var loadedHotkeys = _jsonHotkeyStorage.Load().ToArray();
         using (Assert.EnterMultipleScope())
         {
             Assert.That(loadedHotkeys, Has.Length.EqualTo(hotkeys.Length));
@@ -130,7 +130,7 @@ public class HotkeyStorageTests
             }
         };
 
-        await _hotkeyStorage.SaveAsync(hotkeys);
+        await _jsonHotkeyStorage.SaveAsync(hotkeys);
 
         using (Assert.EnterMultipleScope())
         {
@@ -152,7 +152,7 @@ public class HotkeyStorageTests
             }
         };
 
-        _hotkeyStorage.Save(hotkeys);
+        _jsonHotkeyStorage.Save(hotkeys);
 
         using (Assert.EnterMultipleScope())
         {
@@ -164,7 +164,7 @@ public class HotkeyStorageTests
     [Test]
     public async Task LoadAsync_WhenFileDoesNotExist_ReturnsEmptyArray()
     {
-        var result = await _hotkeyStorage.LoadAsync();
+        var result = (await _jsonHotkeyStorage.LoadAsync()).ToArray();
 
         Assert.That(result, Is.Not.Null);
         Assert.That(result, Is.Empty);
@@ -173,7 +173,7 @@ public class HotkeyStorageTests
     [Test]
     public void Load_WhenFileDoesNotExist_ReturnsEmptyArray()
     {
-        var result = _hotkeyStorage.Load();
+        var result = _jsonHotkeyStorage.Load().ToArray();
 
         Assert.That(result, Is.Not.Null);
         Assert.That(result, Is.Empty);
@@ -185,7 +185,7 @@ public class HotkeyStorageTests
         Directory.CreateDirectory(_testDirectory);
         await File.WriteAllTextAsync(_testFilePath, "invalid json content");
 
-        var result = await _hotkeyStorage.LoadAsync();
+        var result = (await _jsonHotkeyStorage.LoadAsync()).ToArray();
 
         Assert.That(result, Is.Not.Null);
         Assert.That(result, Is.Empty);
@@ -197,7 +197,7 @@ public class HotkeyStorageTests
         Directory.CreateDirectory(_testDirectory);
         File.WriteAllText(_testFilePath, "invalid json content");
 
-        var result = _hotkeyStorage.Load();
+        var result = _jsonHotkeyStorage.Load().ToArray();
 
         Assert.That(result, Is.Not.Null);
         Assert.That(result, Is.Empty);
@@ -209,7 +209,7 @@ public class HotkeyStorageTests
         Directory.CreateDirectory(_testDirectory);
         await File.WriteAllTextAsync(_testFilePath, string.Empty);
 
-        var result = await _hotkeyStorage.LoadAsync();
+        var result = await _jsonHotkeyStorage.LoadAsync();
 
         Assert.That(result, Is.Empty);
     }
@@ -220,7 +220,7 @@ public class HotkeyStorageTests
         Directory.CreateDirectory(_testDirectory);
         File.WriteAllText(_testFilePath, string.Empty);
 
-        var result = _hotkeyStorage.Load();
+        var result = _jsonHotkeyStorage.Load();
 
         Assert.That(result, Is.Empty);
     }
@@ -231,7 +231,7 @@ public class HotkeyStorageTests
         Directory.CreateDirectory(_testDirectory);
         await File.WriteAllTextAsync(_testFilePath, "null");
 
-        var result = await _hotkeyStorage.LoadAsync();
+        var result = await _jsonHotkeyStorage.LoadAsync();
 
         Assert.That(result, Is.Empty);
     }
@@ -242,7 +242,7 @@ public class HotkeyStorageTests
         Directory.CreateDirectory(_testDirectory);
         File.WriteAllText(_testFilePath, "null");
 
-        var result = _hotkeyStorage.Load();
+        var result = _jsonHotkeyStorage.Load();
 
         Assert.That(result, Is.Empty);
     }
@@ -259,10 +259,10 @@ public class HotkeyStorageTests
             new HotkeyInfo { Id = 2, Hotkey = new Hotkey(ModifierKeys.Ctrl, VirtualKeys.B), Name = "Second" }
         };
 
-        await _hotkeyStorage.SaveAsync(firstSet);
-        await _hotkeyStorage.SaveAsync(secondSet);
+        await _jsonHotkeyStorage.SaveAsync(firstSet);
+        await _jsonHotkeyStorage.SaveAsync(secondSet);
 
-        var result = await _hotkeyStorage.LoadAsync();
+        var result = (await _jsonHotkeyStorage.LoadAsync()).ToArray();
         Assert.That(result, Has.Length.EqualTo(1));
         Assert.That(result[0].Name, Is.EqualTo("Second"));
     }
@@ -279,10 +279,10 @@ public class HotkeyStorageTests
             new HotkeyInfo { Id = 2, Hotkey = new Hotkey(ModifierKeys.Ctrl, VirtualKeys.B), Name = "Second" }
         };
 
-        _hotkeyStorage.Save(firstSet);
-        _hotkeyStorage.Save(secondSet);
+        _jsonHotkeyStorage.Save(firstSet);
+        _jsonHotkeyStorage.Save(secondSet);
 
-        var result = _hotkeyStorage.Load();
+        var result = _jsonHotkeyStorage.Load().ToArray();
         Assert.That(result, Has.Length.EqualTo(1));
         Assert.That(result[0].Name, Is.EqualTo("Second"));
     }
