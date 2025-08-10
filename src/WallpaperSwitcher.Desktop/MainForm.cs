@@ -1,12 +1,14 @@
 using System.Collections.Specialized;
 using WallpaperSwitcher.Core;
-using WallpaperSwitcher.Core.GlobalHotKey;
+using WallpaperSwitcher.Core.GlobalHotkey;
+using WallpaperSwitcher.Core.Persistence;
+using WallpaperSwitcher.Core.Wallpaper;
 
 namespace WallpaperSwitcher.Desktop;
 
 public partial class MainForm : Form
 {
-    private readonly GlobalHotkeyManager _globalHotkeyManager;
+    private readonly HotkeyService _hotkeyService;
 
     // default wallpaper manager implementation
     private readonly WallpaperManager _wallpaperManager = Properties.Settings.Default.SelectedModeIndex switch
@@ -54,10 +56,10 @@ public partial class MainForm : Form
         base.WndProc(ref m);
 
         // Handle global hotkey messages
-        if (m.Msg == GlobalHotkeyManager.WmHotkeyMessage)
+        if (m.Msg == HotkeyService.WmHotkey)
         {
             var id = m.WParam.ToInt32();
-            _globalHotkeyManager.ProcessWindowMessage(id);
+            _hotkeyService.ProcessWindowMessage(id);
         }
     }
 
@@ -77,10 +79,13 @@ public partial class MainForm : Form
 
         // *********************************************************
         // GlobalHotkeyManager initialization and event subscription
-        _globalHotkeyManager = new GlobalHotkeyManager(this.Handle);
-        _globalHotkeyManager.HotkeyPressed += (_, e) =>
+        _hotkeyService = new HotkeyService(
+            new Win32HotkeyRegistrar(this.Handle),
+            new JsonHotkeyStorage()
+        );
+        _hotkeyService.HotkeyPressed += (_, e) =>
         {
-            if (e.HotkeyInfo.Name == GlobalHotkeyManager.DefaultNextWallpaperHotkeyName)
+            if (e.HotkeyInfo.Name == Default.NextWallpaperHotkeyName)
             {
                 nextWallpaperButton_Click(this, EventArgs.Empty);
                 return;
@@ -112,7 +117,7 @@ public partial class MainForm : Form
         PopulateComponentsFromInitialSettings();
         // ********************************
         // Load hotkeys from user settings
-        await _globalHotkeyManager.LoadHotkeysAsync();
+        await _hotkeyService.LoadHotkeysAsync();
     }
 
     private void LoadInitialSettings()
@@ -122,7 +127,7 @@ public partial class MainForm : Form
         PopulateComponentsFromInitialSettings();
         // ********************************
         // Load hotkeys from user settings
-        _globalHotkeyManager.LoadHotkeys();
+        _hotkeyService.LoadHotkeys();
     }
 
     private void PopulateComponentsFromInitialSettings()
@@ -422,8 +427,8 @@ public partial class MainForm : Form
 
             removeFolderComboBox_SelectedIndexChanged(removeFolderComboBox, EventArgs.Empty);
 
-            _ = _globalHotkeyManager.UnregisterHotkey(folderToRemove);
-            await _globalHotkeyManager.SaveHotkeysAsync();
+            _ = _hotkeyService.UnregisterHotkey(folderToRemove);
+            await _hotkeyService.SaveHotkeysAsync();
 
             SaveSettings();
         }
@@ -483,7 +488,7 @@ public partial class MainForm : Form
     private void settingsButton_Click(object? sender, EventArgs e)
     {
         using var settingsForm = new SettingsForm(
-            _globalHotkeyManager,
+            _hotkeyService,
             currentFolderComboBox.Items.Cast<string>().ToList()
         );
         var result = settingsForm.ShowDialog(this);

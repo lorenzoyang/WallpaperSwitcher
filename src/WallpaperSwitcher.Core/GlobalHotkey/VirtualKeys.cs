@@ -1,4 +1,4 @@
-﻿namespace WallpaperSwitcher.Core.GlobalHotKey;
+﻿namespace WallpaperSwitcher.Core.GlobalHotkey;
 
 /// <summary>
 /// Defines virtual key codes for keyboard keys used in global hotkey registration.

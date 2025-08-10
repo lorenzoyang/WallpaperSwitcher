@@ -1,4 +1,4 @@
-﻿namespace WallpaperSwitcher.Core.GlobalHotKey;
+﻿namespace WallpaperSwitcher.Core.GlobalHotkey;
 
 /// <summary>
 /// Specifies the modifier keys that can be combined with virtual keys to create hotkey combinations.
@@ -46,7 +46,7 @@ public enum ModifierKeys : uint
 /// <summary>
 /// Provides extension methods for the <see cref="ModifierKeys"/> enumeration.
 /// </summary>
-internal static class ModifierKeysExtensions
+public static class ModifierKeysExtensions
 {
     /// <summary>
     /// Converts the specified <see cref="ModifierKeys"/> value to a human-readable string.
@@ -62,12 +62,12 @@ internal static class ModifierKeysExtensions
 
         var parts = new List<string>();
 
-        if (modifierKeys.HasFlag(ModifierKeys.Ctrl))
-            parts.Add("Ctrl");
-        if (modifierKeys.HasFlag(ModifierKeys.Alt))
-            parts.Add("Alt");
         if (modifierKeys.HasFlag(ModifierKeys.Shift))
             parts.Add("Shift");
+        if (modifierKeys.HasFlag(ModifierKeys.Alt))
+            parts.Add("Alt");
+        if (modifierKeys.HasFlag(ModifierKeys.Ctrl))
+            parts.Add("Ctrl");
         if (modifierKeys.HasFlag(ModifierKeys.Win))
             parts.Add("Win");
 

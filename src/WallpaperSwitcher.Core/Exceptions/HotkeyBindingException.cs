@@ -1,4 +1,4 @@
-﻿namespace WallpaperSwitcher.Core.GlobalHotKey.Exceptions;
+﻿namespace WallpaperSwitcher.Core.Exceptions;
 
 /// <summary>
 /// Represents errors that occur when binding a global hotkey fails.

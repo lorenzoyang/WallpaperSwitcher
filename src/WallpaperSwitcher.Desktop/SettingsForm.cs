@@ -1,22 +1,21 @@
 ﻿using WallpaperSwitcher.Core;
-using WallpaperSwitcher.Core.GlobalHotKey;
-using static WallpaperSwitcher.Core.GlobalHotKey.GlobalHotkeyManager;
+using WallpaperSwitcher.Core.GlobalHotkey;
 
 namespace WallpaperSwitcher.Desktop;
 
 public partial class SettingsForm : Form
 {
-    private readonly GlobalHotkeyManager _globalHotkeyManager;
+    private readonly HotkeyService _hotkeyService;
 
     // Dictionary to hold folder hotkeys, where the key is the folder path and the value is the HotkeyInfo
     private readonly Dictionary<string, HotkeyInfo?> _folderHotkeys;
 
-    public SettingsForm(GlobalHotkeyManager globalHotkeyManager, List<string> folders)
+    public SettingsForm(HotkeyService hotkeyService, List<string> folders)
     {
         InitializeComponent();
 
         // GlobalHotkeyManager passed from the main form that is already initialized
-        _globalHotkeyManager = globalHotkeyManager;
+        _hotkeyService = hotkeyService;
         // Initialize the folder hotkeys dictionary with the provided folders
         _folderHotkeys = folders.ToDictionary(folder => folder, HotkeyInfo? (_) => null);
     }
@@ -25,12 +24,12 @@ public partial class SettingsForm : Form
     {
         // Display Next Wallpaper Hotkey
         nextWallpaperHkTextBox.Text =
-            _globalHotkeyManager.GetHotKeyInfo(DefaultNextWallpaperHotkeyName)?.ToString() ??
+            _hotkeyService.GetHotKeyInfoBy(h => h.Name, Default.NextWallpaperHotkeyName)?.ToString() ??
             string.Empty;
 
-        var hotkeyInfosWithoutNextWallpaper = _globalHotkeyManager
+        var hotkeyInfosWithoutNextWallpaper = _hotkeyService
             .GetRegisteredHotkeys()
-            .Where(hotkeyInfo => hotkeyInfo.Name != DefaultNextWallpaperHotkeyName)
+            .Where(hotkeyInfo => hotkeyInfo.Name != Default.NextWallpaperHotkeyName)
             .ToList();
         // Populate the folder hotkeys dictionary with existing hotkeys, excluding the next wallpaper hotkey
         foreach (var hotkeyInfo in hotkeyInfosWithoutNextWallpaper.Where(hotkeyInfo =>
@@ -121,20 +120,20 @@ public partial class SettingsForm : Form
             if (string.IsNullOrEmpty(newHotkeyText))
             {
                 // this is equivalent to unregistering the hotkey
-                _globalHotkeyManager.UnregisterHotkey(DefaultNextWallpaperHotkeyName);
+                _hotkeyService.UnregisterHotkey(Default.NextWallpaperHotkeyName);
             }
             else if (string.IsNullOrEmpty(OriginalValue))
             {
                 // this is equivalent to registering a new hotkey
-                _globalHotkeyManager.RegisterHotkey(newHotkeyText, DefaultNextWallpaperHotkeyName);
+                _hotkeyService.RegisterHotkey(newHotkeyText, Default.NextWallpaperHotkeyName);
             }
             else
             {
                 // this is equivalent to changing the hotkey binding
-                _globalHotkeyManager.ChangeHotkeyBinding(DefaultNextWallpaperHotkeyName, newHotkeyText);
+                _hotkeyService.ChangeHotkeyBinding(Default.NextWallpaperHotkeyName, newHotkeyText);
             }
 
-            await _globalHotkeyManager.SaveHotkeysAsync();
+            await _hotkeyService.SaveHotkeysAsync();
 
             SetNextWallpaperHkEditMode(false);
         }
@@ -143,7 +142,7 @@ public partial class SettingsForm : Form
             SetNextWallpaperHkEditMode(false);
             nextWallpaperHkTextBox.Text = string.Empty;
             FormHelper.ShowErrorMessage(
-                $"Failed to save the hotkey for '{DefaultNextWallpaperHotkeyName}': {exception.Message}, please try again.",
+                $"Failed to save the hotkey for '{Default.NextWallpaperHotkeyName}': {exception.Message}, please try again.",
                 "Error Saving Hotkey"
             );
         }
@@ -190,20 +189,20 @@ public partial class SettingsForm : Form
             if (string.IsNullOrEmpty(newHotkeyText))
             {
                 // this is equivalent to unregistering the hotkey
-                _globalHotkeyManager.UnregisterHotkey(selectedFolder);
+                _hotkeyService.UnregisterHotkey(selectedFolder);
             }
             else if (string.IsNullOrEmpty(OriginalValue))
             {
                 // this is equivalent to registering a new hotkey
-                _globalHotkeyManager.RegisterHotkey(newHotkeyText, selectedFolder);
+                _hotkeyService.RegisterHotkey(newHotkeyText, selectedFolder);
             }
             else
             {
                 // this is equivalent to changing the hotkey binding
-                _globalHotkeyManager.ChangeHotkeyBinding(selectedFolder, newHotkeyText);
+                _hotkeyService.ChangeHotkeyBinding(selectedFolder, newHotkeyText);
             }
 
-            await _globalHotkeyManager.SaveHotkeysAsync();
+            await _hotkeyService.SaveHotkeysAsync();
 
             SetFolderHkEditMode(false);
         }

@@ -1,8 +1,7 @@
-﻿using Windows.Win32.UI.Shell;
-using Windows.Win32;
+﻿using Windows.Win32;
+using Windows.Win32.UI.Shell;
 
-
-namespace WallpaperSwitcher.Core;
+namespace WallpaperSwitcher.Core.Wallpaper;
 
 /// <summary>
 /// Provides an abstract base for managing desktop wallpapers and wallpaper slideshows
