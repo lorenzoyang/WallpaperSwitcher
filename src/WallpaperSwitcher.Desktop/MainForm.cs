@@ -3,7 +3,6 @@ using WallpaperSwitcher.Core;
 using WallpaperSwitcher.Core.GlobalHotkey;
 using WallpaperSwitcher.Core.Persistence;
 using WallpaperSwitcher.Core.Wallpaper;
-using WallpaperSwitcher.Core.Win32Api;
 
 namespace WallpaperSwitcher.Desktop;
 

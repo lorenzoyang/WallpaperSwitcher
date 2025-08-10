@@ -1,8 +1,7 @@
 ﻿using Windows.Win32;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
-using WallpaperSwitcher.Core.GlobalHotkey;
 
-namespace WallpaperSwitcher.Core.Win32Api;
+namespace WallpaperSwitcher.Core.GlobalHotkey;
 
 /// <summary>
 /// Implements global hotkey registration using the Win32 API.

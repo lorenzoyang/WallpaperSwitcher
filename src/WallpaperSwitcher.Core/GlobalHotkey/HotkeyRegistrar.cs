@@ -1,7 +1,6 @@
 ﻿using Windows.Win32.Foundation;
-using WallpaperSwitcher.Core.GlobalHotkey;
 
-namespace WallpaperSwitcher.Core.Win32Api;
+namespace WallpaperSwitcher.Core.GlobalHotkey;
 
 /// <summary>
 /// Provides a base abstraction for registering and unregistering global hotkeys

@@ -123,7 +123,7 @@ public static class WallpaperHelper
 
         return (IShellItemArray)shellItemArrayObj;
     }
-    
+
     private static bool IsValidWallpaperExtension(string wallpaper)
     {
         return WallpaperManager.SupportedExtensions.Contains(Path.GetExtension(wallpaper)

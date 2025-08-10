@@ -1,6 +1,5 @@
 ﻿using WallpaperSwitcher.Core.Exceptions;
 using WallpaperSwitcher.Core.Persistence;
-using WallpaperSwitcher.Core.Win32Api;
 
 namespace WallpaperSwitcher.Core.GlobalHotkey;
 
