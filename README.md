@@ -41,7 +41,7 @@
 **Wallpaper Switcher** is portable and requires no installation. Choose from two deployment methods:
 
 
-### 🔹 Option 1: Single Executable (Simplest)
+### Option 1: Single Executable (Simplest)
 
 1. Download `WallpaperSwitcher.exe` from the [Releases](https://github.com/lorenzoyang/WallpaperSwitcher/releases) page.
 2. Save it to any folder (e.g., Desktop or `C:\Programs`).
@@ -49,7 +49,7 @@
 
 > ⚠️ **Note:** The first launch may be slightly slower due to self-extraction.
 
-### 🔹 Option 2: Full Package (Recommended)
+### Option 2: Full Package (Recommended)
 
 1. Download the `WallpaperSwitcher.zip` file from the [Releases](https://github.com/lorenzoyang/WallpaperSwitcher/releases) page.
 2. Extract the contents to a directory of your choice (e.g., `C:\Programs\WallpaperSwitcher`).
@@ -62,21 +62,21 @@
 
 ## Running the App
 
-### ▶️ Launching
+### Launching
 
 * **Single Executable:** Double-click `WallpaperSwitcher.exe`.
 * **Full Package:** Navigate to `bin/` and run `WallpaperSwitcher.exe`.
 
-### 📌 Create Shortcut (Optional)
+### Create Shortcut (Optional)
 
 * Right-click `WallpaperSwitcher.exe` → **Create shortcut**
 * Move the shortcut to Desktop or Pin it to Start
 
-## 💡 Usage Tips
+## Usage Tips
 
 Here are some helpful tips and details to get the most out of **Wallpaper Switcher**:
 
-### 🖥️ General Behavior
+### General Behavior
 
 - When you close the main window (via the "X" button), the application minimizes to the **system tray** and continues running in the background.
 - To **completely exit**, right-click the tray icon and choose **Exit**.
@@ -86,7 +86,7 @@ Here are some helpful tips and details to get the most out of **Wallpaper Switch
   - Open the settings window
   - Exit the application
 
-### ⚙️ User Data & Configuration
+### User Data & Configuration
 
 All user data is stored in:
 
@@ -99,7 +99,7 @@ This folder includes:
 * `hotkeys.json`: Stores your custom global hotkey mappings
 * A folder prefixed with `WallpaperSwitcher*` containing `user.config.xml`, which holds other settings
 
-### 🔄 How to Reset the App
+### How to Reset the App
 
 To fully reset Wallpaper Switcher to its default state:
 1. **Delete the user data folder:**
@@ -118,7 +118,7 @@ To fully reset Wallpaper Switcher to its default state:
 
 > ⚠️ **Note:** The app will regenerate default settings and hotkeys on next launch.
 
-### ⌨️ Hotkey Usage & Format
+### Hotkey Usage & Format
 
 - **Default hotkey**: `Ctrl + Alt + N` (for switching to the next wallpaper)
 - You can change hotkeys via the **Settings** window

@@ -7,11 +7,20 @@
         <UseWindowsForms>true</UseWindowsForms>
         <ImplicitUsings>enable</ImplicitUsings>
         <ApplicationIcon>WallpaperSwitcherIconFile6.ico</ApplicationIcon>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
 
+        <!-- Publish settings -->
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <SelfContained>true</SelfContained>
-        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <PublishSingleFile>true</PublishSingleFile>
+        <PublishTrimmed>false</PublishTrimmed>
+        <PublishDir>..\..\Publish</PublishDir>
+
+        <!-- Assembly metadata -->
         <AssemblyName>WallpaperSwitcher</AssemblyName>
+        <Company>lorenzoyang</Company>
+        <Product>WallpaperSwitcher</Product>
+        <Version>3.0.0</Version>
     </PropertyGroup>
 
     <ItemGroup>

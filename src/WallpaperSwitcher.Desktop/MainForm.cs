@@ -1,5 +1,4 @@
 using System.Collections.Specialized;
-using WallpaperSwitcher.Core;
 using WallpaperSwitcher.Core.GlobalHotkey;
 using WallpaperSwitcher.Core.Persistence;
 using WallpaperSwitcher.Core.Wallpaper;

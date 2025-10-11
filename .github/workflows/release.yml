@@ -1,0 +1,98 @@
+name: .NET Desktop CI/CD
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+          echo "Version: $version"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore WallpaperSwitcher.sln
+
+      - name: Build application
+        run: dotnet build WallpaperSwitcher.sln --configuration Release --no-restore
+
+      - name: Test application
+        run: dotnet test WallpaperSwitcher.sln --configuration Release --no-build --verbosity normal
+
+      - name: Publish as a single executable
+        run: |
+          dotnet publish src/WallpaperSwitcher.Desktop/WallpaperSwitcher.Desktop.csproj `
+            --configuration Release `
+            --runtime win-x64 `
+            --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:PublishTrimmed=false `
+            -p:Version=${{ steps.get_version.outputs.VERSION }} `
+            --output ./publish-single-file
+
+      - name: Publish as a self-contained package for ZIP
+        run: |
+          dotnet publish src/WallpaperSwitcher.Desktop/WallpaperSwitcher.Desktop.csproj `
+            --configuration Release `
+            --runtime win-x64 `
+            --self-contained true `
+            -p:Version=${{ steps.get_version.outputs.VERSION }} `
+            --output ./staging/bin
+
+      - name: Add Readme to ZIP package root
+        run: |
+          if (Test-Path ./README-Release.txt) {
+            Copy-Item -Path ./README-Release.txt -Destination ./staging/
+          } else {
+            Write-Warning "README-Release.txt not found, skipping..."
+          }
+
+      - name: Package the final ZIP file
+        run: |
+          $version = "${{ steps.get_version.outputs.VERSION }}"
+          Compress-Archive -Path ./staging/* -DestinationPath "WallpaperSwitcher-v$version.zip"
+
+      - name: Rename single executable
+        run: |
+          $version = "${{ steps.get_version.outputs.VERSION }}"
+          Rename-Item -Path ./publish-single-file/WallpaperSwitcher.Desktop.exe -NewName "WallpaperSwitcher-v$version.exe"
+
+      - name: Build Changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v4
+        with:
+          configuration: ".github/changelog-config.json"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          files: |
+            ./publish-single-file/WallpaperSwitcher-v${{ steps.get_version.outputs.VERSION }}.exe
+            ./WallpaperSwitcher-v${{ steps.get_version.outputs.VERSION }}.zip
+          fail_on_unmatched_files: true
+          draft: false
+          prerelease: false
