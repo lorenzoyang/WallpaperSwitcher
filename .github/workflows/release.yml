@@ -69,9 +69,6 @@ jobs:
             Write-Warning "README-Release.txt not found, skipping..."
           }
 
-      - name: Display Staging Folder Structure
-        run: Get-ChildItem -Path ./staging -Recurse
-
       - name: Package the final ZIP file
         run: |
           $version = "${{ steps.get_version.outputs.VERSION }}"
