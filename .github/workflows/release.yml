@@ -74,7 +74,7 @@ jobs:
       - name: Rename single executable
         run: |
           $version = "${{ steps.get_version.outputs.VERSION }}"
-          Rename-Item -Path ./publish-single-file/WallpaperSwitcher.Desktop.exe -NewName "WallpaperSwitcher-v$version.exe"
+          Rename-Item -Path ./publish-single-file/WallpaperSwitcher.exe -NewName "WallpaperSwitcher-v$version.exe"
 
       - name: Build Changelog
         id: changelog
