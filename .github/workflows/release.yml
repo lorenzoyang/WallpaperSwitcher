@@ -57,6 +57,7 @@ jobs:
             --configuration Release `
             --runtime win-x64 `
             --self-contained true `
+            -p:PublishSingleFile=false `
             -p:Version=${{ steps.get_version.outputs.VERSION }} `
             --output ./staging/bin
 
@@ -67,7 +68,7 @@ jobs:
           } else {
             Write-Warning "README-Release.txt not found, skipping..."
           }
-            
+
       - name: Display Staging Folder Structure
         run: Get-ChildItem -Path ./staging -Recurse
 
