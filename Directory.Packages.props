@@ -4,6 +4,6 @@
         <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     </PropertyGroup>
     <ItemGroup>
-        <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.183"/>
+        <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.248"/>
     </ItemGroup>
 </Project>
