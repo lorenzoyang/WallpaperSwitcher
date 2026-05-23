@@ -129,6 +129,12 @@ public partial class MainForm : Form
         _hotkeyService.LoadHotkeys();
     }
 
+    /// <summary>
+    /// Creates the wallpaper manager implementation for the persisted mode index.
+    /// </summary>
+    /// <remarks>
+    /// Invalid persisted values fall back to native Windows slideshow mode.
+    /// </remarks>
     private static WallpaperManager CreateWallpaperManager(int selectedModeIndex)
     {
         return selectedModeIndex switch

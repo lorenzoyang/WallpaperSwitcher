@@ -5,10 +5,11 @@ namespace WallpaperSwitcher.Core.Persistence;
 
 /// <summary>
 /// Provides source generation context for System.Text.Json to enable
-/// high-performance serialization and deserialization of <see cref="HotkeyInfo"/> objects.
+/// high-performance serialization and deserialization of the application's JSON-backed data models.
 /// </summary>
 /// <remarks>
-/// This class is used to configure JSON source generation, reducing runtime reflection overhead.
+/// This class is used by <see cref="JsonHotkeyStorage"/> and <see cref="JsonAppSettingsStorage"/>
+/// to configure JSON source generation, reducing runtime reflection overhead.
 /// </remarks>
 [JsonSourceGenerationOptions(WriteIndented = true)]
 [JsonSerializable(typeof(HotkeyInfo))]
