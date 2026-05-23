@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Serialization;
 using WallpaperSwitcher.Core.GlobalHotkey;
 
 namespace WallpaperSwitcher.Core.Persistence;
@@ -14,11 +13,7 @@ namespace WallpaperSwitcher.Core.Persistence;
 /// </remarks>
 public sealed class JsonHotkeyStorage : IHotkeyStorage
 {
-    private static readonly string DefaultLocation = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "WallpaperSwitcher",
-        "hotkeys.json"
-    );
+    private static readonly string DefaultLocation = AppDataPaths.HotkeysFile;
 
     /// <summary>
     /// Gets the full path of the JSON file used for storing hotkey configurations.
@@ -108,7 +103,7 @@ public sealed class JsonHotkeyStorage : IHotkeyStorage
         using var fileStream = File.Create(Location);
         JsonSerializer.Serialize(fileStream, hotkeys, SourceGenerationContext.Default.HotkeyInfoArray);
     }
-    
+
     private void EnsureDirectoryExists()
     {
         var directory = Path.GetDirectoryName(Location);
@@ -117,18 +112,4 @@ public sealed class JsonHotkeyStorage : IHotkeyStorage
             Directory.CreateDirectory(directory);
         }
     }
-}
-
-/// <summary>
-/// Provides source generation context for System.Text.Json to enable
-/// high-performance serialization and deserialization of <see cref="HotkeyInfo"/> objects.
-/// </summary>
-/// <remarks>
-/// This class is used to configure JSON source generation, reducing runtime reflection overhead.
-/// </remarks>
-[JsonSourceGenerationOptions(WriteIndented = true)]
-[JsonSerializable(typeof(HotkeyInfo))]
-[JsonSerializable(typeof(HotkeyInfo[]))]
-internal partial class SourceGenerationContext : JsonSerializerContext
-{
 }

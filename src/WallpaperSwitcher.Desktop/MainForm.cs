@@ -1,4 +1,3 @@
-using System.Collections.Specialized;
 using WallpaperSwitcher.Core.GlobalHotkey;
 using WallpaperSwitcher.Core.Persistence;
 using WallpaperSwitcher.Core.Wallpaper;
@@ -7,15 +6,13 @@ namespace WallpaperSwitcher.Desktop;
 
 public partial class MainForm : Form
 {
+    private readonly IAppSettingsStorage _appSettingsStorage = new JsonAppSettingsStorage();
+
+    private readonly AppSettings _appSettings;
+
     private readonly HotkeyService _hotkeyService;
 
-    // default wallpaper manager implementation
-    private readonly WallpaperManager _wallpaperManager = Properties.Settings.Default.SelectedModeIndex switch
-    {
-        0 => new NativeWallpaperManager(), // Native Windows implementation
-        1 => new CustomWallpaperManager(), // Custom implementation (if any)
-        _ => throw new NotSupportedException("Selected mode is not supported.")
-    };
+    private readonly WallpaperManager _wallpaperManager;
 
     private readonly ToolTip _toolTip = new()
     {
@@ -64,6 +61,9 @@ public partial class MainForm : Form
 
     public MainForm(bool startMinimized = false)
     {
+        _appSettings = _appSettingsStorage.Load();
+        _wallpaperManager = CreateWallpaperManager(_appSettings.SelectedModeIndex);
+
         InitializeComponent();
 
         // ********************************
@@ -129,14 +129,23 @@ public partial class MainForm : Form
         _hotkeyService.LoadHotkeys();
     }
 
+    private static WallpaperManager CreateWallpaperManager(int selectedModeIndex)
+    {
+        return selectedModeIndex switch
+        {
+            0 => new NativeWallpaperManager(), // Native Windows implementation
+            1 => new CustomWallpaperManager(), // Custom implementation
+            _ => new NativeWallpaperManager()
+        };
+    }
+
     private void PopulateComponentsFromInitialSettings()
     {
         // ****************************************
         // Load the wallpaper folders from settings
         currentFolderComboBox.Items.Clear();
         removeFolderComboBox.Items.Clear();
-        var wallpaperFolders = Properties.Settings.Default.WallpaperFolders ?? [];
-        foreach (var folderPath in wallpaperFolders)
+        foreach (var folderPath in _appSettings.WallpaperFolders)
         {
             // User might have deleted the folder, so we check if it still exists
             if (!Directory.Exists(folderPath)) continue;
@@ -150,12 +159,12 @@ public partial class MainForm : Form
         // Selected mode: 0 = Native, 1 = Custom, 0 is the default
         // disable temporarily the event handler to prevent unnecessary message box reminder
         modeComboBox.SelectedIndexChanged -= modeComboBox_SelectedIndexChanged;
-        modeComboBox.SelectedIndex = Properties.Settings.Default.SelectedModeIndex;
+        modeComboBox.SelectedIndex = _appSettings.SelectedModeIndex is 0 or 1 ? _appSettings.SelectedModeIndex : 0;
         modeComboBox.SelectedIndexChanged += modeComboBox_SelectedIndexChanged;
 
         // *******************************************
         // Load the last selected folder from settings
-        var lastSelectedFolder = Properties.Settings.Default.LastSelectedFolder;
+        var lastSelectedFolder = _appSettings.LastSelectedFolder;
         if (string.IsNullOrEmpty(lastSelectedFolder)) return;
         // User might have deleted the last selected folder, so we check if it still exists
         if (!currentFolderComboBox.Items.Contains(lastSelectedFolder)) return;
@@ -166,31 +175,22 @@ public partial class MainForm : Form
     {
         // **************************************
         // Save the wallpaper folders to settings
-        var wallpaperFolders = new StringCollection();
-        foreach (string? item in currentFolderComboBox.Items)
-        {
-            if (!string.IsNullOrEmpty(item) && Directory.Exists(item))
-            {
-                wallpaperFolders.Add(item);
-            }
-        }
-
-        Properties.Settings.Default.WallpaperFolders = wallpaperFolders;
+        _appSettings.WallpaperFolders = currentFolderComboBox.Items
+            .Cast<string>()
+            .Where(Directory.Exists)
+            .ToList();
 
         // *****************************************
         // Save the last selected folder to settings
-        if (currentFolderComboBox.SelectedItem != null)
-        {
-            Properties.Settings.Default.LastSelectedFolder = currentFolderComboBox.SelectedItem.ToString();
-        }
+        _appSettings.LastSelectedFolder = currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty;
 
         // *****************************
         // Save the selected mode index
         // If an unsupported mode is selected, default to Native (0)
-        Properties.Settings.Default.SelectedModeIndex =
+        _appSettings.SelectedModeIndex =
             modeComboBox.SelectedIndex is 0 or 1 ? modeComboBox.SelectedIndex : 0;
 
-        Properties.Settings.Default.Save();
+        _appSettingsStorage.Save(_appSettings);
     }
 
     // ****************************
@@ -293,14 +293,14 @@ public partial class MainForm : Form
         Hide();
 
         // Show a balloon tip only once
-        if (Properties.Settings.Default.HasShownTrayTip) return;
+        if (_appSettings.HasShownTrayTip) return;
         _trayIcon.BalloonTipTitle = @"Wallpaper Switcher";
         _trayIcon.BalloonTipText =
             @"Application minimized to system tray. Double-click the tray icon to restore.";
         _trayIcon.BalloonTipIcon = ToolTipIcon.Info;
         _trayIcon.ShowBalloonTip(10000);
 
-        Properties.Settings.Default.HasShownTrayTip = true;
+        _appSettings.HasShownTrayTip = true;
         SaveSettings();
     }
 
@@ -488,7 +488,9 @@ public partial class MainForm : Form
     {
         using var settingsForm = new SettingsForm(
             _hotkeyService,
-            currentFolderComboBox.Items.Cast<string>().ToList()
+            currentFolderComboBox.Items.Cast<string>().ToList(),
+            _appSettingsStorage,
+            _appSettings
         );
         var result = settingsForm.ShowDialog(this);
         switch (result)
