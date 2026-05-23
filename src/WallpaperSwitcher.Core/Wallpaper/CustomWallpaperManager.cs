@@ -24,8 +24,8 @@ public sealed class CustomWallpaperManager : WallpaperManager
         set
         {
             _slideShowFolder = value;
-            _slideShowWallpapers = Directory.GetFiles(value)
-                .Where(file => SupportedExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()))
+            _slideShowWallpapers = Directory.EnumerateFiles(value)
+                .Where(WallpaperHelper.IsValidWallpaperExtension)
                 .OrderBy(Path.GetFileName)
                 .ToList();
             CurrentIndex = 0;
@@ -46,7 +46,12 @@ public sealed class CustomWallpaperManager : WallpaperManager
     /// </remarks>
     public override void SetSlideShow(string folder)
     {
-        if (!WallpaperHelper.IsValidWallpaperFolder(folder, out _)) return;
+        if (!WallpaperHelper.IsValidWallpaperFolder(folder, out _))
+        {
+            ClearSlideShow();
+            return;
+        }
+
         SlideShowFolder = folder;
         // If the folder is the same as the current "slideshow folder", do nothing
         // this happens only if the current wallpaper is contained in the slideshow folder.
@@ -70,9 +75,16 @@ public sealed class CustomWallpaperManager : WallpaperManager
     /// </remarks>
     public override void AdvanceForwardSlideshow()
     {
-        if (string.IsNullOrEmpty(SlideShowFolder) || _slideShowWallpapers.Count == 1) return;
+        if (string.IsNullOrEmpty(SlideShowFolder) || _slideShowWallpapers.Count <= 1) return;
         CurrentIndex++;
         SetWallpaper(_slideShowWallpapers[CurrentIndex]);
+    }
+
+    private void ClearSlideShow()
+    {
+        _slideShowFolder = string.Empty;
+        _slideShowWallpapers = [];
+        _currentIndex = 0;
     }
 
     /// <summary>

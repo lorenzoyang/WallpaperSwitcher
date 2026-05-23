@@ -33,7 +33,7 @@ public abstract class WallpaperManager
     /// </summary>
     public static readonly string[] SupportedExtensions =
     [
-        ".jpg", ".jpeg", ".png", ".bmp", "dib", ".gif", ".tif", ".tiff", "jfif"
+        ".jpg", ".jpeg", ".png", ".bmp", ".dib", ".gif", ".tif", ".tiff", ".jfif"
     ];
 
     /// <summary>
@@ -53,24 +53,6 @@ public abstract class WallpaperManager
         if (!WallpaperHelper.IsValidWallpaper(wallpaper)) return;
         DesktopWallpaper.SetWallpaper(null, wallpaper);
     }
-
-    // /// <summary>
-    // /// Gets the full path to the folder currently being used for the wallpaper slideshow.
-    // /// </summary>
-    // /// <returns>The absolute path to the slideshow folder, or an empty string if none is set.</returns>
-    // public string GetSlideShowFolder()
-    // {
-    //     DesktopWallpaper.GetSlideshow(out var shellItemArray);
-    //     if (shellItemArray is null) return string.Empty;
-    //     shellItemArray.GetCount(out var count);
-    //     if (count == 0) return string.Empty; // No items in the slideshow or no slideshow set
-    //     shellItemArray.GetItemAt(0, out var shellItem);
-    //     if (shellItem is null) return string.Empty;
-    //     shellItem.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out var pathPtr);
-    //     // Convert the PWSTR to string
-    //     var path = pathPtr.ToString();
-    //     return path ?? string.Empty;
-    // }
 
     /// <summary>
     /// Sets a wallpaper slideshow using images from the specified folder.

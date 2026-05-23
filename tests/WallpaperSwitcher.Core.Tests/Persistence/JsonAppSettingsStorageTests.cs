@@ -106,4 +106,48 @@ public class JsonAppSettingsStorageTests
 
         Assert.That(settings.WallpaperFolders, Is.Empty);
     }
+
+    [Test]
+    public void Load_WithNullJsonProperties_NormalizesDefaultValues()
+    {
+        Directory.CreateDirectory(_testDirectory);
+        File.WriteAllText(_testFilePath,
+            """
+            {
+              "WallpaperFolders": null,
+              "LastSelectedFolder": null,
+              "SelectedModeIndex": 1
+            }
+            """);
+
+        var settings = _storage.Load();
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(settings.WallpaperFolders, Is.Empty);
+            Assert.That(settings.LastSelectedFolder, Is.Empty);
+            Assert.That(settings.SelectedModeIndex, Is.EqualTo(1));
+        }
+    }
+
+    [Test]
+    public async Task LoadAsync_WithPartialJson_NormalizesDefaultValues()
+    {
+        Directory.CreateDirectory(_testDirectory);
+        await File.WriteAllTextAsync(_testFilePath,
+            """
+            {
+              "SelectedModeIndex": 1
+            }
+            """);
+
+        var settings = await _storage.LoadAsync();
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(settings.WallpaperFolders, Is.Empty);
+            Assert.That(settings.LastSelectedFolder, Is.Empty);
+            Assert.That(settings.SelectedModeIndex, Is.EqualTo(1));
+        }
+    }
 }

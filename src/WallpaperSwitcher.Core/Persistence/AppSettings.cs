@@ -10,6 +10,17 @@ namespace WallpaperSwitcher.Core.Persistence;
 public sealed class AppSettings
 {
     /// <summary>
+    /// Ensures loaded settings have non-null collection and string values.
+    /// </summary>
+    /// <returns>The current settings instance after default values are restored where needed.</returns>
+    internal AppSettings Normalize()
+    {
+        WallpaperFolders ??= [];
+        LastSelectedFolder ??= string.Empty;
+        return this;
+    }
+
+    /// <summary>
     /// Gets or sets the wallpaper folders configured by the user.
     /// </summary>
     public List<string> WallpaperFolders { get; set; } = [];

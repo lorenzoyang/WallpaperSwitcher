@@ -42,23 +42,9 @@ public sealed class JsonAppSettingsStorage : IAppSettingsStorage
     /// </remarks>
     public AppSettings Load()
     {
-        if (!File.Exists(Location))
-        {
-            return new AppSettings();
-        }
-
-        try
-        {
-            using var fileStream = File.OpenRead(Location);
-            return JsonSerializer.Deserialize(
-                fileStream,
-                SourceGenerationContext.Default.AppSettings
-            ) ?? new AppSettings();
-        }
-        catch (JsonException)
-        {
-            return new AppSettings();
-        }
+        return StorageFile.TryOpenRead(Location, out var fileStream)
+            ? ReadSettings(fileStream)
+            : new AppSettings();
     }
 
     /// <inheritdoc/>
@@ -67,29 +53,15 @@ public sealed class JsonAppSettingsStorage : IAppSettingsStorage
     /// </remarks>
     public async Task<AppSettings> LoadAsync()
     {
-        if (!File.Exists(Location))
-        {
-            return new AppSettings();
-        }
-
-        try
-        {
-            await using var fileStream = File.OpenRead(Location);
-            return await JsonSerializer.DeserializeAsync(
-                fileStream,
-                SourceGenerationContext.Default.AppSettings
-            ) ?? new AppSettings();
-        }
-        catch (JsonException)
-        {
-            return new AppSettings();
-        }
+        return StorageFile.TryOpenRead(Location, out var fileStream)
+            ? await ReadSettingsAsync(fileStream)
+            : new AppSettings();
     }
 
     /// <inheritdoc/>
     public void Save(AppSettings settings)
     {
-        EnsureDirectoryExists();
+        StorageFile.EnsureParentDirectoryExists(Location);
         using var fileStream = File.Create(Location);
         JsonSerializer.Serialize(
             fileStream,
@@ -101,7 +73,7 @@ public sealed class JsonAppSettingsStorage : IAppSettingsStorage
     /// <inheritdoc/>
     public async Task SaveAsync(AppSettings settings)
     {
-        EnsureDirectoryExists();
+        StorageFile.EnsureParentDirectoryExists(Location);
         await using var fileStream = File.Create(Location);
         await JsonSerializer.SerializeAsync(
             fileStream,
@@ -110,12 +82,40 @@ public sealed class JsonAppSettingsStorage : IAppSettingsStorage
         );
     }
 
-    private void EnsureDirectoryExists()
+    private static AppSettings ReadSettings(Stream stream)
     {
-        var directory = Path.GetDirectoryName(Location);
-        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        using (stream)
         {
-            Directory.CreateDirectory(directory);
+            try
+            {
+                return (JsonSerializer.Deserialize(
+                    stream,
+                    SourceGenerationContext.Default.AppSettings
+                ) ?? new AppSettings()).Normalize();
+            }
+            catch (JsonException)
+            {
+                return new AppSettings();
+            }
+        }
+    }
+
+    private static async Task<AppSettings> ReadSettingsAsync(Stream stream)
+    {
+        await using (stream)
+        {
+            try
+            {
+                var settings = await JsonSerializer.DeserializeAsync(
+                    stream,
+                    SourceGenerationContext.Default.AppSettings
+                );
+                return (settings ?? new AppSettings()).Normalize();
+            }
+            catch (JsonException)
+            {
+                return new AppSettings();
+            }
         }
     }
 }

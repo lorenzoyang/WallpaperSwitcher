@@ -9,6 +9,11 @@ namespace WallpaperSwitcher.Core.Wallpaper;
 /// </summary>
 public static class WallpaperHelper
 {
+    private static readonly HashSet<string> SupportedExtensions = new(
+        WallpaperManager.SupportedExtensions,
+        StringComparer.OrdinalIgnoreCase
+    );
+
     /// <summary>
     /// Gets the number of supported image files in the specified folder.
     /// </summary>
@@ -25,7 +30,7 @@ public static class WallpaperHelper
         }
 
         return Directory
-            .GetFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
+            .EnumerateFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
             .Count(IsValidWallpaperExtension);
     }
 
@@ -124,9 +129,8 @@ public static class WallpaperHelper
         return (IShellItemArray)shellItemArrayObj;
     }
 
-    private static bool IsValidWallpaperExtension(string wallpaper)
+    internal static bool IsValidWallpaperExtension(string wallpaper)
     {
-        return WallpaperManager.SupportedExtensions.Contains(Path.GetExtension(wallpaper)
-            .ToLowerInvariant());
+        return SupportedExtensions.Contains(Path.GetExtension(wallpaper));
     }
 }

@@ -504,10 +504,6 @@ public partial class MainForm : Form
             case DialogResult.OK:
                 FormHelper.ShowSuccessMessage("Settings saved successfully.");
                 break;
-            // case DialogResult.Cancel:
-            //     FormHelper.ShowWarningMessage(
-            //         "Settings window was closed without confirming. Any unsaved changes may have been discarded.");
-            //     break;
         }
     }
 }

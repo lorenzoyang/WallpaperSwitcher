@@ -12,7 +12,7 @@ namespace WallpaperSwitcher.Core.GlobalHotkey;
 /// with the Windows API and an <see cref="IHotkeyStorage"/> implementation for
 /// saving and loading hotkey configurations.
 /// </remarks>
-public sealed class HotkeyService
+public sealed class HotkeyService : IDisposable
 {
     private readonly HotkeyRegistrar _hotkeyRegistrar;
     private readonly IHotkeyStorage _hotkeyStorage;
@@ -55,13 +55,13 @@ public sealed class HotkeyService
     /// Gets all currently registered hotkeys.
     /// </summary>
     /// <returns>
-    /// An immutable collection of <see cref="HotkeyInfo"/> representing the currently registered hotkeys.
+    /// A snapshot of <see cref="HotkeyInfo"/> values representing the currently registered hotkeys.
     /// </returns>
     /// <exception cref="ObjectDisposedException">Thrown if the service has been disposed.</exception>
     public IEnumerable<HotkeyInfo> GetRegisteredHotkeys()
     {
         ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
-        return _registeredHotkeys.Values;
+        return _registeredHotkeys.Values.ToArray();
     }
 
     /// <summary>
@@ -88,6 +88,8 @@ public sealed class HotkeyService
     /// <param name="id">The identifier of the hotkey that was pressed.</param>
     public void ProcessWindowMessage(int id)
     {
+        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
+
         if (_registeredHotkeys.TryGetValue(id, out var hotkeyInfo))
         {
             HotkeyPressed?.Invoke(this, new HotkeyPressedEventArgs(hotkeyInfo));
@@ -115,7 +117,7 @@ public sealed class HotkeyService
         ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
         if (Hotkey.TryParseFrom(hotkeyString, out var hotkey, out var errorMessage))
         {
-            return RegisterHotkey(hotkey, name);
+            return RegisterHotkey(hotkey, name, id);
         }
 
         throw new HotkeyParsingException($"Failed to parse hotkey string '{hotkeyString}': {errorMessage}",
@@ -126,6 +128,13 @@ public sealed class HotkeyService
     {
         ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
 
+        ValidateHotkeyName(name);
+
+        if (id is not null && _registeredHotkeys.ContainsKey(id.Value))
+        {
+            throw new HotkeyBindingException($"A hotkey with the id '{id}' is already registered.");
+        }
+
         var existingHotkeyInfo = IsHotkeyDuplicate(hotkey);
         if (existingHotkeyInfo is not null)
         {
@@ -133,11 +142,6 @@ public sealed class HotkeyService
                 "A hotkey with the same combination is already registered.",
                 existingHotkeyInfo
             );
-        }
-
-        if (string.IsNullOrEmpty(name))
-        {
-            throw new HotkeyBindingException("Hotkey name cannot be null or empty.");
         }
 
         var hotkeyId = id ?? NextHotkeyId++;
@@ -149,6 +153,7 @@ public sealed class HotkeyService
                 Hotkey = hotkey,
                 Name = name,
             };
+            EnsureNextHotkeyIdIsAfter(hotkeyId);
             return hotkeyId;
         }
 
@@ -183,7 +188,7 @@ public sealed class HotkeyService
         if (!_registeredHotkeys.ContainsKey(id))
             return false;
 
-        if (_hotkeyRegistrar.UnregisterHotKey(id)) return false;
+        if (!_hotkeyRegistrar.UnregisterHotKey(id)) return false;
 
         _registeredHotkeys.Remove(id);
         return true;
@@ -207,16 +212,82 @@ public sealed class HotkeyService
             throw new HotkeyBindingException($"No hotkey registered with the name '{name}'.");
         }
 
+        // If the new hotkey text is empty or whitespace, we do not register a new hotkey
+        // and simply remove the existing hotkey.
+        if (string.IsNullOrWhiteSpace(newHotkeyString))
+        {
+            if (!UnregisterHotkey(existingHkInfo.Id))
+            {
+                throw new HotkeyBindingException($"Failed to unregister hotkey '{name}' during re-binding.");
+            }
+
+            return;
+        }
+
+        var newHotkey = ParseHotkeyOrThrow(newHotkeyString);
+        var duplicateHotkeyInfo = IsHotkeyDuplicate(newHotkey);
+        if (duplicateHotkeyInfo is not null && duplicateHotkeyInfo.Id != existingHkInfo.Id)
+        {
+            throw new HotkeyDuplicateBindingException(
+                "A hotkey with the same combination is already registered.",
+                duplicateHotkeyInfo
+            );
+        }
+
         if (!UnregisterHotkey(existingHkInfo.Id))
         {
             throw new HotkeyBindingException($"Failed to unregister hotkey '{name}' during re-binding.");
         }
 
-        // If the new hotkey text is empty or whitespace, we do not register a new hotkey
-        // and simply remove the existing hotkey.
-        if (string.IsNullOrWhiteSpace(newHotkeyString)) return;
+        try
+        {
+            _ = RegisterHotkey(newHotkey, name, existingHkInfo.Id);
+        }
+        catch
+        {
+            RestoreHotkey(existingHkInfo);
+            throw;
+        }
+    }
 
-        _ = RegisterHotkey(newHotkeyString, name, existingHkInfo.Id);
+    private static void ValidateHotkeyName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new HotkeyBindingException("Hotkey name cannot be null or empty.");
+        }
+    }
+
+    private static Hotkey ParseHotkeyOrThrow(string hotkeyString)
+    {
+        if (Hotkey.TryParseFrom(hotkeyString, out var hotkey, out var errorMessage))
+        {
+            return hotkey;
+        }
+
+        throw new HotkeyParsingException(
+            $"Failed to parse hotkey string '{hotkeyString}': {errorMessage}",
+            hotkeyString
+        );
+    }
+
+    private void RestoreHotkey(HotkeyInfo hotkeyInfo)
+    {
+        if (_hotkeyRegistrar.RegisterHotKey(
+                hotkeyInfo.Id,
+                hotkeyInfo.Hotkey.ModifierKeys,
+                hotkeyInfo.Hotkey.VirtualKeys))
+        {
+            _registeredHotkeys[hotkeyInfo.Id] = hotkeyInfo;
+        }
+    }
+
+    private void EnsureNextHotkeyIdIsAfter(int hotkeyId)
+    {
+        if (hotkeyId >= NextHotkeyId)
+        {
+            NextHotkeyId = hotkeyId + 1;
+        }
     }
 
     /// <summary>
@@ -228,16 +299,14 @@ public sealed class HotkeyService
         ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
 
         var hotkeyInfos = (await _hotkeyStorage.LoadAsync()).ToArray();
-        // If is the first load
+        // First launch: create the default "Next Wallpaper" binding.
         if (hotkeyInfos.Length == 0)
         {
-            // initialize with default hotkey: Next Wallpaper CTRL+SHIFT+N
             _ = RegisterHotkey(Default.NextWallpaperHotkeyString, Default.NextWallpaperHotkeyName);
             await _hotkeyStorage.SaveAsync(_registeredHotkeys.Values.ToArray());
         }
         else
         {
-            // otherwise, register all loaded hotkeys
             foreach (var (id, hotkey, name) in hotkeyInfos)
             {
                 _ = RegisterHotkey(hotkey, name, id);
@@ -254,16 +323,14 @@ public sealed class HotkeyService
         ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
 
         var hotkeyInfos = _hotkeyStorage.Load().ToArray();
-        // If is the first load
+        // First launch: create the default "Next Wallpaper" binding.
         if (hotkeyInfos.Length == 0)
         {
-            // initialize with default hotkey: Next Wallpaper CTRL+SHIFT+N
             _ = RegisterHotkey(Default.NextWallpaperHotkeyString, Default.NextWallpaperHotkeyName);
             _hotkeyStorage.Save(_registeredHotkeys.Values.ToArray());
         }
         else
         {
-            // otherwise, register all loaded hotkeys
             foreach (var (id, hotkey, name) in hotkeyInfos)
             {
                 _ = RegisterHotkey(hotkey, name, id);
@@ -276,6 +343,7 @@ public sealed class HotkeyService
     /// </summary>
     public async Task SaveHotkeysAsync()
     {
+        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
         await _hotkeyStorage.SaveAsync(_registeredHotkeys.Values.ToArray());
     }
 
