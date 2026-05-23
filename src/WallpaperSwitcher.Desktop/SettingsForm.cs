@@ -1,21 +1,30 @@
 ﻿using WallpaperSwitcher.Core;
 using WallpaperSwitcher.Core.GlobalHotkey;
+using WallpaperSwitcher.Core.Persistence;
 
 namespace WallpaperSwitcher.Desktop;
 
 public partial class SettingsForm : Form
 {
     private readonly HotkeyService _hotkeyService;
+    private readonly IAppSettingsStorage _appSettingsStorage;
+    private readonly AppSettings _appSettings;
 
     // Dictionary to hold folder hotkeys, where the key is the folder path and the value is the HotkeyInfo
     private readonly Dictionary<string, HotkeyInfo?> _folderHotkeys;
 
-    public SettingsForm(HotkeyService hotkeyService, List<string> folders)
+    public SettingsForm(
+        HotkeyService hotkeyService,
+        List<string> folders,
+        IAppSettingsStorage appSettingsStorage,
+        AppSettings appSettings)
     {
         InitializeComponent();
 
         // GlobalHotkeyManager passed from the main form that is already initialized
         _hotkeyService = hotkeyService;
+        _appSettingsStorage = appSettingsStorage;
+        _appSettings = appSettings;
         // Initialize the folder hotkeys dictionary with the provided folders
         _folderHotkeys = folders.ToDictionary(folder => folder, HotkeyInfo? (_) => null);
     }
@@ -44,7 +53,7 @@ public partial class SettingsForm : Form
             folderHkComboBox.Items.Add(folder);
         }
 
-        launchStartupCheckBox.Checked = Properties.Settings.Default.LaunchAtStartup;
+        launchStartupCheckBox.Checked = _appSettings.LaunchAtStartup;
     }
 
     private void SetNextWallpaperHkEditMode(bool isEditing)
@@ -79,9 +88,8 @@ public partial class SettingsForm : Form
 
     private void SaveSettings()
     {
-        Properties.Settings.Default.LaunchAtStartup = launchStartupCheckBox.Checked;
-
-        Properties.Settings.Default.Save();
+        _appSettings.LaunchAtStartup = launchStartupCheckBox.Checked;
+        _appSettingsStorage.Save(_appSettings);
     }
 
     // *********************************

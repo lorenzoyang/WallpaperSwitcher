@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Serialization;
 using WallpaperSwitcher.Core.GlobalHotkey;
 
 namespace WallpaperSwitcher.Core.Persistence;
@@ -14,11 +13,7 @@ namespace WallpaperSwitcher.Core.Persistence;
 /// </remarks>
 public sealed class JsonHotkeyStorage : IHotkeyStorage
 {
-    private static readonly string DefaultLocation = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "WallpaperSwitcher",
-        "hotkeys.json"
-    );
+    private static readonly string DefaultLocation = AppDataPaths.HotkeysFile;
 
     /// <summary>
     /// Gets the full path of the JSON file used for storing hotkey configurations.
@@ -51,22 +46,9 @@ public sealed class JsonHotkeyStorage : IHotkeyStorage
     /// </remarks>
     public async Task<IEnumerable<HotkeyInfo>> LoadAsync()
     {
-        if (!File.Exists(Location))
-        {
-            return [];
-        }
-
-        try
-        {
-            await using var fileStream = File.OpenRead(Location);
-            var hotkeys =
-                await JsonSerializer.DeserializeAsync(fileStream, SourceGenerationContext.Default.HotkeyInfoArray);
-            return hotkeys ?? [];
-        }
-        catch (JsonException)
-        {
-            return [];
-        }
+        return StorageFile.TryOpenRead(Location, out var fileStream)
+            ? await ReadHotkeysAsync(fileStream)
+            : [];
     }
 
     /// <inheritdoc/>
@@ -75,28 +57,15 @@ public sealed class JsonHotkeyStorage : IHotkeyStorage
     /// </remarks>
     public IEnumerable<HotkeyInfo> Load()
     {
-        if (!File.Exists(Location))
-        {
-            return [];
-        }
-
-        try
-        {
-            using var fileStream = File.OpenRead(Location);
-            var hotkeys =
-                JsonSerializer.Deserialize(fileStream, SourceGenerationContext.Default.HotkeyInfoArray);
-            return hotkeys ?? [];
-        }
-        catch (JsonException)
-        {
-            return [];
-        }
+        return StorageFile.TryOpenRead(Location, out var fileStream)
+            ? ReadHotkeys(fileStream)
+            : [];
     }
 
     /// <inheritdoc/>
     public async Task SaveAsync(IEnumerable<HotkeyInfo> hotkeys)
     {
-        EnsureDirectoryExists();
+        StorageFile.EnsureParentDirectoryExists(Location);
         await using var fileStream = File.Create(Location);
         await JsonSerializer.SerializeAsync(fileStream, hotkeys, SourceGenerationContext.Default.HotkeyInfoArray);
     }
@@ -104,31 +73,44 @@ public sealed class JsonHotkeyStorage : IHotkeyStorage
     /// <inheritdoc/>
     public void Save(IEnumerable<HotkeyInfo> hotkeys)
     {
-        EnsureDirectoryExists();
+        StorageFile.EnsureParentDirectoryExists(Location);
         using var fileStream = File.Create(Location);
         JsonSerializer.Serialize(fileStream, hotkeys, SourceGenerationContext.Default.HotkeyInfoArray);
     }
-    
-    private void EnsureDirectoryExists()
+
+    private static IEnumerable<HotkeyInfo> ReadHotkeys(Stream stream)
     {
-        var directory = Path.GetDirectoryName(Location);
-        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        using (stream)
         {
-            Directory.CreateDirectory(directory);
+            try
+            {
+                return JsonSerializer.Deserialize(
+                    stream,
+                    SourceGenerationContext.Default.HotkeyInfoArray
+                ) ?? [];
+            }
+            catch (JsonException)
+            {
+                return [];
+            }
         }
     }
-}
 
-/// <summary>
-/// Provides source generation context for System.Text.Json to enable
-/// high-performance serialization and deserialization of <see cref="HotkeyInfo"/> objects.
-/// </summary>
-/// <remarks>
-/// This class is used to configure JSON source generation, reducing runtime reflection overhead.
-/// </remarks>
-[JsonSourceGenerationOptions(WriteIndented = true)]
-[JsonSerializable(typeof(HotkeyInfo))]
-[JsonSerializable(typeof(HotkeyInfo[]))]
-internal partial class SourceGenerationContext : JsonSerializerContext
-{
+    private static async Task<IEnumerable<HotkeyInfo>> ReadHotkeysAsync(Stream stream)
+    {
+        await using (stream)
+        {
+            try
+            {
+                return await JsonSerializer.DeserializeAsync(
+                    stream,
+                    SourceGenerationContext.Default.HotkeyInfoArray
+                ) ?? [];
+            }
+            catch (JsonException)
+            {
+                return [];
+            }
+        }
+    }
 }

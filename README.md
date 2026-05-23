@@ -28,6 +28,7 @@
 - [x] **Global Hotkey Support**
   - Hotkey for "Next Wallpaper"
   - Hotkey for switching wallpaper folders
+  - Strict validation to prevent duplicate or unsafe global hotkeys
 - [x] **Auto Start on Boot**
   - Optional setting to launch automatically on Windows startup
 - [x] **Settings Interface**
@@ -96,12 +97,13 @@ C:\Users\<YourUsername>\AppData\Local\WallpaperSwitcher
 
 This folder includes:
 
+* `settings.json`: Stores wallpaper folders, the last selected folder, selected switching mode, tray hint state, and startup preference
 * `hotkeys.json`: Stores your custom global hotkey mappings
-* A folder prefixed with `WallpaperSwitcher*` containing `user.config.xml`, which holds other settings
 
 ### How to Reset the App
 
-To fully reset Wallpaper Switcher to its default state:
+To fully reset Wallpaper Switcher to its default state, use the manual reset steps below:
+
 1. **Delete the user data folder:**
    ```
    C:\Users\<YourUsername>\AppData\Local\WallpaperSwitcher
@@ -113,8 +115,8 @@ To fully reset Wallpaper Switcher to its default state:
      HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
      ```
    - Delete the `WallpaperSwitcher` entry
-3. **Alternative method:**
-   - You can reset settings and remove hotkeys from within the app via the **Settings** window
+
+For smaller changes, use the **Settings** window to update startup behavior or remove individual hotkey bindings without deleting all user data.
 
 > ⚠️ **Note:** The app will regenerate default settings and hotkeys on next launch.
 
@@ -124,15 +126,29 @@ To fully reset Wallpaper Switcher to its default state:
 - You can change hotkeys via the **Settings** window
 - **Hotkey rules:**
   - Use `+` as a separator (spaces and case are ignored)
-  - Only **one letter key** (e.g., `N`) is allowed
+  - A hotkey must include at least one modifier and one letter key
+  - Only **one letter key** from `A` to `Z` is allowed
+  - Duplicate modifiers are rejected
+  - Bare keys, `None`, numeric key codes, and unsupported keys are rejected
   - Combine it with one or more of the following modifiers:
     - `Ctrl`
+    - `Control` (alias for `Ctrl`)
     - `Alt`
     - `Shift`
+    - `Win`
+    - `Windows` (alias for `Win`)
 - **Examples:**
   - `Ctrl + Alt + N`
   - `Ctrl + Shift + N`
   - `Ctrl + Alt + Shift + N`
+  - `Control + Windows + N`
+
+## Development
+
+This project includes GitHub Actions for routine validation and release publishing:
+
+- Pull requests and pushes to `main` run formatting, Release build, and tests.
+- Pushing a version tag such as `v1.1.0` builds release artifacts and creates a GitHub Release.
 
 ## License
 

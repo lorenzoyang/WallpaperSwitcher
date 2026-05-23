@@ -28,6 +28,7 @@
 - [x] **全局快捷键支持：**
   - 切换壁纸快捷键
   - 切换文件夹快捷键
+  - 严格校验，避免重复或不安全的全局快捷键
 - [x] **开机自启：**
   - 可选开机自动启动
 - [x] **设置界面：**
@@ -90,12 +91,13 @@
 C:\Users\<用户名>\AppData\Local\WallpaperSwitcher
 ```
 包含：
+* `settings.json`：保存壁纸文件夹、上次选择的文件夹、切换模式、托盘提示状态和开机自启偏好
 * `hotkeys.json`：保存快捷键配置
-* `WallpaperSwitcher*`前缀文件夹：存储`user.config.xml`设置文件
 
 ### 🔄 重置程序
 
-完全重置步骤：
+如需将 Wallpaper Switcher 完全恢复到默认状态，请使用以下手动重置步骤：
+
 1. **删除用户数据文件夹：**
    ```
    C:\Users\<用户名>\AppData\Local\WallpaperSwitcher
@@ -107,8 +109,8 @@ C:\Users\<用户名>\AppData\Local\WallpaperSwitcher
      HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
      ```
    - 删除`WallpaperSwitcher`键值
-3. **应用内重置：**
-   - 通过**设置**窗口可重置配置和快捷键
+
+如果只是进行较小调整，可以通过**设置**窗口修改开机自启状态或移除单个快捷键绑定，无需删除全部用户数据。
 
 > ⚠️ **注意：** 重启程序将自动生成默认配置
 
@@ -118,15 +120,29 @@ C:\Users\<用户名>\AppData\Local\WallpaperSwitcher
 - 通过**设置**窗口修改快捷键
 - **设置规则：**
   - 使用`+`分隔符（不区分大小写和空格）
-  - 仅支持**单个字母键**（如`N`）
+  - 快捷键必须包含至少一个修饰键和一个字母键
+  - 仅支持`A`到`Z`中的**单个字母键**
+  - 不允许重复修饰键
+  - 不接受单独字母键、`None`、数字键码或未支持的按键
   - 可组合以下修饰键：
     - `Ctrl`
+    - `Control`（`Ctrl`的别名）
     - `Alt`
     - `Shift`
+    - `Win`
+    - `Windows`（`Win`的别名）
 - **有效示例：**
   - `Ctrl + Alt + N`
   - `Ctrl + Shift + N`
   - `Ctrl + Alt + Shift + N`
+  - `Control + Windows + N`
+
+## 开发与发布
+
+本项目包含 GitHub Actions，用于日常检查和发布：
+
+- Pull Request 和推送到 `main` 时会运行格式检查、Release 构建和测试
+- 推送版本标签（例如 `v1.1.0`）时会构建发布产物并创建 GitHub Release
 
 ## 开源许可
 

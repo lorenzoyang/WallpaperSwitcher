@@ -53,7 +53,8 @@ public static class ModifierKeysExtensions
     /// </summary>
     /// <param name="modifierKeys">The modifier keys to convert.</param>
     /// <returns>
-    /// A string representation of the modifier keys (e.g., "Ctrl+Alt"), or "None" if no modifiers are set.
+    /// A string representation of the modifier keys in canonical order
+    /// (<c>Ctrl+Alt+Shift+Win</c>), or <c>None</c> if no modifiers are set.
     /// </returns>
     public static string ToFormattedString(this ModifierKeys modifierKeys)
     {
@@ -62,12 +63,12 @@ public static class ModifierKeysExtensions
 
         var parts = new List<string>();
 
-        if (modifierKeys.HasFlag(ModifierKeys.Shift))
-            parts.Add("Shift");
-        if (modifierKeys.HasFlag(ModifierKeys.Alt))
-            parts.Add("Alt");
         if (modifierKeys.HasFlag(ModifierKeys.Ctrl))
             parts.Add("Ctrl");
+        if (modifierKeys.HasFlag(ModifierKeys.Alt))
+            parts.Add("Alt");
+        if (modifierKeys.HasFlag(ModifierKeys.Shift))
+            parts.Add("Shift");
         if (modifierKeys.HasFlag(ModifierKeys.Win))
             parts.Add("Win");
 

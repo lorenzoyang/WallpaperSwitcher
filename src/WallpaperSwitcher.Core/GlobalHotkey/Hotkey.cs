@@ -8,12 +8,22 @@
 /// <param name="VirtualKeys">The primary virtual key (e.g., A, F1) used in the hotkey.</param>
 public readonly record struct Hotkey(ModifierKeys ModifierKeys, VirtualKeys VirtualKeys)
 {
+    private static readonly IReadOnlyDictionary<string, ModifierKeys> ModifierAliases =
+        new Dictionary<string, ModifierKeys>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Alt"] = ModifierKeys.Alt,
+            ["Ctrl"] = ModifierKeys.Ctrl,
+            ["Control"] = ModifierKeys.Ctrl,
+            ["Shift"] = ModifierKeys.Shift,
+            ["Win"] = ModifierKeys.Win,
+            ["Windows"] = ModifierKeys.Win
+        };
+
     /// <summary>
     /// Returns a string representation of the hotkey.
     /// </summary>
     /// <remarks>
-    /// If no modifier keys are present, only the primary key is returned.
-    /// Otherwise, the result is formatted as <c>Modifier+Key</c>.
+    /// Modifier keys are formatted in canonical order before the primary key.
     /// </remarks>
     /// <returns>
     /// A string that represents the current hotkey combination.
@@ -29,7 +39,7 @@ public readonly record struct Hotkey(ModifierKeys ModifierKeys, VirtualKeys Virt
     /// Attempts to parse a string representation of a hotkey into a <see cref="Hotkey"/> instance.
     /// </summary>
     /// <param name="hotkeyString">
-    /// The string to parse, containing one or more modifiers and a primary key, 
+    /// The string to parse, containing one or more modifiers and one primary key,
     /// separated by the specified <paramref name="separator"/>.
     /// </param>
     /// <param name="hotkey">
@@ -46,14 +56,26 @@ public readonly record struct Hotkey(ModifierKeys ModifierKeys, VirtualKeys Virt
     /// </param>
     /// <returns>
     /// <see langword="true"/> if parsing was successful; otherwise, <see langword="false"/>.
+    /// A valid global hotkey requires at least one modifier and a non-<c>None</c> key.
     /// </returns>
     public static bool TryParseFrom(string hotkeyString, out Hotkey hotkey, out string errorMessage,
         string separator = "+")
     {
         var modifierKeys = ModifierKeys.None;
-        var virtualKey = VirtualKeys.None;
         hotkey = default;
         errorMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(hotkeyString))
+        {
+            errorMessage = "Hotkey string cannot be empty.";
+            return false;
+        }
+
+        if (string.IsNullOrEmpty(separator))
+        {
+            errorMessage = "Hotkey separator cannot be empty.";
+            return false;
+        }
 
         var parts = hotkeyString.Split(separator,
             StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -63,39 +85,40 @@ public readonly record struct Hotkey(ModifierKeys ModifierKeys, VirtualKeys Virt
             return false;
         }
 
-        // Process all parts except the last one (which should be the main key)
-        for (var i = 0; i < parts.Length; i++)
+        for (var i = 0; i < parts.Length - 1; i++)
         {
-            var part = parts[i].ToUpperInvariant();
-            if (i == parts.Length - 1)
+            var part = parts[i];
+            if (!ModifierAliases.TryGetValue(part, out var parsedModifier))
             {
-                // Last part is the main key
-                if (Enum.TryParse<VirtualKeys>(part, out var parsedKey))
-                {
-                    virtualKey = parsedKey;
-                }
-                else
-                {
-                    errorMessage = $"Invalid key: {part}";
-                    return false;
-                }
+                errorMessage = $"Invalid modifier: {part}";
+                return false;
             }
-            else
+
+            if ((modifierKeys & parsedModifier) == parsedModifier)
             {
-                // Previous parts are modifiers
-                if (Enum.TryParse<ModifierKeys>(part, ignoreCase: true, out var parsedModifier))
-                {
-                    modifierKeys |= parsedModifier;
-                }
-                else
-                {
-                    errorMessage = $"Invalid modifier: {part}";
-                    return false;
-                }
+                errorMessage = $"Duplicate modifier: {part}";
+                return false;
             }
+
+            modifierKeys |= parsedModifier;
+        }
+
+        var keyPart = parts[^1];
+        if (IsNumericToken(keyPart) ||
+            !Enum.TryParse<VirtualKeys>(keyPart, ignoreCase: true, out var virtualKey) ||
+            virtualKey == VirtualKeys.None ||
+            !Enum.IsDefined(virtualKey))
+        {
+            errorMessage = $"Invalid key: {keyPart}";
+            return false;
         }
 
         hotkey = new Hotkey(modifierKeys, virtualKey);
         return true;
+    }
+
+    private static bool IsNumericToken(string value)
+    {
+        return uint.TryParse(value, out _);
     }
 }
