@@ -1,0 +1,14 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/WallpaperSwitcher.Core/WallpaperSwitcher.Core.csproj" />
+    <Project Path="src/WallpaperSwitcher.Desktop/WallpaperSwitcher.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WallpaperSwitcher.Core.Tests/WallpaperSwitcher.Core.Tests.csproj" />
+  </Folder>
+</Solution>
