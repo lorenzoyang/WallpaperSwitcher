@@ -19,8 +19,7 @@ public sealed class HotkeyService : IDisposable
     private readonly HotkeyRegistrar _hotkeyRegistrar;
     private readonly IHotkeyStorage _hotkeyStorage;
 
-    // Registered hotkeys should be released when the service is disposed.
-    // Any usage of this field should check for disposal.
+    // Tracks only hotkeys successfully registered with the operating system.
     private readonly Dictionary<int, HotkeyInfo> _registeredHotkeys = new();
 
     private bool _disposed;
@@ -196,8 +195,7 @@ public sealed class HotkeyService : IDisposable
             throw new HotkeyBindingException($"No hotkey registered with the name '{name}'.");
         }
 
-        // If the new hotkey text is empty or whitespace, we do not register a new hotkey
-        // and simply remove the existing hotkey.
+        // A blank binding means the user intentionally disabled this hotkey.
         if (string.IsNullOrWhiteSpace(newHotkeyString))
         {
             if (!UnregisterHotkey(existingHkInfo.Id))
@@ -346,7 +344,7 @@ public sealed class HotkeyService : IDisposable
 
     private bool RegisterLoadedHotkeys(IReadOnlyCollection<HotkeyInfo> hotkeyInfos)
     {
-        // First launch: create the default "Next Wallpaper" binding.
+        // First launch: create the default "Next Wallpaper" binding and let the caller persist it.
         if (hotkeyInfos.Count == 0)
         {
             _ = RegisterHotkey(Default.NextWallpaperHotkeyString, Default.NextWallpaperHotkeyName);
@@ -396,7 +394,7 @@ public sealed class HotkeyService : IDisposable
             return;
         }
 
-        // Always unregister hotkeys (both managed and unmanaged cleanup)
+        // Release all OS registrations even when Dispose is reached from the finalizer.
         var ids = new List<int>(_registeredHotkeys.Keys);
         foreach (var id in ids)
         {

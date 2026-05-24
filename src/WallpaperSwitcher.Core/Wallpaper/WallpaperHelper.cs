@@ -5,7 +5,7 @@ namespace WallpaperSwitcher.Core.Wallpaper;
 
 /// <summary>
 /// Provides helper methods for managing wallpapers and wallpaper folders,
-/// including validation and integration with Windows shell APIs.
+/// including top-level folder validation and Windows Shell API integration.
 /// </summary>
 public static class WallpaperHelper
 {
@@ -17,9 +17,9 @@ public static class WallpaperHelper
     /// <summary>
     /// Gets the number of supported image files in the specified folder.
     /// </summary>
-    /// <param name="folder">The full path to the folder to scan for images.</param>
+    /// <param name="folder">The full path to the folder to scan.</param>
     /// <returns>
-    /// The number of image files with supported extensions in the folder.
+    /// The number of top-level image files with supported extensions in the folder.
     /// Returns <c>0</c> if the folder is invalid or contains no valid images.
     /// </returns>
     public static int GetImageCount(string folder)
@@ -41,9 +41,9 @@ public static class WallpaperHelper
     /// contains a message describing the validation failure.
     /// </param>
     /// <returns>
-    /// <c>true</c> if the folder exists and contains at least one supported image file; otherwise, <c>false</c>.
+    /// <c>true</c> if the folder exists and contains at least one supported top-level image file;
+    /// otherwise, <c>false</c>.
     /// </returns>
-    /// <exception cref="UnauthorizedAccessException"></exception>
     public static bool IsValidWallpaperFolder(string folder, out string errorMessage)
     {
         errorMessage = string.Empty;
@@ -59,7 +59,7 @@ public static class WallpaperHelper
             return false;
         }
 
-        // Check if folder contains any image files
+        // Directory enumeration can fail for inaccessible or transient folders.
         try
         {
             if (GetImageCount(folder) == 0)
@@ -96,17 +96,15 @@ public static class WallpaperHelper
     }
 
     /// <summary>
-    /// Creates an <see cref="IShellItemArray"/> from the contents of the specified folder.
-    /// Useful for interacting with Windows Shell APIs such as slideshow management.
+    /// Creates a Windows Shell item array for the specified folder.
     /// </summary>
     /// <param name="folder">The full path to the folder.</param>
-    /// <returns>An <see cref="IShellItemArray"/> representing the folder's contents.</returns>
+    /// <returns>An <see cref="IShellItemArray"/> suitable for <c>IDesktopWallpaper.SetSlideshow</c>.</returns>
     /// <exception cref="Exception">
     /// Thrown if shell item or shell item array creation fails.
     /// </exception>
     internal static IShellItemArray CreateShellItemArrayFromFolder(string folder)
     {
-        // Create shell item from folder path
         var hr = PInvoke.SHCreateItemFromParsingName(
             folder,
             null,
@@ -116,7 +114,6 @@ public static class WallpaperHelper
         hr.ThrowOnFailure();
         var shellItem = (IShellItem)shellItemObj;
 
-        // Create shell item array from shell item
         hr = PInvoke.SHCreateShellItemArrayFromShellItem(
             shellItem,
             typeof(IShellItemArray).GUID,
@@ -127,11 +124,24 @@ public static class WallpaperHelper
         return (IShellItemArray)shellItemArrayObj;
     }
 
+    /// <summary>
+    /// Determines whether a path has an extension supported by the wallpaper managers.
+    /// </summary>
+    /// <param name="wallpaper">The path whose extension should be checked.</param>
+    /// <returns><c>true</c> when the extension is supported; otherwise, <c>false</c>.</returns>
     internal static bool IsValidWallpaperExtension(string wallpaper)
     {
         return SupportedExtensions.Contains(Path.GetExtension(wallpaper));
     }
 
+    /// <summary>
+    /// Enumerates supported wallpaper files directly inside a folder.
+    /// </summary>
+    /// <remarks>
+    /// This method does not recurse into subfolders and expects callers to validate that the folder exists.
+    /// </remarks>
+    /// <param name="folder">The folder to enumerate.</param>
+    /// <returns>A lazy sequence of matching wallpaper file paths.</returns>
     internal static IEnumerable<string> EnumerateWallpaperFiles(string folder)
     {
         return Directory

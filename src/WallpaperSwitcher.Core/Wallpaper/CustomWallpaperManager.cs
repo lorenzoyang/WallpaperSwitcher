@@ -3,9 +3,7 @@ using Windows.Win32.Foundation;
 namespace WallpaperSwitcher.Core.Wallpaper;
 
 /// <summary>
-/// Provides a custom implementation of <see cref="WallpaperManager"/> that simulates
-/// Windows’ slideshow feature by programmatically cycling wallpapers using the
-/// <see cref="WallpaperManager.SetWallpaper(string)"/> method.
+/// Provides a custom slideshow implementation by cycling through wallpaper files directly.
 /// </summary>
 public sealed class CustomWallpaperManager : WallpaperManager
 {
@@ -14,10 +12,11 @@ public sealed class CustomWallpaperManager : WallpaperManager
     private int _currentIndex;
 
     /// <summary>
-    /// Gets or sets the folder containing images used in the wallpaper slideshow.
-    /// Setting this property updates the internal slideshow image list
-    /// and resets the slideshow to the first image.
+    /// Gets or sets the folder containing top-level images used in the custom slideshow.
     /// </summary>
+    /// <remarks>
+    /// Setting this property rebuilds the ordered wallpaper list and resets the slideshow index.
+    /// </remarks>
     protected override string SlideShowFolder
     {
         get => _slideShowFolder;
@@ -52,12 +51,10 @@ public sealed class CustomWallpaperManager : WallpaperManager
         }
 
         SlideShowFolder = folder;
-        // If the folder is the same as the current "slideshow folder", do nothing
-        // this happens only if the current wallpaper is contained in the slideshow folder.
         var currentWallpaper = GetCurrentWallpaper();
         var index = _slideShowWallpapers.IndexOf(currentWallpaper);
-        // the current wallpaper is already in the slideshow folder,
-        // so we don't need to set the slideshow again.
+
+        // Preserve the user's current wallpaper when it is already part of the selected folder.
         if (index >= 0)
         {
             CurrentIndex = index;

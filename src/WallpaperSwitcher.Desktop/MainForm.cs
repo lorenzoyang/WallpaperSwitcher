@@ -4,6 +4,10 @@ using WallpaperSwitcher.Core.Wallpaper;
 
 namespace WallpaperSwitcher.Desktop;
 
+/// <summary>
+/// Main application window responsible for coordinating settings, tray behavior,
+/// wallpaper switching, and global hotkey dispatch.
+/// </summary>
 public partial class MainForm : Form
 {
     private const string ApplicationTitle = "Wallpaper Switcher";
@@ -28,15 +32,20 @@ public partial class MainForm : Form
 
     private readonly NotifyIcon _trayIcon;
 
-    // When the user closes the form, if this is true the program exits completely.
-    // If false, it minimizes to the system tray.
+    // Distinguishes an explicit exit from the default close-to-tray behavior.
     private bool IsExiting { get; set; }
 
-    // Allows the form to start hidden while still supporting normal visibility later.
+    // Gates initial visibility so --minimized can start directly in the tray.
     private bool AllowVisible { get; set; } = true;
 
     private bool HasLoadedInitialSettings { get; set; }
 
+    /// <summary>
+    /// Initializes the main form and optionally starts it hidden in the system tray.
+    /// </summary>
+    /// <param name="startMinimized">
+    /// <see langword="true"/> to load settings without showing the main window.
+    /// </param>
     public MainForm(bool startMinimized = false)
     {
         _appSettings = _appSettingsStorage.Load();

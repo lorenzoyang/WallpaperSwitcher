@@ -4,15 +4,25 @@ using WallpaperSwitcher.Core.Persistence;
 
 namespace WallpaperSwitcher.Desktop;
 
+/// <summary>
+/// Dialog for editing application startup behavior and global hotkey bindings.
+/// </summary>
 public partial class SettingsForm : Form
 {
     private readonly HotkeyService _hotkeyService;
     private readonly IAppSettingsStorage _appSettingsStorage;
     private readonly AppSettings _appSettings;
 
-    // Dictionary to hold folder hotkeys, where the key is the folder path and the value is the HotkeyInfo
+    // Caches folder hotkeys while the dialog is open so combo-box changes can update quickly.
     private readonly Dictionary<string, HotkeyInfo?> _folderHotkeys;
 
+    /// <summary>
+    /// Initializes a settings dialog backed by the running hotkey service and shared app settings.
+    /// </summary>
+    /// <param name="hotkeyService">The already initialized hotkey service owned by the main form.</param>
+    /// <param name="folders">The currently configured wallpaper folders.</param>
+    /// <param name="appSettingsStorage">The storage provider used to persist setting changes.</param>
+    /// <param name="appSettings">The mutable settings instance shared with the main form.</param>
     public SettingsForm(
         HotkeyService hotkeyService,
         List<string> folders,
@@ -21,17 +31,14 @@ public partial class SettingsForm : Form
     {
         InitializeComponent();
 
-        // GlobalHotkeyManager passed from the main form that is already initialized
         _hotkeyService = hotkeyService;
         _appSettingsStorage = appSettingsStorage;
         _appSettings = appSettings;
-        // Initialize the folder hotkeys dictionary with the provided folders
         _folderHotkeys = folders.ToDictionary(folder => folder, HotkeyInfo? (_) => null);
     }
 
     private void LoadInitialSettings()
     {
-        // Display Next Wallpaper Hotkey
         nextWallpaperHkTextBox.Text =
             _hotkeyService.GetHotKeyInfoBy(h => h.Name, Default.NextWallpaperHotkeyName)?.ToString() ??
             string.Empty;
@@ -40,14 +47,13 @@ public partial class SettingsForm : Form
             .GetRegisteredHotkeys()
             .Where(hotkeyInfo => hotkeyInfo.Name != Default.NextWallpaperHotkeyName)
             .ToList();
-        // Populate the folder hotkeys dictionary with existing hotkeys, excluding the next wallpaper hotkey
+
         foreach (var hotkeyInfo in hotkeyInfosWithoutNextWallpaper.Where(hotkeyInfo =>
                      _folderHotkeys.ContainsKey(hotkeyInfo.Name)))
         {
             _folderHotkeys[hotkeyInfo.Name] = hotkeyInfo;
         }
 
-        // Display Folder Hotkeys in the ComboBox
         foreach (var folder in _folderHotkeys.Keys)
         {
             folderHkComboBox.Items.Add(folder);
@@ -99,21 +105,15 @@ public partial class SettingsForm : Form
         _appSettingsStorage.Save(_appSettings);
     }
 
-    // *********************************
-    // Event handlers for Form events  *
-    // *********************************
     private string OriginalValue { get; set; } = string.Empty;
 
     private void SettingsForm_Load(object sender, EventArgs e)
     {
-        // To prevent any control from being focused when the form loads
+        // Keep the first editable hotkey box unfocused until the user chooses to modify it.
         ActiveControl = nextWallpaperHkLabel;
         LoadInitialSettings();
     }
 
-    //
-    // Event handlers for Next Wallpaper Hotkey 
-    //
     private void nextWallpaperHkModifyButton_Click(object sender, EventArgs e)
     {
         OriginalValue = nextWallpaperHkTextBox.Text;
@@ -146,19 +146,13 @@ public partial class SettingsForm : Form
             );
         }
     }
-    // End of Event handlers for Next Wallpaper Hotkey
 
-    //
-    // Event handlers for Folder Hotkeys
-    //
     private void folderHkComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
-        // Di default no item is selected, so when the form loads, the button is disabled.
-        // If the user selects an item, the button is enabled.
+        // Folder hotkey editing starts disabled until the user selects a folder.
         if (!folderHkModifyButton.Enabled) folderHkModifyButton.Enabled = true;
 
         if (!TryGetSelectedFolder(out var selectedFolder)) return;
-        // Update the TextBox to display the corresponding hotkey (if defined).
         if (_folderHotkeys.TryGetValue(selectedFolder, out var hotkeyInfo))
         {
             folderHkTextBox.Text = hotkeyInfo?.ToString() ?? string.Empty;
@@ -204,7 +198,6 @@ public partial class SettingsForm : Form
             );
         }
     }
-    // End of Event handlers for Folder Hotkeys
 
     private void settingsFormOkButton_Click(object sender, EventArgs e)
     {
@@ -220,7 +213,7 @@ public partial class SettingsForm : Form
         {
             var success = StartupManager.SetStartupEnabled(
                 requestedStartupState,
-                startMinimized: true // Always start minimized to system tray
+                startMinimized: true // Startup launches to the tray instead of showing the main window.
             );
             if (!success)
             {

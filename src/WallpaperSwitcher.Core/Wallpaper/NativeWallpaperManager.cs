@@ -16,8 +16,8 @@ public sealed class NativeWallpaperManager : WallpaperManager
     {
         if (!WallpaperHelper.IsValidWallpaperFolder(folder, out _)) return;
         SlideShowFolder = folder;
-        // Windows Slide Show default behavior: if the folder is the same as the current slideshow folder,
-        // do nothing, will not start from the first image.
+
+        // Windows keeps its current slideshow position when the same folder is assigned again.
         DesktopWallpaper.SetSlideshow(WallpaperHelper.CreateShellItemArrayFromFolder(SlideShowFolder));
     }
 
