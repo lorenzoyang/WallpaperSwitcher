@@ -11,7 +11,7 @@ concurrency:
 
 env:
   DOTNET_VERSION: 10.0.x
-  SOLUTION_PATH: WallpaperSwitcher.sln
+  SOLUTION_PATH: WallpaperSwitcher.slnx
   DESKTOP_PROJECT: src/WallpaperSwitcher.Desktop/WallpaperSwitcher.Desktop.csproj
   CONFIGURATION: Release
   RUNTIME_IDENTIFIER: win-x64
@@ -53,7 +53,7 @@ jobs:
         run: dotnet restore $env:SOLUTION_PATH
 
       - name: Verify formatting
-        run: dotnet format whitespace --verify-no-changes --no-restore
+        run: dotnet format $env:SOLUTION_PATH whitespace --verify-no-changes --no-restore
 
       - name: Build application
         run: dotnet build $env:SOLUTION_PATH --configuration $env:CONFIGURATION --no-restore

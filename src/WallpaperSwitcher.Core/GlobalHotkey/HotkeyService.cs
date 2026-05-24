@@ -14,16 +14,17 @@ namespace WallpaperSwitcher.Core.GlobalHotkey;
 /// </remarks>
 public sealed class HotkeyService : IDisposable
 {
+    private const int FirstGeneratedHotkeyId = 1000;
+
     private readonly HotkeyRegistrar _hotkeyRegistrar;
     private readonly IHotkeyStorage _hotkeyStorage;
 
-    // Registered hotkeys should be released when the service is disposed.
-    // Any usage of this field should check for disposal.
+    // Tracks only hotkeys successfully registered with the operating system.
     private readonly Dictionary<int, HotkeyInfo> _registeredHotkeys = new();
 
     private bool _disposed;
 
-    private int NextHotkeyId { get; set; } = 1000;
+    private int NextHotkeyId { get; set; } = FirstGeneratedHotkeyId;
 
     /// <summary>
     /// The Windows message identifier for a registered hotkey being pressed.
@@ -60,8 +61,8 @@ public sealed class HotkeyService : IDisposable
     /// <exception cref="ObjectDisposedException">Thrown if the service has been disposed.</exception>
     public IEnumerable<HotkeyInfo> GetRegisteredHotkeys()
     {
-        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
-        return _registeredHotkeys.Values.ToArray();
+        ThrowIfDisposed();
+        return GetHotkeySnapshot();
     }
 
     /// <summary>
@@ -76,7 +77,7 @@ public sealed class HotkeyService : IDisposable
     /// <exception cref="ObjectDisposedException">Thrown if the service has been disposed.</exception>
     public HotkeyInfo? GetHotKeyInfoBy<T>(Func<HotkeyInfo, T> propertySelector, T value)
     {
-        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
+        ThrowIfDisposed();
         return _registeredHotkeys.Values
             .FirstOrDefault(h => EqualityComparer<T>.Default.Equals(propertySelector(h), value));
     }
@@ -88,7 +89,7 @@ public sealed class HotkeyService : IDisposable
     /// <param name="id">The identifier of the hotkey that was pressed.</param>
     public void ProcessWindowMessage(int id)
     {
-        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
+        ThrowIfDisposed();
 
         if (_registeredHotkeys.TryGetValue(id, out var hotkeyInfo))
         {
@@ -114,45 +115,22 @@ public sealed class HotkeyService : IDisposable
     /// </exception>
     public int RegisterHotkey(string hotkeyString, string name, int? id = null)
     {
-        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
-        if (Hotkey.TryParseFrom(hotkeyString, out var hotkey, out var errorMessage))
-        {
-            return RegisterHotkey(hotkey, name, id);
-        }
-
-        throw new HotkeyParsingException($"Failed to parse hotkey string '{hotkeyString}': {errorMessage}",
-            hotkeyString);
+        ThrowIfDisposed();
+        return RegisterHotkey(ParseHotkeyOrThrow(hotkeyString), name, id);
     }
 
     private int RegisterHotkey(Hotkey hotkey, string name, int? id = null)
     {
-        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
+        ThrowIfDisposed();
 
         ValidateHotkeyName(name);
+        EnsureHotkeyIdIsAvailable(id);
+        EnsureHotkeyCombinationIsAvailable(hotkey);
 
-        if (id is not null && _registeredHotkeys.ContainsKey(id.Value))
+        var hotkeyId = ReserveHotkeyId(id);
+        if (TryRegisterWithOperatingSystem(hotkeyId, hotkey))
         {
-            throw new HotkeyBindingException($"A hotkey with the id '{id}' is already registered.");
-        }
-
-        var existingHotkeyInfo = IsHotkeyDuplicate(hotkey);
-        if (existingHotkeyInfo is not null)
-        {
-            throw new HotkeyDuplicateBindingException(
-                "A hotkey with the same combination is already registered.",
-                existingHotkeyInfo
-            );
-        }
-
-        var hotkeyId = id ?? NextHotkeyId++;
-        if (_hotkeyRegistrar.RegisterHotKey(hotkeyId, hotkey.ModifierKeys, hotkey.VirtualKeys))
-        {
-            _registeredHotkeys[hotkeyId] = new HotkeyInfo
-            {
-                Id = hotkeyId,
-                Hotkey = hotkey,
-                Name = name,
-            };
+            _registeredHotkeys[hotkeyId] = CreateHotkeyInfo(hotkeyId, hotkey, name);
             EnsureNextHotkeyIdIsAfter(hotkeyId);
             return hotkeyId;
         }
@@ -175,7 +153,7 @@ public sealed class HotkeyService : IDisposable
     /// <exception cref="ObjectDisposedException">Thrown if the service has been disposed.</exception>
     public bool UnregisterHotkey(string name)
     {
-        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
+        ThrowIfDisposed();
 
         var existingHkInfo = GetHotKeyInfoBy(h => h.Name, name);
         return existingHkInfo is not null && UnregisterHotkey(existingHkInfo.Id);
@@ -183,12 +161,17 @@ public sealed class HotkeyService : IDisposable
 
     private bool UnregisterHotkey(int id)
     {
-        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
+        ThrowIfDisposed();
 
         if (!_registeredHotkeys.ContainsKey(id))
+        {
             return false;
+        }
 
-        if (!_hotkeyRegistrar.UnregisterHotKey(id)) return false;
+        if (!_hotkeyRegistrar.UnregisterHotKey(id))
+        {
+            return false;
+        }
 
         _registeredHotkeys.Remove(id);
         return true;
@@ -204,7 +187,7 @@ public sealed class HotkeyService : IDisposable
     /// </exception>
     public void ChangeHotkeyBinding(string name, string newHotkeyString)
     {
-        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
+        ThrowIfDisposed();
 
         var existingHkInfo = GetHotKeyInfoBy(h => h.Name, name);
         if (existingHkInfo is null)
@@ -212,8 +195,7 @@ public sealed class HotkeyService : IDisposable
             throw new HotkeyBindingException($"No hotkey registered with the name '{name}'.");
         }
 
-        // If the new hotkey text is empty or whitespace, we do not register a new hotkey
-        // and simply remove the existing hotkey.
+        // A blank binding means the user intentionally disabled this hotkey.
         if (string.IsNullOrWhiteSpace(newHotkeyString))
         {
             if (!UnregisterHotkey(existingHkInfo.Id))
@@ -225,14 +207,7 @@ public sealed class HotkeyService : IDisposable
         }
 
         var newHotkey = ParseHotkeyOrThrow(newHotkeyString);
-        var duplicateHotkeyInfo = IsHotkeyDuplicate(newHotkey);
-        if (duplicateHotkeyInfo is not null && duplicateHotkeyInfo.Id != existingHkInfo.Id)
-        {
-            throw new HotkeyDuplicateBindingException(
-                "A hotkey with the same combination is already registered.",
-                duplicateHotkeyInfo
-            );
-        }
+        EnsureHotkeyCombinationIsAvailable(newHotkey, allowedHotkeyId: existingHkInfo.Id);
 
         if (!UnregisterHotkey(existingHkInfo.Id))
         {
@@ -250,12 +225,44 @@ public sealed class HotkeyService : IDisposable
         }
     }
 
+    private void ThrowIfDisposed()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
+    }
+
+    private HotkeyInfo[] GetHotkeySnapshot()
+    {
+        return _registeredHotkeys.Values.ToArray();
+    }
+
     private static void ValidateHotkeyName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
             throw new HotkeyBindingException("Hotkey name cannot be null or empty.");
         }
+    }
+
+    private void EnsureHotkeyIdIsAvailable(int? id)
+    {
+        if (id is not null && _registeredHotkeys.ContainsKey(id.Value))
+        {
+            throw new HotkeyBindingException($"A hotkey with the id '{id}' is already registered.");
+        }
+    }
+
+    private void EnsureHotkeyCombinationIsAvailable(Hotkey hotkey, int? allowedHotkeyId = null)
+    {
+        var duplicateHotkeyInfo = IsHotkeyDuplicate(hotkey);
+        if (duplicateHotkeyInfo is null || duplicateHotkeyInfo.Id == allowedHotkeyId)
+        {
+            return;
+        }
+
+        throw new HotkeyDuplicateBindingException(
+            "A hotkey with the same combination is already registered.",
+            duplicateHotkeyInfo
+        );
     }
 
     private static Hotkey ParseHotkeyOrThrow(string hotkeyString)
@@ -271,12 +278,29 @@ public sealed class HotkeyService : IDisposable
         );
     }
 
+    private int ReserveHotkeyId(int? id)
+    {
+        return id ?? NextHotkeyId++;
+    }
+
+    private bool TryRegisterWithOperatingSystem(int hotkeyId, Hotkey hotkey)
+    {
+        return _hotkeyRegistrar.RegisterHotKey(hotkeyId, hotkey.ModifierKeys, hotkey.VirtualKeys);
+    }
+
+    private static HotkeyInfo CreateHotkeyInfo(int hotkeyId, Hotkey hotkey, string name)
+    {
+        return new HotkeyInfo
+        {
+            Id = hotkeyId,
+            Hotkey = hotkey,
+            Name = name,
+        };
+    }
+
     private void RestoreHotkey(HotkeyInfo hotkeyInfo)
     {
-        if (_hotkeyRegistrar.RegisterHotKey(
-                hotkeyInfo.Id,
-                hotkeyInfo.Hotkey.ModifierKeys,
-                hotkeyInfo.Hotkey.VirtualKeys))
+        if (TryRegisterWithOperatingSystem(hotkeyInfo.Id, hotkeyInfo.Hotkey))
         {
             _registeredHotkeys[hotkeyInfo.Id] = hotkeyInfo;
         }
@@ -296,21 +320,11 @@ public sealed class HotkeyService : IDisposable
     /// </summary>
     public async Task LoadHotkeysAsync()
     {
-        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
+        ThrowIfDisposed();
 
-        var hotkeyInfos = (await _hotkeyStorage.LoadAsync()).ToArray();
-        // First launch: create the default "Next Wallpaper" binding.
-        if (hotkeyInfos.Length == 0)
+        if (RegisterLoadedHotkeys((await _hotkeyStorage.LoadAsync()).ToArray()))
         {
-            _ = RegisterHotkey(Default.NextWallpaperHotkeyString, Default.NextWallpaperHotkeyName);
-            await _hotkeyStorage.SaveAsync(_registeredHotkeys.Values.ToArray());
-        }
-        else
-        {
-            foreach (var (id, hotkey, name) in hotkeyInfos)
-            {
-                _ = RegisterHotkey(hotkey, name, id);
-            }
+            await _hotkeyStorage.SaveAsync(GetHotkeySnapshot());
         }
     }
 
@@ -320,22 +334,29 @@ public sealed class HotkeyService : IDisposable
     /// </summary>
     public void LoadHotkeys()
     {
-        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
+        ThrowIfDisposed();
 
-        var hotkeyInfos = _hotkeyStorage.Load().ToArray();
-        // First launch: create the default "Next Wallpaper" binding.
-        if (hotkeyInfos.Length == 0)
+        if (RegisterLoadedHotkeys(_hotkeyStorage.Load().ToArray()))
+        {
+            _hotkeyStorage.Save(GetHotkeySnapshot());
+        }
+    }
+
+    private bool RegisterLoadedHotkeys(IReadOnlyCollection<HotkeyInfo> hotkeyInfos)
+    {
+        // First launch: create the default "Next Wallpaper" binding and let the caller persist it.
+        if (hotkeyInfos.Count == 0)
         {
             _ = RegisterHotkey(Default.NextWallpaperHotkeyString, Default.NextWallpaperHotkeyName);
-            _hotkeyStorage.Save(_registeredHotkeys.Values.ToArray());
+            return true;
         }
-        else
+
+        foreach (var (id, hotkey, name) in hotkeyInfos)
         {
-            foreach (var (id, hotkey, name) in hotkeyInfos)
-            {
-                _ = RegisterHotkey(hotkey, name, id);
-            }
+            _ = RegisterHotkey(hotkey, name, id);
         }
+
+        return false;
     }
 
     /// <summary>
@@ -343,8 +364,8 @@ public sealed class HotkeyService : IDisposable
     /// </summary>
     public async Task SaveHotkeysAsync()
     {
-        ObjectDisposedException.ThrowIf(_disposed, typeof(HotkeyService));
-        await _hotkeyStorage.SaveAsync(_registeredHotkeys.Values.ToArray());
+        ThrowIfDisposed();
+        await _hotkeyStorage.SaveAsync(GetHotkeySnapshot());
     }
 
     /// <summary>
@@ -368,9 +389,12 @@ public sealed class HotkeyService : IDisposable
 
     private void Dispose(bool disposing)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
 
-        // Always unregister hotkeys (both managed and unmanaged cleanup)
+        // Release all OS registrations even when Dispose is reached from the finalizer.
         var ids = new List<int>(_registeredHotkeys.Keys);
         foreach (var id in ids)
         {
@@ -385,16 +409,4 @@ public sealed class HotkeyService : IDisposable
 
         _disposed = true;
     }
-}
-
-/// <summary>
-/// Provides data for the <see cref="HotkeyService.HotkeyPressed"/> event.
-/// </summary>
-/// <param name="hotkeyInfo">The information about the hotkey that was pressed.</param>
-public class HotkeyPressedEventArgs(HotkeyInfo hotkeyInfo) : EventArgs
-{
-    /// <summary>
-    /// Gets the information about the hotkey that was pressed.
-    /// </summary>
-    public HotkeyInfo HotkeyInfo { get; } = hotkeyInfo;
 }

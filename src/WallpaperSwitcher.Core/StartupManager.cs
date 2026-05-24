@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.Win32;
 
 namespace WallpaperSwitcher.Core;
@@ -73,11 +73,21 @@ public static class StartupManager
             throw new InvalidOperationException("Unable to access Windows startup registry key");
         }
 
-        // Add --minimized argument so the app starts directly to system tray
-        var commandLine = startMinimized ? $"\"{ExecutablePath}\" --minimized" : $"\"{ExecutablePath}\"";
-        key.SetValue(ApplicationName, commandLine);
+        key.SetValue(ApplicationName, BuildStartupCommand(ExecutablePath, startMinimized));
 
         return true;
+    }
+
+    /// <summary>
+    /// Builds the quoted command line stored in the Windows startup registry value.
+    /// </summary>
+    /// <param name="executablePath">The executable path to launch.</param>
+    /// <param name="startMinimized">Whether to append the <c>--minimized</c> startup argument.</param>
+    /// <returns>The complete command line to write to the Run registry key.</returns>
+    internal static string BuildStartupCommand(string executablePath, bool startMinimized)
+    {
+        var command = $"\"{executablePath}\"";
+        return startMinimized ? $"{command} --minimized" : command;
     }
 
     /// <summary>

@@ -42,9 +42,8 @@ public sealed class JsonAppSettingsStorage : IAppSettingsStorage
     /// </remarks>
     public AppSettings Load()
     {
-        return StorageFile.TryOpenRead(Location, out var fileStream)
-            ? ReadSettings(fileStream)
-            : new AppSettings();
+        var fileStream = StorageFile.OpenReadIfExists(Location);
+        return fileStream is null ? CreateDefaultSettings() : ReadSettings(fileStream);
     }
 
     /// <inheritdoc/>
@@ -53,9 +52,8 @@ public sealed class JsonAppSettingsStorage : IAppSettingsStorage
     /// </remarks>
     public async Task<AppSettings> LoadAsync()
     {
-        return StorageFile.TryOpenRead(Location, out var fileStream)
-            ? await ReadSettingsAsync(fileStream)
-            : new AppSettings();
+        var fileStream = StorageFile.OpenReadIfExists(Location);
+        return fileStream is null ? CreateDefaultSettings() : await ReadSettingsAsync(fileStream);
     }
 
     /// <inheritdoc/>
@@ -88,14 +86,14 @@ public sealed class JsonAppSettingsStorage : IAppSettingsStorage
         {
             try
             {
-                return (JsonSerializer.Deserialize(
+                return NormalizeSettings(JsonSerializer.Deserialize(
                     stream,
                     SourceGenerationContext.Default.AppSettings
-                ) ?? new AppSettings()).Normalize();
+                ));
             }
             catch (JsonException)
             {
-                return new AppSettings();
+                return CreateDefaultSettings();
             }
         }
     }
@@ -110,12 +108,22 @@ public sealed class JsonAppSettingsStorage : IAppSettingsStorage
                     stream,
                     SourceGenerationContext.Default.AppSettings
                 );
-                return (settings ?? new AppSettings()).Normalize();
+                return NormalizeSettings(settings);
             }
             catch (JsonException)
             {
-                return new AppSettings();
+                return CreateDefaultSettings();
             }
         }
+    }
+
+    private static AppSettings CreateDefaultSettings()
+    {
+        return new AppSettings();
+    }
+
+    private static AppSettings NormalizeSettings(AppSettings? settings)
+    {
+        return (settings ?? CreateDefaultSettings()).Normalize();
     }
 }

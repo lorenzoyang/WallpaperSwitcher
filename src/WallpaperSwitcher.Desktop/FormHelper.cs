@@ -31,7 +31,6 @@ internal static class FormHelper
 
     public static void ShowErrorMessageWithLink(string message, string caption = "Error")
     {
-        // Include the GitHub link in the message
         var fullMessage = $"{message}\n\nPlease report this bug on GitHub: {GitHubIssuesUrl}";
 
         MessageBox.Show(
@@ -58,13 +57,12 @@ internal static class FormHelper
         {
             var fullText = comboBox.SelectedItem?.ToString() ?? string.Empty;
 
-            // Only show tooltip if text is longer than what can be displayed
-            // -20: to account for padding and dropdown arrow
+            // Reserve space for the dropdown arrow when deciding whether the text is clipped.
             toolTip.SetToolTip(
                 comboBox,
                 (TextRenderer.MeasureText(fullText, comboBox.Font).Width > comboBox.Width - 20)
                     ? fullText
-                    : ""); // Clear tooltip for short text
+                    : "");
         }
     }
 
@@ -76,14 +74,11 @@ internal static class FormHelper
 
     public static bool TryActivateExistingInstance(string appName)
     {
-        // Try multiple approaches for robustness
-        // Get all processes with the same process name
         var processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Application.ExecutablePath));
         foreach (var process in processes)
         {
             if (process.Id == Environment.ProcessId) continue;
 
-            // Try to find main window
             var hWnd = process.MainWindowHandle;
             if (hWnd == IntPtr.Zero)
             {
@@ -93,7 +88,6 @@ internal static class FormHelper
 
             if (hWnd == IntPtr.Zero) continue;
 
-            // Send custom message to show the form
             var result = PInvoke.PostMessage(
                 (HWND)hWnd, WmShowFirstInstanceMessage, new WPARAM(UIntPtr.Zero), IntPtr.Zero
             );

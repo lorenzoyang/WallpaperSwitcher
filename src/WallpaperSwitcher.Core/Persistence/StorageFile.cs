@@ -22,17 +22,9 @@ internal static class StorageFile
     /// Opens an existing file for reading without forcing callers to duplicate existence checks.
     /// </summary>
     /// <param name="location">The storage file path.</param>
-    /// <param name="fileStream">The opened stream, or <see langword="null"/> when the file does not exist.</param>
-    /// <returns><see langword="true"/> when the file exists and was opened; otherwise, <see langword="false"/>.</returns>
-    public static bool TryOpenRead(string location, out FileStream fileStream)
+    /// <returns>The opened stream, or <see langword="null"/> when the file does not exist.</returns>
+    public static FileStream? OpenReadIfExists(string location)
     {
-        if (File.Exists(location))
-        {
-            fileStream = File.OpenRead(location);
-            return true;
-        }
-
-        fileStream = null!;
-        return false;
+        return File.Exists(location) ? File.OpenRead(location) : null;
     }
 }
