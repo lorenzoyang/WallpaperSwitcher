@@ -1,4 +1,4 @@
-﻿using Windows.Win32.Foundation;
+using Windows.Win32.Foundation;
 
 namespace WallpaperSwitcher.Core.Wallpaper;
 
@@ -24,8 +24,7 @@ public sealed class CustomWallpaperManager : WallpaperManager
         set
         {
             _slideShowFolder = value;
-            _slideShowWallpapers = Directory.EnumerateFiles(value)
-                .Where(WallpaperHelper.IsValidWallpaperExtension)
+            _slideShowWallpapers = WallpaperHelper.EnumerateWallpaperFiles(value)
                 .OrderBy(Path.GetFileName)
                 .ToList();
             CurrentIndex = 0;

@@ -1,4 +1,4 @@
-﻿using Windows.Win32;
+using Windows.Win32;
 using Windows.Win32.UI.Shell;
 
 namespace WallpaperSwitcher.Core.Wallpaper;
@@ -29,9 +29,7 @@ public static class WallpaperHelper
             return 0;
         }
 
-        return Directory
-            .EnumerateFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
-            .Count(IsValidWallpaperExtension);
+        return EnumerateWallpaperFiles(folder).Count();
     }
 
     /// <summary>
@@ -132,5 +130,12 @@ public static class WallpaperHelper
     internal static bool IsValidWallpaperExtension(string wallpaper)
     {
         return SupportedExtensions.Contains(Path.GetExtension(wallpaper));
+    }
+
+    internal static IEnumerable<string> EnumerateWallpaperFiles(string folder)
+    {
+        return Directory
+            .EnumerateFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
+            .Where(IsValidWallpaperExtension);
     }
 }

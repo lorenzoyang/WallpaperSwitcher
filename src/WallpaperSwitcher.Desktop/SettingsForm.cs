@@ -1,4 +1,4 @@
-﻿using WallpaperSwitcher.Core;
+using WallpaperSwitcher.Core;
 using WallpaperSwitcher.Core.GlobalHotkey;
 using WallpaperSwitcher.Core.Persistence;
 
@@ -58,31 +58,38 @@ public partial class SettingsForm : Form
 
     private void SetNextWallpaperHkEditMode(bool isEditing)
     {
-        nextWallpaperHkTextBox.ReadOnly = !isEditing;
-        // Assuming that the user has made modifications
-        nextWallpaperHkSaveButton.Enabled = isEditing;
-        // Prevent modifying the folder hotkey while editing the next wallpaper hotkey
-        folderHkModifyButton.Enabled = !isEditing;
-        // Until you press Save, the button is temporarily disabled.
-        nextWallpaperHkModifyButton.Enabled = !isEditing;
-        // Clean the original value if we are exiting edit mode
-        OriginalValue = isEditing ? OriginalValue : string.Empty;
-        // Settings Form Ok button is disabled while editing hotkeys
-        settingsFormOkButton.Enabled = !isEditing;
+        SetHotkeyEditMode(
+            nextWallpaperHkTextBox,
+            nextWallpaperHkSaveButton,
+            nextWallpaperHkModifyButton,
+            folderHkModifyButton,
+            isEditing
+        );
     }
 
     private void SetFolderHkEditMode(bool isEditing)
     {
-        folderHkTextBox.ReadOnly = !isEditing;
-        // Assuming that the user has made modifications
-        folderHkSaveButton.Enabled = isEditing;
-        // Prevent modifying the next wallpaper hotkey while editing the folder hotkey
-        nextWallpaperHkModifyButton.Enabled = !isEditing;
-        // Until you press Save, the button is temporarily disabled.
-        folderHkModifyButton.Enabled = !isEditing;
-        // Clean the original value if we are exiting edit mode
+        SetHotkeyEditMode(
+            folderHkTextBox,
+            folderHkSaveButton,
+            folderHkModifyButton,
+            nextWallpaperHkModifyButton,
+            isEditing
+        );
+    }
+
+    private void SetHotkeyEditMode(
+        TextBox textBox,
+        Button saveButton,
+        Button modifyButton,
+        Button otherModifyButton,
+        bool isEditing)
+    {
+        textBox.ReadOnly = !isEditing;
+        saveButton.Enabled = isEditing;
+        modifyButton.Enabled = !isEditing;
+        otherModifyButton.Enabled = !isEditing;
         OriginalValue = isEditing ? OriginalValue : string.Empty;
-        // Settings Form Ok button is disabled while editing hotkeys
         settingsFormOkButton.Enabled = !isEditing;
     }
 
@@ -125,23 +132,7 @@ public partial class SettingsForm : Form
                 return;
             }
 
-            if (string.IsNullOrEmpty(newHotkeyText))
-            {
-                // this is equivalent to unregistering the hotkey
-                _hotkeyService.UnregisterHotkey(Default.NextWallpaperHotkeyName);
-            }
-            else if (string.IsNullOrEmpty(OriginalValue))
-            {
-                // this is equivalent to registering a new hotkey
-                _hotkeyService.RegisterHotkey(newHotkeyText, Default.NextWallpaperHotkeyName);
-            }
-            else
-            {
-                // this is equivalent to changing the hotkey binding
-                _hotkeyService.ChangeHotkeyBinding(Default.NextWallpaperHotkeyName, newHotkeyText);
-            }
-
-            await _hotkeyService.SaveHotkeysAsync();
+            await SaveHotkeyChangeAsync(Default.NextWallpaperHotkeyName, newHotkeyText);
 
             SetNextWallpaperHkEditMode(false);
         }
@@ -166,9 +157,8 @@ public partial class SettingsForm : Form
         // If the user selects an item, the button is enabled.
         if (!folderHkModifyButton.Enabled) folderHkModifyButton.Enabled = true;
 
-        if (folderHkComboBox is null || folderHkComboBox.Items.Count <= 0) return;
+        if (!TryGetSelectedFolder(out var selectedFolder)) return;
         // Update the TextBox to display the corresponding hotkey (if defined).
-        var selectedFolder = folderHkComboBox.SelectedItem!.ToString()!;
         if (_folderHotkeys.TryGetValue(selectedFolder, out var hotkeyInfo))
         {
             folderHkTextBox.Text = hotkeyInfo?.ToString() ?? string.Empty;
@@ -193,24 +183,14 @@ public partial class SettingsForm : Form
                 return;
             }
 
-            var selectedFolder = folderHkComboBox.SelectedItem!.ToString()!;
-            if (string.IsNullOrEmpty(newHotkeyText))
+            if (!TryGetSelectedFolder(out var selectedFolder))
             {
-                // this is equivalent to unregistering the hotkey
-                _hotkeyService.UnregisterHotkey(selectedFolder);
-            }
-            else if (string.IsNullOrEmpty(OriginalValue))
-            {
-                // this is equivalent to registering a new hotkey
-                _hotkeyService.RegisterHotkey(newHotkeyText, selectedFolder);
-            }
-            else
-            {
-                // this is equivalent to changing the hotkey binding
-                _hotkeyService.ChangeHotkeyBinding(selectedFolder, newHotkeyText);
+                SetFolderHkEditMode(false);
+                return;
             }
 
-            await _hotkeyService.SaveHotkeysAsync();
+            await SaveHotkeyChangeAsync(selectedFolder, newHotkeyText);
+            RefreshFolderHotkey(selectedFolder);
 
             SetFolderHkEditMode(false);
         }
@@ -233,16 +213,18 @@ public partial class SettingsForm : Form
 
     private void launchStartupCheckBox_CheckedChanged(object? sender, EventArgs e)
     {
+        var requestedStartupState = launchStartupCheckBox.Checked;
+        var actionMessage = requestedStartupState ? "enable" : "disable";
+
         try
         {
             var success = StartupManager.SetStartupEnabled(
-                launchStartupCheckBox.Checked,
+                requestedStartupState,
                 startMinimized: true // Always start minimized to system tray
             );
             if (!success)
             {
                 RevertCheckboxState();
-                var actionMessage = launchStartupCheckBox.Checked ? "disable" : "enable";
                 FormHelper.ShowErrorMessageWithLink(
                     $"Failed to {actionMessage} launch at startup. Please check your permissions and try again.",
                     "Startup Registration Error"
@@ -268,5 +250,40 @@ public partial class SettingsForm : Form
             launchStartupCheckBox.Checked = !launchStartupCheckBox.Checked;
             launchStartupCheckBox.CheckedChanged += launchStartupCheckBox_CheckedChanged;
         }
+    }
+
+    private async Task SaveHotkeyChangeAsync(string name, string newHotkeyText)
+    {
+        ApplyHotkeyChange(name, newHotkeyText);
+        await _hotkeyService.SaveHotkeysAsync();
+    }
+
+    private void ApplyHotkeyChange(string name, string newHotkeyText)
+    {
+        if (string.IsNullOrEmpty(newHotkeyText))
+        {
+            _ = _hotkeyService.UnregisterHotkey(name);
+        }
+        else if (string.IsNullOrEmpty(OriginalValue))
+        {
+            _ = _hotkeyService.RegisterHotkey(newHotkeyText, name);
+        }
+        else
+        {
+            _hotkeyService.ChangeHotkeyBinding(name, newHotkeyText);
+        }
+    }
+
+    private bool TryGetSelectedFolder(out string selectedFolder)
+    {
+        selectedFolder = folderHkComboBox.SelectedItem?.ToString() ?? string.Empty;
+        return !string.IsNullOrEmpty(selectedFolder);
+    }
+
+    private void RefreshFolderHotkey(string folder)
+    {
+        var hotkeyInfo = _hotkeyService.GetHotKeyInfoBy(h => h.Name, folder);
+        _folderHotkeys[folder] = hotkeyInfo;
+        folderHkTextBox.Text = hotkeyInfo?.ToString() ?? string.Empty;
     }
 }

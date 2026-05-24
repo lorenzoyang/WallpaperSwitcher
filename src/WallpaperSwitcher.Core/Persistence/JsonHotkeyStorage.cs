@@ -46,9 +46,8 @@ public sealed class JsonHotkeyStorage : IHotkeyStorage
     /// </remarks>
     public async Task<IEnumerable<HotkeyInfo>> LoadAsync()
     {
-        return StorageFile.TryOpenRead(Location, out var fileStream)
-            ? await ReadHotkeysAsync(fileStream)
-            : [];
+        var fileStream = StorageFile.OpenReadIfExists(Location);
+        return fileStream is null ? EmptyHotkeys() : await ReadHotkeysAsync(fileStream);
     }
 
     /// <inheritdoc/>
@@ -57,28 +56,39 @@ public sealed class JsonHotkeyStorage : IHotkeyStorage
     /// </remarks>
     public IEnumerable<HotkeyInfo> Load()
     {
-        return StorageFile.TryOpenRead(Location, out var fileStream)
-            ? ReadHotkeys(fileStream)
-            : [];
+        var fileStream = StorageFile.OpenReadIfExists(Location);
+        return fileStream is null ? EmptyHotkeys() : ReadHotkeys(fileStream);
     }
 
     /// <inheritdoc/>
     public async Task SaveAsync(IEnumerable<HotkeyInfo> hotkeys)
     {
+        var hotkeyArray = ToHotkeyArray(hotkeys);
         StorageFile.EnsureParentDirectoryExists(Location);
         await using var fileStream = File.Create(Location);
-        await JsonSerializer.SerializeAsync(fileStream, hotkeys, SourceGenerationContext.Default.HotkeyInfoArray);
+        await JsonSerializer.SerializeAsync(fileStream, hotkeyArray, SourceGenerationContext.Default.HotkeyInfoArray);
     }
 
     /// <inheritdoc/>
     public void Save(IEnumerable<HotkeyInfo> hotkeys)
     {
+        var hotkeyArray = ToHotkeyArray(hotkeys);
         StorageFile.EnsureParentDirectoryExists(Location);
         using var fileStream = File.Create(Location);
-        JsonSerializer.Serialize(fileStream, hotkeys, SourceGenerationContext.Default.HotkeyInfoArray);
+        JsonSerializer.Serialize(fileStream, hotkeyArray, SourceGenerationContext.Default.HotkeyInfoArray);
     }
 
-    private static IEnumerable<HotkeyInfo> ReadHotkeys(Stream stream)
+    private static HotkeyInfo[] ToHotkeyArray(IEnumerable<HotkeyInfo> hotkeys)
+    {
+        return hotkeys as HotkeyInfo[] ?? hotkeys.ToArray();
+    }
+
+    private static HotkeyInfo[] EmptyHotkeys()
+    {
+        return [];
+    }
+
+    private static HotkeyInfo[] ReadHotkeys(Stream stream)
     {
         using (stream)
         {
@@ -87,16 +97,16 @@ public sealed class JsonHotkeyStorage : IHotkeyStorage
                 return JsonSerializer.Deserialize(
                     stream,
                     SourceGenerationContext.Default.HotkeyInfoArray
-                ) ?? [];
+                ) ?? EmptyHotkeys();
             }
             catch (JsonException)
             {
-                return [];
+                return EmptyHotkeys();
             }
         }
     }
 
-    private static async Task<IEnumerable<HotkeyInfo>> ReadHotkeysAsync(Stream stream)
+    private static async Task<HotkeyInfo[]> ReadHotkeysAsync(Stream stream)
     {
         await using (stream)
         {
@@ -105,11 +115,11 @@ public sealed class JsonHotkeyStorage : IHotkeyStorage
                 return await JsonSerializer.DeserializeAsync(
                     stream,
                     SourceGenerationContext.Default.HotkeyInfoArray
-                ) ?? [];
+                ) ?? EmptyHotkeys();
             }
             catch (JsonException)
             {
-                return [];
+                return EmptyHotkeys();
             }
         }
     }

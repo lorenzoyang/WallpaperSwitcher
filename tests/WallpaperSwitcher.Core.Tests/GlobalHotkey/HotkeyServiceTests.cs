@@ -34,6 +34,37 @@ public class HotkeyServiceTests
     }
 
     [Test]
+    public void RegisterHotkey_WithDuplicateId_ThrowsAndKeepsExistingBinding()
+    {
+        var service = CreateService();
+        service.RegisterHotkey("Ctrl+Alt+A", "Folder", 42);
+
+        Assert.Throws<HotkeyBindingException>(() => service.RegisterHotkey("Ctrl+Alt+B", "Other", 42));
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(service.GetRegisteredHotkeys(), Has.Exactly(1).Items);
+            Assert.That(service.GetHotKeyInfoBy(h => h.Name, "Folder")?.Id, Is.EqualTo(42));
+        }
+    }
+
+    [Test]
+    public void RegisterHotkey_WithDuplicateCombination_ThrowsWithExistingHotkey()
+    {
+        var service = CreateService();
+        service.RegisterHotkey("Ctrl+Alt+A", "Folder");
+
+        var exception = Assert.Throws<HotkeyDuplicateBindingException>(() =>
+            service.RegisterHotkey("Ctrl+Alt+A", "Other"));
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(exception?.ExistingHotkey.Name, Is.EqualTo("Folder"));
+            Assert.That(service.GetRegisteredHotkeys(), Has.Exactly(1).Items);
+        }
+    }
+
+    [Test]
     public void UnregisterHotkey_WhenRegistrarSucceeds_RemovesBindingAndReturnsTrue()
     {
         var registrar = new FakeHotkeyRegistrar();
@@ -172,12 +203,57 @@ public class HotkeyServiceTests
     }
 
     [Test]
+    public async Task LoadHotkeysAsync_WithPersistedIds_AdvancesNextGeneratedId()
+    {
+        var storage = new FakeHotkeyStorage
+        {
+            Hotkeys =
+            [
+                new HotkeyInfo
+                {
+                    Id = 1000,
+                    Hotkey = new Hotkey(ModifierKeys.Ctrl | ModifierKeys.Alt, VirtualKeys.A),
+                    Name = "A"
+                },
+                new HotkeyInfo
+                {
+                    Id = 1005,
+                    Hotkey = new Hotkey(ModifierKeys.Ctrl | ModifierKeys.Alt, VirtualKeys.B),
+                    Name = "B"
+                }
+            ]
+        };
+        var service = CreateService(storage: storage);
+
+        await service.LoadHotkeysAsync();
+        var newId = service.RegisterHotkey("Ctrl+Alt+C", "C");
+
+        Assert.That(newId, Is.EqualTo(1006));
+    }
+
+    [Test]
     public void LoadHotkeys_WhenStorageIsEmpty_RegistersAndSavesDefaultHotkey()
     {
         var storage = new FakeHotkeyStorage();
         var service = CreateService(storage: storage);
 
         service.LoadHotkeys();
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(service.GetRegisteredHotkeys(), Has.Exactly(1).Items);
+            Assert.That(storage.SavedHotkeys, Has.Exactly(1).Items);
+            Assert.That(storage.SavedHotkeys[0].Name, Is.EqualTo(Default.NextWallpaperHotkeyName));
+        }
+    }
+
+    [Test]
+    public async Task LoadHotkeysAsync_WhenStorageIsEmpty_RegistersAndSavesDefaultHotkey()
+    {
+        var storage = new FakeHotkeyStorage();
+        var service = CreateService(storage: storage);
+
+        await service.LoadHotkeysAsync();
 
         using (Assert.EnterMultipleScope())
         {

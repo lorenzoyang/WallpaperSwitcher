@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.Win32;
 
 namespace WallpaperSwitcher.Core;
@@ -74,10 +74,15 @@ public static class StartupManager
         }
 
         // Add --minimized argument so the app starts directly to system tray
-        var commandLine = startMinimized ? $"\"{ExecutablePath}\" --minimized" : $"\"{ExecutablePath}\"";
-        key.SetValue(ApplicationName, commandLine);
+        key.SetValue(ApplicationName, BuildStartupCommand(ExecutablePath, startMinimized));
 
         return true;
+    }
+
+    internal static string BuildStartupCommand(string executablePath, bool startMinimized)
+    {
+        var command = $"\"{executablePath}\"";
+        return startMinimized ? $"{command} --minimized" : command;
     }
 
     /// <summary>
