@@ -35,6 +35,7 @@
   <img src="./assets/gifs/Settings_Demo.gif" alt="设置窗口演示" width="350"/>
 
   - 配置快捷键、开机自启和壁纸切换模式
+  - 检查 GitHub 上是否有新版本发布
 
 ## 系统要求
 
@@ -69,6 +70,8 @@ Wallpaper Switcher 是便携版软件，不需要传统安装程序。你可以�
 1. 从托盘菜单完全退出 Wallpaper Switcher
 2. 用新版 `WallpaperSwitcher.exe` 或新版完整包文件替换旧文件
 3. 重新启动程序
+
+你可以在 **设置** 中点击 **Check for Updates** 检查 GitHub 上是否有新版本。如果存在更新，Wallpaper Switcher 可以帮你打开对应的发布页面。
 
 如果你把程序移动到了新目录，并且启用了 **开机自启**，请在 **设置** 中先关闭再重新开启该选项，让 Windows 记录新的程序路径。
 
