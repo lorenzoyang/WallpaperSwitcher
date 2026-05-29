@@ -17,6 +17,8 @@ public partial class SettingsForm : Form
     private readonly IAppSettingsStorage _appSettingsStorage;
     private readonly AppSettings _appSettings;
     private readonly IUpdateChecker _updateChecker;
+    private CancellationTokenSource? _updateCheckCancellationTokenSource;
+    private bool _isClosing;
 
     // Caches folder hotkeys while the dialog is open so combo-box changes can update quickly.
     private readonly Dictionary<string, HotkeyInfo?> _folderHotkeys;
@@ -121,6 +123,13 @@ public partial class SettingsForm : Form
         LoadInitialSettings();
     }
 
+    protected override void OnFormClosing(FormClosingEventArgs e)
+    {
+        _isClosing = true;
+        _updateCheckCancellationTokenSource?.Cancel();
+        base.OnFormClosing(e);
+    }
+
     private void nextWallpaperHkModifyButton_Click(object sender, EventArgs e)
     {
         OriginalValue = nextWallpaperHkTextBox.Text;
@@ -219,10 +228,14 @@ public partial class SettingsForm : Form
     private async Task CheckForUpdatesAsync()
     {
         SetUpdateCheckInProgress(true);
+        using var updateCheckCancellationTokenSource = new CancellationTokenSource();
+        _updateCheckCancellationTokenSource = updateCheckCancellationTokenSource;
 
         try
         {
-            var result = await _updateChecker.CheckForUpdatesAsync(GetCurrentApplicationVersion());
+            var result = await _updateChecker.CheckForUpdatesAsync(
+                GetCurrentApplicationVersion(),
+                updateCheckCancellationTokenSource.Token);
             if (result.IsUpdateAvailable)
             {
                 ShowUpdateAvailableMessage(result);
@@ -234,6 +247,9 @@ public partial class SettingsForm : Form
                 "No Updates Found"
             );
         }
+        catch (OperationCanceledException) when (updateCheckCancellationTokenSource.IsCancellationRequested)
+        {
+        }
         catch (UpdateCheckException exception)
         {
             FormHelper.ShowWarningMessage(
@@ -244,7 +260,15 @@ public partial class SettingsForm : Form
         }
         finally
         {
-            SetUpdateCheckInProgress(false);
+            if (ReferenceEquals(_updateCheckCancellationTokenSource, updateCheckCancellationTokenSource))
+            {
+                _updateCheckCancellationTokenSource = null;
+            }
+
+            if (!_isClosing && !IsDisposed && !Disposing)
+            {
+                SetUpdateCheckInProgress(false);
+            }
         }
     }
 

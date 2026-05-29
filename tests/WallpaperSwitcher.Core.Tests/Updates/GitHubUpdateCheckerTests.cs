@@ -5,6 +5,9 @@ namespace WallpaperSwitcher.Core.Tests.Updates;
 
 public class GitHubUpdateCheckerTests
 {
+    private static readonly Uri LatestReleaseApiUri =
+        new("https://api.github.com/repos/lorenzoyang/WallpaperSwitcher/releases/latest");
+
     [Test]
     public async Task CheckForUpdatesAsync_WhenLatestVersionIsNewer_ReturnsUpdateAvailable()
     {
@@ -73,6 +76,26 @@ public class GitHubUpdateCheckerTests
     }
 
     [Test]
+    public void CheckForUpdatesAsync_WhenGitHubRateLimitIsExceeded_ThrowsFriendlyUpdateCheckException()
+    {
+        var checker = CreateChecker(
+            "Rate limit exceeded",
+            HttpStatusCode.Forbidden,
+            configureResponse: response =>
+            {
+                response.Headers.TryAddWithoutValidation("X-RateLimit-Remaining", "0");
+                response.Headers.TryAddWithoutValidation("X-RateLimit-Reset", "0");
+            });
+
+        var exception = Assert.ThrowsAsync<UpdateCheckException>(
+            async () => await checker.CheckForUpdatesAsync(new Version(3, 0, 1)));
+
+        Assert.That(
+            exception?.Message,
+            Does.Contain("rate limit").And.Contain("1970-01-01 00:00:00 UTC"));
+    }
+
+    [Test]
     public void CheckForUpdatesAsync_WhenGitHubReturnsInvalidJson_ThrowsUpdateCheckException()
     {
         var checker = CreateChecker("{ invalid json");
@@ -111,6 +134,61 @@ public class GitHubUpdateCheckerTests
     }
 
     [Test]
+    public void CheckForUpdatesAsync_WhenReleaseTagHasMoreThanOneVPrefix_ThrowsUpdateCheckException()
+    {
+        var checker = CreateChecker("""
+                                    {
+                                      "tag_name": "vv3.0.2",
+                                      "html_url": "https://github.com/lorenzoyang/WallpaperSwitcher/releases/tag/vv3.0.2"
+                                    }
+                                    """);
+
+        var exception = Assert.ThrowsAsync<UpdateCheckException>(
+            async () => await checker.CheckForUpdatesAsync(new Version(3, 0, 1)));
+
+        Assert.That(exception?.Message, Does.Contain("unsupported release tag"));
+    }
+
+    [Test]
+    public void CheckForUpdatesAsync_WhenReleaseUrlIsNotTrustedGitHubUrl_ThrowsUpdateCheckException()
+    {
+        var checker = CreateChecker("""
+                                    {
+                                      "tag_name": "v3.0.2",
+                                      "html_url": "https://example.com/lorenzoyang/WallpaperSwitcher/releases/tag/v3.0.2"
+                                    }
+                                    """);
+
+        var exception = Assert.ThrowsAsync<UpdateCheckException>(
+            async () => await checker.CheckForUpdatesAsync(new Version(3, 0, 1)));
+
+        Assert.That(exception?.Message, Does.Contain("valid release page URL"));
+    }
+
+    [Test]
+    public void CheckForUpdatesAsync_WhenRequestTimesOut_ThrowsUpdateCheckException()
+    {
+        var handler = new StubHttpMessageHandler(async (_, cancellationToken) =>
+        {
+            await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("{}")
+            };
+        });
+
+        var checker = new GitHubUpdateChecker(
+            new HttpClient(handler),
+            LatestReleaseApiUri,
+            TimeSpan.FromMilliseconds(10));
+
+        var exception = Assert.ThrowsAsync<UpdateCheckException>(
+            async () => await checker.CheckForUpdatesAsync(new Version(3, 0, 1)));
+
+        Assert.That(exception?.Message, Does.Contain("timed out"));
+    }
+
+    [Test]
     public async Task CheckForUpdatesAsync_SendsGitHubHeaders()
     {
         HttpRequestMessage? capturedRequest = null;
@@ -135,39 +213,43 @@ public class GitHubUpdateCheckerTests
     private static GitHubUpdateChecker CreateChecker(
         string content,
         HttpStatusCode statusCode = HttpStatusCode.OK,
-        Action<HttpRequestMessage>? onRequest = null)
+        Action<HttpRequestMessage>? onRequest = null,
+        Action<HttpResponseMessage>? configureResponse = null)
     {
-        var handler = new StubHttpMessageHandler(request =>
+        var handler = new StubHttpMessageHandler((request, _) =>
         {
             onRequest?.Invoke(request);
-            return new HttpResponseMessage(statusCode)
+            var response = new HttpResponseMessage(statusCode)
             {
                 Content = new StringContent(content)
             };
+            configureResponse?.Invoke(response);
+
+            return Task.FromResult(response);
         });
 
         return new GitHubUpdateChecker(
             new HttpClient(handler),
-            new Uri("https://api.github.com/repos/lorenzoyang/WallpaperSwitcher/releases/latest"));
+            LatestReleaseApiUri);
     }
 
     private static GitHubUpdateChecker CreateThrowingChecker(Exception exception)
     {
-        var handler = new StubHttpMessageHandler(_ => throw exception);
+        var handler = new StubHttpMessageHandler((_, _) => throw exception);
 
         return new GitHubUpdateChecker(
             new HttpClient(handler),
-            new Uri("https://api.github.com/repos/lorenzoyang/WallpaperSwitcher/releases/latest"));
+            LatestReleaseApiUri);
     }
 
     private sealed class StubHttpMessageHandler(
-        Func<HttpRequestMessage, HttpResponseMessage> responseFactory) : HttpMessageHandler
+        Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> responseFactory) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            return Task.FromResult(responseFactory(request));
+            return responseFactory(request, cancellationToken);
         }
     }
 }
