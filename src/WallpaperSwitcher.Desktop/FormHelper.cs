@@ -51,6 +51,15 @@ internal static class FormHelper
         );
     }
 
+    public static void OpenUrl(Uri uri)
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = uri.AbsoluteUri,
+            UseShellExecute = true
+        });
+    }
+
     public static void ShowFolderToolTipForComboBox(ToolTip toolTip, ComboBox? comboBox)
     {
         if (comboBox is { SelectedItem: not null })

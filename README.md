@@ -35,6 +35,7 @@
   <img src="./assets/gifs/Settings_Demo.gif" alt="Settings window demo" width="350"/>
 
   - Configure hotkeys, startup behavior, and wallpaper switching mode
+  - Check whether a newer GitHub release is available
 
 ## System Requirements
 
@@ -69,6 +70,8 @@ Settings and hotkeys are stored outside the app folder, so updating normally doe
 1. Exit Wallpaper Switcher completely from the tray menu.
 2. Replace the old `WallpaperSwitcher.exe` or extracted package files with the new release.
 3. Launch the app again.
+
+You can use **Settings** > **Check for Updates** to see whether a newer GitHub release is available. If an update exists, Wallpaper Switcher can open the release page for you.
 
 If you moved the executable to a new folder and enabled **Launch at startup**, disable and re-enable that option in **Settings** so Windows stores the new executable path.
 

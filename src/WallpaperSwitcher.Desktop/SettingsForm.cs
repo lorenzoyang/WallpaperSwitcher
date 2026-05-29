@@ -1,6 +1,7 @@
 using WallpaperSwitcher.Core;
 using WallpaperSwitcher.Core.GlobalHotkey;
 using WallpaperSwitcher.Core.Persistence;
+using WallpaperSwitcher.Core.Updates;
 
 namespace WallpaperSwitcher.Desktop;
 
@@ -9,9 +10,15 @@ namespace WallpaperSwitcher.Desktop;
 /// </summary>
 public partial class SettingsForm : Form
 {
+    private const string CheckForUpdatesButtonDefaultText = "Check for Updates";
+    private const string CheckForUpdatesButtonBusyText = "Checking...";
+
     private readonly HotkeyService _hotkeyService;
     private readonly IAppSettingsStorage _appSettingsStorage;
     private readonly AppSettings _appSettings;
+    private readonly IUpdateChecker _updateChecker;
+    private CancellationTokenSource? _updateCheckCancellationTokenSource;
+    private bool _isClosing;
 
     // Caches folder hotkeys while the dialog is open so combo-box changes can update quickly.
     private readonly Dictionary<string, HotkeyInfo?> _folderHotkeys;
@@ -27,13 +34,15 @@ public partial class SettingsForm : Form
         HotkeyService hotkeyService,
         List<string> folders,
         IAppSettingsStorage appSettingsStorage,
-        AppSettings appSettings)
+        AppSettings appSettings,
+        IUpdateChecker? updateChecker = null)
     {
         InitializeComponent();
 
         _hotkeyService = hotkeyService;
         _appSettingsStorage = appSettingsStorage;
         _appSettings = appSettings;
+        _updateChecker = updateChecker ?? new GitHubUpdateChecker();
         _folderHotkeys = folders.ToDictionary(folder => folder, HotkeyInfo? (_) => null);
     }
 
@@ -112,6 +121,13 @@ public partial class SettingsForm : Form
         // Keep the first editable hotkey box unfocused until the user chooses to modify it.
         ActiveControl = nextWallpaperHkLabel;
         LoadInitialSettings();
+    }
+
+    protected override void OnFormClosing(FormClosingEventArgs e)
+    {
+        _isClosing = true;
+        _updateCheckCancellationTokenSource?.Cancel();
+        base.OnFormClosing(e);
     }
 
     private void nextWallpaperHkModifyButton_Click(object sender, EventArgs e)
@@ -202,6 +218,113 @@ public partial class SettingsForm : Form
     private void settingsFormOkButton_Click(object sender, EventArgs e)
     {
         DialogResult = DialogResult.OK;
+    }
+
+    private async void checkForUpdatesButton_Click(object sender, EventArgs e)
+    {
+        await CheckForUpdatesAsync();
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        SetUpdateCheckInProgress(true);
+        using var updateCheckCancellationTokenSource = new CancellationTokenSource();
+        _updateCheckCancellationTokenSource = updateCheckCancellationTokenSource;
+
+        try
+        {
+            var result = await _updateChecker.CheckForUpdatesAsync(
+                GetCurrentApplicationVersion(),
+                updateCheckCancellationTokenSource.Token);
+            if (result.IsUpdateAvailable)
+            {
+                ShowUpdateAvailableMessage(result);
+                return;
+            }
+
+            FormHelper.ShowSuccessMessage(
+                $"You are using the latest version.\n\nCurrent version: {FormatVersion(result.CurrentVersion)}",
+                "No Updates Found"
+            );
+        }
+        catch (OperationCanceledException) when (updateCheckCancellationTokenSource.IsCancellationRequested)
+        {
+        }
+        catch (UpdateCheckException exception)
+        {
+            FormHelper.ShowWarningMessage(
+                $"Unable to check for updates: {exception.Message}\n\n" +
+                "Please check your internet connection and try again.",
+                "Update Check Failed"
+            );
+        }
+        finally
+        {
+            if (ReferenceEquals(_updateCheckCancellationTokenSource, updateCheckCancellationTokenSource))
+            {
+                _updateCheckCancellationTokenSource = null;
+            }
+
+            if (!_isClosing && !IsDisposed && !Disposing)
+            {
+                SetUpdateCheckInProgress(false);
+            }
+        }
+    }
+
+    private void ShowUpdateAvailableMessage(UpdateCheckResult result)
+    {
+        var dialogResult = MessageBox.Show(
+            this,
+            "A new version of Wallpaper Switcher is available.\n\n" +
+            $"Current version: {FormatVersion(result.CurrentVersion)}\n" +
+            $"Latest version: {FormatVersion(result.LatestVersion)}\n\n" +
+            "Open the GitHub release page?",
+            "Update Available",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Information
+        );
+
+        if (dialogResult != DialogResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            FormHelper.OpenUrl(result.ReleaseUri);
+        }
+        catch (Exception exception)
+        {
+            FormHelper.ShowWarningMessage(
+                $"Unable to open the release page: {exception.Message}",
+                "Open Release Page Failed"
+            );
+        }
+    }
+
+    private void SetUpdateCheckInProgress(bool isChecking)
+    {
+        if (isChecking)
+        {
+            // Move focus before disabling the clicked button so WinForms does not select the hotkey textbox.
+            settingsFormOkButton.Focus();
+        }
+
+        checkForUpdatesButton.Enabled = !isChecking;
+        checkForUpdatesButton.Text = isChecking
+            ? CheckForUpdatesButtonBusyText
+            : CheckForUpdatesButtonDefaultText;
+    }
+
+    private static Version GetCurrentApplicationVersion()
+    {
+        return typeof(SettingsForm).Assembly.GetName().Version ?? new Version(0, 0, 0);
+    }
+
+    private static string FormatVersion(Version version)
+    {
+        return $"{version.Major}.{Math.Max(version.Minor, 0)}.{Math.Max(version.Build, 0)}";
     }
 
     private void launchStartupCheckBox_CheckedChanged(object? sender, EventArgs e)

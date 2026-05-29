@@ -40,6 +40,7 @@ namespace WallpaperSwitcher.Desktop
             folderHkSaveButton = new Button();
             folderHkLabel = new Label();
             launchStartupCheckBox = new CheckBox();
+            checkForUpdatesButton = new Button();
             settingsFormOkButton = new Button();
             hotkeysGroupBox = new GroupBox();
             generalGroupBox = new GroupBox();
@@ -190,7 +191,24 @@ namespace WallpaperSwitcher.Desktop
             launchStartupCheckBox.Text = "Launch at startup";
             launchStartupCheckBox.UseVisualStyleBackColor = true;
             launchStartupCheckBox.CheckedChanged += launchStartupCheckBox_CheckedChanged;
-            // 
+            //
+            // checkForUpdatesButton
+            //
+            checkForUpdatesButton.BackColor = Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(227)))), ((int)(((byte)(229)))));
+            checkForUpdatesButton.FlatAppearance.BorderSize = 0;
+            checkForUpdatesButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(((int)(((byte)(203)))), ((int)(((byte)(206)))), ((int)(((byte)(208)))));
+            checkForUpdatesButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(((int)(((byte)(194)))), ((int)(((byte)(196)))), ((int)(((byte)(199)))));
+            checkForUpdatesButton.FlatStyle = FlatStyle.Flat;
+            checkForUpdatesButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            checkForUpdatesButton.ForeColor = Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(58)))), ((int)(((byte)(64)))));
+            checkForUpdatesButton.Location = new Point(23, 65);
+            checkForUpdatesButton.Name = "checkForUpdatesButton";
+            checkForUpdatesButton.Size = new Size(160, 30);
+            checkForUpdatesButton.TabIndex = 13;
+            checkForUpdatesButton.Text = "Check for Updates";
+            checkForUpdatesButton.UseVisualStyleBackColor = false;
+            checkForUpdatesButton.Click += checkForUpdatesButton_Click;
+            //
             // settingsFormOkButton
             // 
             settingsFormOkButton.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
@@ -202,10 +220,10 @@ namespace WallpaperSwitcher.Desktop
             settingsFormOkButton.FlatStyle = FlatStyle.Flat;
             settingsFormOkButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             settingsFormOkButton.ForeColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(69)))), ((int)(((byte)(149)))));
-            settingsFormOkButton.Location = new Point(490, 275);
+            settingsFormOkButton.Location = new Point(490, 315);
             settingsFormOkButton.Name = "settingsFormOkButton";
             settingsFormOkButton.Size = new Size(90, 30);
-            settingsFormOkButton.TabIndex = 13;
+            settingsFormOkButton.TabIndex = 14;
             settingsFormOkButton.Text = "OK";
             settingsFormOkButton.UseVisualStyleBackColor = false;
             settingsFormOkButton.Click += settingsFormOkButton_Click;
@@ -235,11 +253,12 @@ namespace WallpaperSwitcher.Desktop
             // 
             generalGroupBox.Anchor = ((AnchorStyles)(((AnchorStyles.Top | AnchorStyles.Left)
            | AnchorStyles.Right)));
+            generalGroupBox.Controls.Add(checkForUpdatesButton);
             generalGroupBox.Controls.Add(launchStartupCheckBox);
             generalGroupBox.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, ((byte)(0)));
             generalGroupBox.Location = new Point(15, 180);
             generalGroupBox.Name = "generalGroupBox";
-            generalGroupBox.Size = new Size(565, 75);
+            generalGroupBox.Size = new Size(565, 115);
             generalGroupBox.TabIndex = 15;
             generalGroupBox.TabStop = false;
             generalGroupBox.Text = "General";
@@ -254,14 +273,14 @@ namespace WallpaperSwitcher.Desktop
             mainPanel.Location = new Point(0, 0);
             mainPanel.Name = "mainPanel";
             mainPanel.Padding = new Padding(12);
-            mainPanel.Size = new Size(594, 321);
+            mainPanel.Size = new Size(594, 361);
             mainPanel.TabIndex = 16;
             // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(594, 321);
+            ClientSize = new Size(594, 361);
             Controls.Add(mainPanel);
             Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -294,6 +313,7 @@ namespace WallpaperSwitcher.Desktop
         private Button folderHkSaveButton;
         private Label folderHkLabel;
         private CheckBox launchStartupCheckBox;
+        private Button checkForUpdatesButton;
         private Button settingsFormOkButton;
         private GroupBox hotkeysGroupBox;
         private GroupBox generalGroupBox;
