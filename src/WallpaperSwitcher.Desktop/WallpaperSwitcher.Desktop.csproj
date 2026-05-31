@@ -20,7 +20,7 @@
         <AssemblyName>WallpaperSwitcher</AssemblyName>
         <Company>lorenzoyang</Company>
         <Product>WallpaperSwitcher</Product>
-        <Version>3.0.1</Version>
+        <Version>4.0.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
