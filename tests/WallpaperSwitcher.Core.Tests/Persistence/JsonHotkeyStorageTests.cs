@@ -51,6 +51,21 @@ public class JsonHotkeyStorageTests
     }
 
     [Test]
+    public void Exists_WhenFileDoesNotExist_ReturnsFalse()
+    {
+        Assert.That(_jsonHotkeyStorage.Exists, Is.False);
+    }
+
+    [Test]
+    public void Exists_WhenFileExists_ReturnsTrue()
+    {
+        Directory.CreateDirectory(_testDirectory);
+        File.WriteAllText(_testFilePath, "[]");
+
+        Assert.That(_jsonHotkeyStorage.Exists, Is.True);
+    }
+
+    [Test]
     public async Task SaveAsync_WithValidHotkeys_CreatesFileWithCorrectContent()
     {
         var hotkeys = new[]

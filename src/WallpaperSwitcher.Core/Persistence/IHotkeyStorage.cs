@@ -8,6 +8,11 @@ namespace WallpaperSwitcher.Core.Persistence;
 public interface IHotkeyStorage
 {
     /// <summary>
+    /// Gets a value indicating whether the backing storage already exists.
+    /// </summary>
+    bool Exists { get; }
+
+    /// <summary>
     /// Asynchronously loads all stored global hotkey configurations.
     /// </summary>
     /// <returns>
