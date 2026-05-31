@@ -34,7 +34,7 @@ namespace WallpaperSwitcher.Desktop
         private void InitializeComponent()
         {
             ComponentResourceManager resources = new ComponentResourceManager(typeof(MainForm));
-            foldersManagementGroupBox = new GroupBox();
+            foldersManagementGroupBox = new ModernCard();
             removeFolderComboBox = new ComboBox();
             removeFolderButton = new Button();
             removeFolderLabel = new Label();
@@ -48,7 +48,7 @@ namespace WallpaperSwitcher.Desktop
             modeComboBox = new ComboBox();
             settingsButton = new Button();
             mainPanel = new Panel();
-            controlGroupBox = new GroupBox();
+            controlGroupBox = new ModernCard();
             foldersManagementGroupBox.SuspendLayout();
             mainPanel.SuspendLayout();
             controlGroupBox.SuspendLayout();
@@ -68,9 +68,9 @@ namespace WallpaperSwitcher.Desktop
             foldersManagementGroupBox.Controls.Add(currentFolderComboBox);
             foldersManagementGroupBox.Controls.Add(currentFolderLabel);
             foldersManagementGroupBox.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, ((byte)(0)));
-            foldersManagementGroupBox.Location = new Point(15, 15);
+            foldersManagementGroupBox.Location = new Point(20, 20);
             foldersManagementGroupBox.Name = "foldersManagementGroupBox";
-            foldersManagementGroupBox.Size = new Size(565, 270);
+            foldersManagementGroupBox.Size = new Size(600, 276);
             foldersManagementGroupBox.TabIndex = 0;
             foldersManagementGroupBox.TabStop = false;
             foldersManagementGroupBox.Text = "Folder Management";
@@ -81,9 +81,9 @@ namespace WallpaperSwitcher.Desktop
                 | AnchorStyles.Right)));
             removeFolderComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             removeFolderComboBox.FormattingEnabled = true;
-            removeFolderComboBox.Location = new Point(20, 220);
+            removeFolderComboBox.Location = new Point(22, 221);
             removeFolderComboBox.Name = "removeFolderComboBox";
-            removeFolderComboBox.Size = new Size(439, 23);
+            removeFolderComboBox.Size = new Size(466, 25);
             removeFolderComboBox.TabIndex = 14;
             removeFolderComboBox.SelectedIndexChanged += removeFolderComboBox_SelectedIndexChanged;
             removeFolderComboBox.MouseEnter += removeFolderComboBox_MouseEnter;
@@ -99,20 +99,19 @@ namespace WallpaperSwitcher.Desktop
             removeFolderButton.FlatStyle = FlatStyle.Flat;
             removeFolderButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             removeFolderButton.ForeColor = Color.FromArgb(((int)(((byte)(114)))), ((int)(((byte)(28)))), ((int)(((byte)(36)))));
-            removeFolderButton.Location = new Point(465, 219);
+            removeFolderButton.Location = new Point(496, 219);
             removeFolderButton.Name = "removeFolderButton";
-            removeFolderButton.Size = new Size(80, 25);
+            removeFolderButton.Size = new Size(82, 30);
             removeFolderButton.TabIndex = 13;
             removeFolderButton.Text = "Remove";
             removeFolderButton.UseVisualStyleBackColor = false;
             removeFolderButton.Click += removeFolderButton_Click;
-            removeFolderButton.EnabledChanged += Button_EnabledChanged;
             // 
             // removeFolderLabel
             // 
             removeFolderLabel.AutoSize = true;
             removeFolderLabel.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
-            removeFolderLabel.Location = new Point(17, 198);
+            removeFolderLabel.Location = new Point(22, 198);
             removeFolderLabel.Name = "removeFolderLabel";
             removeFolderLabel.Size = new Size(147, 15);
             removeFolderLabel.TabIndex = 12;
@@ -122,7 +121,7 @@ namespace WallpaperSwitcher.Desktop
             // 
             addFolderLabel.AutoSize = true;
             addFolderLabel.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
-            addFolderLabel.Location = new Point(17, 118);
+            addFolderLabel.Location = new Point(22, 117);
             addFolderLabel.Name = "addFolderLabel";
             addFolderLabel.Size = new Size(121, 15);
             addFolderLabel.TabIndex = 11;
@@ -139,14 +138,13 @@ namespace WallpaperSwitcher.Desktop
             addFolderButton.FlatStyle = FlatStyle.Flat;
             addFolderButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             addFolderButton.ForeColor = Color.FromArgb(((int)(((byte)(21)))), ((int)(((byte)(87)))), ((int)(((byte)(36)))));
-            addFolderButton.Location = new Point(465, 138);
+            addFolderButton.Location = new Point(496, 138);
             addFolderButton.Name = "addFolderButton";
-            addFolderButton.Size = new Size(80, 25);
+            addFolderButton.Size = new Size(82, 30);
             addFolderButton.TabIndex = 10;
             addFolderButton.Text = "Add";
             addFolderButton.UseVisualStyleBackColor = false;
             addFolderButton.Click += addFolderButton_Click;
-            addFolderButton.EnabledChanged += Button_EnabledChanged;
             // 
             // browseFolderButton
             // 
@@ -158,14 +156,13 @@ namespace WallpaperSwitcher.Desktop
             browseFolderButton.FlatStyle = FlatStyle.Flat;
             browseFolderButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             browseFolderButton.ForeColor = Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(58)))), ((int)(((byte)(64)))));
-            browseFolderButton.Location = new Point(379, 138);
+            browseFolderButton.Location = new Point(404, 138);
             browseFolderButton.Name = "browseFolderButton";
-            browseFolderButton.Size = new Size(80, 25);
+            browseFolderButton.Size = new Size(84, 30);
             browseFolderButton.TabIndex = 9;
             browseFolderButton.Text = "Browse...";
             browseFolderButton.UseVisualStyleBackColor = false;
             browseFolderButton.Click += browseFolderButton_Click;
-            browseFolderButton.EnabledChanged += Button_EnabledChanged;
             // 
             // addFolderTextBox
             // 
@@ -174,10 +171,10 @@ namespace WallpaperSwitcher.Desktop
             addFolderTextBox.BackColor = SystemColors.ControlLightLight;
             addFolderTextBox.BorderStyle = BorderStyle.FixedSingle;
             addFolderTextBox.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
-            addFolderTextBox.Location = new Point(20, 139);
+            addFolderTextBox.Location = new Point(22, 140);
             addFolderTextBox.Name = "addFolderTextBox";
             addFolderTextBox.ReadOnly = true;
-            addFolderTextBox.Size = new Size(353, 23);
+            addFolderTextBox.Size = new Size(374, 24);
             addFolderTextBox.TabIndex = 5;
             addFolderTextBox.TextChanged += addFolderTextBox_TextChanged;
             // 
@@ -187,9 +184,9 @@ namespace WallpaperSwitcher.Desktop
                 | AnchorStyles.Right)));
             currentFolderComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             currentFolderComboBox.FormattingEnabled = true;
-            currentFolderComboBox.Location = new Point(20, 55);
+            currentFolderComboBox.Location = new Point(22, 65);
             currentFolderComboBox.Name = "currentFolderComboBox";
-            currentFolderComboBox.Size = new Size(525, 23);
+            currentFolderComboBox.Size = new Size(556, 25);
             currentFolderComboBox.TabIndex = 1;
             currentFolderComboBox.SelectedIndexChanged += currentFolderComboBox_SelectedIndexChanged;
             currentFolderComboBox.MouseEnter += currentFolderComboBox_MouseEnter;
@@ -198,7 +195,7 @@ namespace WallpaperSwitcher.Desktop
             // 
             currentFolderLabel.AutoSize = true;
             currentFolderLabel.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
-            currentFolderLabel.Location = new Point(17, 33);
+            currentFolderLabel.Location = new Point(22, 42);
             currentFolderLabel.Name = "currentFolderLabel";
             currentFolderLabel.Size = new Size(144, 15);
             currentFolderLabel.TabIndex = 0;
@@ -215,14 +212,13 @@ namespace WallpaperSwitcher.Desktop
             nextWallpaperButton.FlatStyle = FlatStyle.Flat;
             nextWallpaperButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             nextWallpaperButton.ForeColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(69)))), ((int)(((byte)(149)))));
-            nextWallpaperButton.Location = new Point(395, 30);
+            nextWallpaperButton.Location = new Point(414, 36);
             nextWallpaperButton.Name = "nextWallpaperButton";
-            nextWallpaperButton.Size = new Size(150, 45);
+            nextWallpaperButton.Size = new Size(164, 44);
             nextWallpaperButton.TabIndex = 0;
             nextWallpaperButton.Text = "Next Wallpaper";
             nextWallpaperButton.UseVisualStyleBackColor = false;
             nextWallpaperButton.Click += nextWallpaperButton_Click;
-            nextWallpaperButton.EnabledChanged += Button_EnabledChanged;
             // 
             // modeComboBox
             // 
@@ -233,9 +229,9 @@ namespace WallpaperSwitcher.Desktop
             modeComboBox.Items.AddRange(new object[] {
                 "Native Mode (System SlideShow)",
                 "Custom Mode (Fast Switching)"});
-            modeComboBox.Location = new Point(20, 40);
+            modeComboBox.Location = new Point(22, 48);
             modeComboBox.Name = "modeComboBox";
-            modeComboBox.Size = new Size(353, 23);
+            modeComboBox.Size = new Size(374, 25);
             modeComboBox.TabIndex = 1;
             modeComboBox.SelectedIndexChanged += modeComboBox_SelectedIndexChanged;
             // 
@@ -250,14 +246,13 @@ namespace WallpaperSwitcher.Desktop
             settingsButton.FlatStyle = FlatStyle.Flat;
             settingsButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             settingsButton.ForeColor = Color.FromArgb(((int)(((byte)(12)))), ((int)(((byte)(84)))), ((int)(((byte)(96)))));
-            settingsButton.Location = new Point(15, 415);
+            settingsButton.Location = new Point(20, 432);
             settingsButton.Name = "settingsButton";
-            settingsButton.Size = new Size(565, 30);
+            settingsButton.Size = new Size(600, 36);
             settingsButton.TabIndex = 2;
             settingsButton.Text = "Settings";
             settingsButton.UseVisualStyleBackColor = false;
             settingsButton.Click += settingsButton_Click;
-            settingsButton.EnabledChanged += Button_EnabledChanged;
             // 
             // mainPanel
             // 
@@ -268,8 +263,8 @@ namespace WallpaperSwitcher.Desktop
             mainPanel.Dock = DockStyle.Fill;
             mainPanel.Location = new Point(0, 0);
             mainPanel.Name = "mainPanel";
-            mainPanel.Padding = new Padding(12);
-            mainPanel.Size = new Size(594, 461);
+            mainPanel.Padding = new Padding(20);
+            mainPanel.Size = new Size(640, 488);
             mainPanel.TabIndex = 3;
             // 
             // controlGroupBox
@@ -279,9 +274,9 @@ namespace WallpaperSwitcher.Desktop
             controlGroupBox.Controls.Add(modeComboBox);
             controlGroupBox.Controls.Add(nextWallpaperButton);
             controlGroupBox.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            controlGroupBox.Location = new Point(15, 300);
+            controlGroupBox.Location = new Point(20, 312);
             controlGroupBox.Name = "controlGroupBox";
-            controlGroupBox.Size = new Size(565, 100);
+            controlGroupBox.Size = new Size(600, 104);
             controlGroupBox.TabIndex = 3;
             controlGroupBox.TabStop = false;
             controlGroupBox.Text = "Wallpaper Control";
@@ -290,7 +285,7 @@ namespace WallpaperSwitcher.Desktop
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(594, 461);
+            ClientSize = new Size(640, 488);
             Controls.Add(mainPanel);
             Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
             FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -301,6 +296,7 @@ namespace WallpaperSwitcher.Desktop
             Text = "Wallpaper Switcher";
             FormClosing += new FormClosingEventHandler(MainForm_FormClosing);
             Load += MainForm_Load;
+            ApplyModernTheme();
             foldersManagementGroupBox.ResumeLayout(false);
             foldersManagementGroupBox.PerformLayout();
             mainPanel.ResumeLayout(false);
@@ -310,27 +306,27 @@ namespace WallpaperSwitcher.Desktop
 
         #endregion
 
-        private void Button_EnabledChanged(object sender, System.EventArgs e)
+        private void ApplyModernTheme()
         {
-            if (sender is Button button)
-            {
-                if (button.Enabled)
-                {
-                    // Restore original colors when enabled
-                    if (button.Tag is Color[] colors)
-                    {
-                        button.BackColor = colors[0];
-                        button.ForeColor = colors[1];
-                    }
-                }
-                else
-                {
-                    // Store original colors and apply disabled style
-                    button.Tag = new Color[] { button.BackColor, button.ForeColor };
-                    button.BackColor = Color.FromArgb(242, 242, 242);
-                    button.ForeColor = Color.Gray;
-                }
-            }
+            ModernTheme.ApplyForm(this);
+            ModernTheme.ApplySurface(mainPanel);
+            ModernTheme.ApplyCard(foldersManagementGroupBox);
+            ModernTheme.ApplyCard(controlGroupBox);
+
+            ModernTheme.ApplyLabel(currentFolderLabel);
+            ModernTheme.ApplyLabel(addFolderLabel);
+            ModernTheme.ApplyLabel(removeFolderLabel);
+
+            ModernTheme.ApplyComboBox(currentFolderComboBox);
+            ModernTheme.ApplyComboBox(removeFolderComboBox);
+            ModernTheme.ApplyComboBox(modeComboBox);
+            ModernTheme.ApplyTextBox(addFolderTextBox);
+
+            ModernTheme.ApplyButton(nextWallpaperButton, ModernButtonKind.Primary);
+            ModernTheme.ApplyButton(settingsButton, ModernButtonKind.Secondary);
+            ModernTheme.ApplyButton(browseFolderButton, ModernButtonKind.Secondary);
+            ModernTheme.ApplyButton(addFolderButton, ModernButtonKind.Success);
+            ModernTheme.ApplyButton(removeFolderButton, ModernButtonKind.Danger);
         }
 
         private GroupBox foldersManagementGroupBox;
