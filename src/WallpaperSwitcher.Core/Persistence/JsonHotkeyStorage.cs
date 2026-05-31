@@ -20,6 +20,9 @@ public sealed class JsonHotkeyStorage : IHotkeyStorage
     /// </summary>
     public string Location { get; }
 
+    /// <inheritdoc/>
+    public bool Exists => File.Exists(Location);
+
     /// <summary>
     /// Initializes a new instance of the <see cref="JsonHotkeyStorage"/> class
     /// using the default file storage location.

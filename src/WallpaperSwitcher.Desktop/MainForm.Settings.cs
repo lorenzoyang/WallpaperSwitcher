@@ -13,7 +13,7 @@ public partial class MainForm
         }
 
         PopulateComponentsFromInitialSettings();
-        await _hotkeyService.LoadHotkeysAsync();
+        ShowHotkeyLoadWarning(await _hotkeyService.LoadHotkeysAsync());
     }
 
     private void LoadInitialSettings()
@@ -24,7 +24,28 @@ public partial class MainForm
         }
 
         PopulateComponentsFromInitialSettings();
-        _hotkeyService.LoadHotkeys();
+        ShowHotkeyLoadWarning(_hotkeyService.LoadHotkeys());
+    }
+
+    private static void ShowHotkeyLoadWarning(HotkeyLoadResult result)
+    {
+        if (!result.HasFailures)
+        {
+            return;
+        }
+
+        var failedHotkeys = string.Join(
+            Environment.NewLine,
+            result.Failures.Select(failure =>
+                $"- {failure.HotkeyInfo.Name}: {failure.HotkeyInfo.Hotkey}")
+        );
+
+        FormHelper.ShowWarningMessage(
+            "Some saved hotkeys could not be registered and have been disabled:\n\n" +
+            $"{failedHotkeys}\n\n" +
+            "They may already be used by Windows or another app. Open Settings to bind new hotkeys.",
+            "Hotkeys Disabled"
+        );
     }
 
     private bool TryBeginInitialSettingsLoad()

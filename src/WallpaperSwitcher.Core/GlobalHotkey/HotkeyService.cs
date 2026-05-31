@@ -316,48 +316,118 @@ public sealed class HotkeyService : IDisposable
 
     /// <summary>
     /// Loads hotkeys asynchronously from persistent storage and registers them.
-    /// If no hotkeys are found, a default hotkey is registered and saved.
+    /// If no storage file exists, a default hotkey is registered and saved.
     /// </summary>
-    public async Task LoadHotkeysAsync()
+    public async Task<HotkeyLoadResult> LoadHotkeysAsync()
     {
         ThrowIfDisposed();
 
-        if (RegisterLoadedHotkeys((await _hotkeyStorage.LoadAsync()).ToArray()))
+        var shouldCreateDefaultHotkey = !_hotkeyStorage.Exists;
+        var registrationResult = RegisterLoadedHotkeys(
+            (await _hotkeyStorage.LoadAsync()).ToArray(),
+            shouldCreateDefaultHotkey
+        );
+
+        if (registrationResult.ShouldSave)
         {
             await _hotkeyStorage.SaveAsync(GetHotkeySnapshot());
         }
+
+        return registrationResult.LoadResult;
     }
 
     /// <summary>
     /// Loads hotkeys from persistent storage and registers them.
-    /// If no hotkeys are found, a default hotkey is registered and saved.
+    /// If no storage file exists, a default hotkey is registered and saved.
     /// </summary>
-    public void LoadHotkeys()
+    public HotkeyLoadResult LoadHotkeys()
     {
         ThrowIfDisposed();
 
-        if (RegisterLoadedHotkeys(_hotkeyStorage.Load().ToArray()))
+        var shouldCreateDefaultHotkey = !_hotkeyStorage.Exists;
+        var registrationResult = RegisterLoadedHotkeys(
+            _hotkeyStorage.Load().ToArray(),
+            shouldCreateDefaultHotkey
+        );
+
+        if (registrationResult.ShouldSave)
         {
             _hotkeyStorage.Save(GetHotkeySnapshot());
         }
+
+        return registrationResult.LoadResult;
     }
 
-    private bool RegisterLoadedHotkeys(IReadOnlyCollection<HotkeyInfo> hotkeyInfos)
+    private LoadedHotkeysRegistrationResult RegisterLoadedHotkeys(
+        IReadOnlyCollection<HotkeyInfo> hotkeyInfos,
+        bool shouldCreateDefaultHotkey)
     {
-        // First launch: create the default "Next Wallpaper" binding and let the caller persist it.
+        var failures = new List<HotkeyLoadFailure>();
+        var shouldSave = false;
+
         if (hotkeyInfos.Count == 0)
         {
-            _ = RegisterHotkey(Default.NextWallpaperHotkeyString, Default.NextWallpaperHotkeyName);
+            if (shouldCreateDefaultHotkey)
+            {
+                var defaultHotkey = CreateDefaultHotkeyInfo();
+                shouldSave = true;
+                _ = TryRegisterLoadedHotkey(defaultHotkey, failures);
+            }
+
+            return CreateLoadedHotkeysRegistrationResult(failures, shouldSave);
+        }
+
+        foreach (var hotkeyInfo in hotkeyInfos)
+        {
+            if (!TryRegisterLoadedHotkey(hotkeyInfo, failures))
+            {
+                // Re-save the active hotkey to clear the failed one from storage
+                shouldSave = true;
+            }
+        }
+
+        return CreateLoadedHotkeysRegistrationResult(failures, shouldSave);
+    }
+
+    private bool TryRegisterLoadedHotkey(HotkeyInfo hotkeyInfo, ICollection<HotkeyLoadFailure> failures)
+    {
+        try
+        {
+            _ = RegisterHotkey(hotkeyInfo.Hotkey, hotkeyInfo.Name, hotkeyInfo.Id);
             return true;
         }
-
-        foreach (var (id, hotkey, name) in hotkeyInfos)
+        catch (HotkeyBindingException exception)
         {
-            _ = RegisterHotkey(hotkey, name, id);
+            failures.Add(new HotkeyLoadFailure(hotkeyInfo, exception.Message));
+            return false;
         }
-
-        return false;
+        catch (HotkeyDuplicateBindingException exception)
+        {
+            failures.Add(new HotkeyLoadFailure(hotkeyInfo, exception.Message));
+            return false;
+        }
     }
+
+    private HotkeyInfo CreateDefaultHotkeyInfo()
+    {
+        return CreateHotkeyInfo(
+            NextHotkeyId,
+            ParseHotkeyOrThrow(Default.NextWallpaperHotkeyString),
+            Default.NextWallpaperHotkeyName
+        );
+    }
+
+    private static LoadedHotkeysRegistrationResult CreateLoadedHotkeysRegistrationResult(
+        IReadOnlyList<HotkeyLoadFailure> failures,
+        bool shouldSave)
+    {
+        return new LoadedHotkeysRegistrationResult(
+            failures.Count == 0 ? HotkeyLoadResult.Success : new HotkeyLoadResult(failures.ToArray()),
+            shouldSave
+        );
+    }
+
+    private sealed record LoadedHotkeysRegistrationResult(HotkeyLoadResult LoadResult, bool ShouldSave);
 
     /// <summary>
     /// Saves the currently registered hotkeys asynchronously to persistent storage.

@@ -178,6 +178,7 @@ public class HotkeyServiceTests
     {
         var storage = new FakeHotkeyStorage
         {
+            Exists = true,
             Hotkeys =
             [
                 new HotkeyInfo
@@ -207,6 +208,7 @@ public class HotkeyServiceTests
     {
         var storage = new FakeHotkeyStorage
         {
+            Exists = true,
             Hotkeys =
             [
                 new HotkeyInfo
@@ -232,16 +234,110 @@ public class HotkeyServiceTests
     }
 
     [Test]
+    public void LoadHotkeys_WhenPersistedHotkeyRegistrationFails_SkipsFailureAndSavesSuccessfulHotkeys()
+    {
+        var registrar = new FakeHotkeyRegistrar();
+        registrar.RegisterResults.Enqueue(true);
+        registrar.RegisterResults.Enqueue(false);
+        var storage = new FakeHotkeyStorage
+        {
+            Exists = true,
+            Hotkeys =
+            [
+                new HotkeyInfo
+                {
+                    Id = 1000,
+                    Hotkey = new Hotkey(ModifierKeys.Ctrl | ModifierKeys.Alt, VirtualKeys.A),
+                    Name = "Folder"
+                },
+                new HotkeyInfo
+                {
+                    Id = 1001,
+                    Hotkey = new Hotkey(ModifierKeys.Ctrl | ModifierKeys.Alt, VirtualKeys.W),
+                    Name = Default.NextWallpaperHotkeyName
+                }
+            ]
+        };
+        var service = CreateService(registrar, storage);
+
+        var result = service.LoadHotkeys();
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(result.HasFailures, Is.True);
+            Assert.That(result.Failures, Has.Exactly(1).Items);
+            Assert.That(result.Failures[0].HotkeyInfo.Name, Is.EqualTo(Default.NextWallpaperHotkeyName));
+            Assert.That(result.Failures[0].HotkeyInfo.Hotkey,
+                Is.EqualTo(new Hotkey(ModifierKeys.Ctrl | ModifierKeys.Alt, VirtualKeys.W)));
+            Assert.That(service.GetRegisteredHotkeys(), Has.Exactly(1).Items);
+            Assert.That(service.GetHotKeyInfoBy(h => h.Name, "Folder"), Is.Not.Null);
+            Assert.That(storage.SaveCount, Is.EqualTo(1));
+            Assert.That(storage.SavedHotkeys, Has.Exactly(1).Items);
+            Assert.That(storage.SavedHotkeys[0].Name, Is.EqualTo("Folder"));
+        }
+    }
+
+    [Test]
+    public async Task LoadHotkeysAsync_WhenPersistedHotkeyRegistrationFails_SkipsFailureAndSavesSuccessfulHotkeys()
+    {
+        var registrar = new FakeHotkeyRegistrar();
+        registrar.RegisterResults.Enqueue(false);
+        var storage = new FakeHotkeyStorage
+        {
+            Exists = true,
+            Hotkeys =
+            [
+                new HotkeyInfo
+                {
+                    Id = 1000,
+                    Hotkey = new Hotkey(ModifierKeys.Ctrl | ModifierKeys.Alt, VirtualKeys.W),
+                    Name = Default.NextWallpaperHotkeyName
+                }
+            ]
+        };
+        var service = CreateService(registrar, storage);
+
+        var result = await service.LoadHotkeysAsync();
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(result.HasFailures, Is.True);
+            Assert.That(result.Failures, Has.Exactly(1).Items);
+            Assert.That(service.GetRegisteredHotkeys(), Is.Empty);
+            Assert.That(storage.SaveCount, Is.EqualTo(1));
+            Assert.That(storage.SavedHotkeys, Is.Empty);
+        }
+    }
+
+    [Test]
+    public void LoadHotkeys_WhenStorageFileExistsButIsEmpty_DoesNotRegisterDefaultHotkey()
+    {
+        var storage = new FakeHotkeyStorage { Exists = true };
+        var service = CreateService(storage: storage);
+
+        var result = service.LoadHotkeys();
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(result.HasFailures, Is.False);
+            Assert.That(service.GetRegisteredHotkeys(), Is.Empty);
+            Assert.That(storage.SaveCount, Is.Zero);
+        }
+    }
+
+    [Test]
     public void LoadHotkeys_WhenStorageIsEmpty_RegistersAndSavesDefaultHotkey()
     {
         var storage = new FakeHotkeyStorage();
         var service = CreateService(storage: storage);
 
-        service.LoadHotkeys();
+        var result = service.LoadHotkeys();
 
         using (Assert.EnterMultipleScope())
         {
+            Assert.That(result.HasFailures, Is.False);
             Assert.That(service.GetRegisteredHotkeys(), Has.Exactly(1).Items);
+            Assert.That(storage.SaveCount, Is.EqualTo(1));
             Assert.That(storage.SavedHotkeys, Has.Exactly(1).Items);
             Assert.That(storage.SavedHotkeys[0].Name, Is.EqualTo(Default.NextWallpaperHotkeyName));
         }
@@ -253,11 +349,13 @@ public class HotkeyServiceTests
         var storage = new FakeHotkeyStorage();
         var service = CreateService(storage: storage);
 
-        await service.LoadHotkeysAsync();
+        var result = await service.LoadHotkeysAsync();
 
         using (Assert.EnterMultipleScope())
         {
+            Assert.That(result.HasFailures, Is.False);
             Assert.That(service.GetRegisteredHotkeys(), Has.Exactly(1).Items);
+            Assert.That(storage.SaveCount, Is.EqualTo(1));
             Assert.That(storage.SavedHotkeys, Has.Exactly(1).Items);
             Assert.That(storage.SavedHotkeys[0].Name, Is.EqualTo(Default.NextWallpaperHotkeyName));
         }
@@ -334,9 +432,13 @@ public class HotkeyServiceTests
 
     private sealed class FakeHotkeyStorage : IHotkeyStorage
     {
+        public bool Exists { get; init; }
+
         public List<HotkeyInfo> Hotkeys { get; init; } = [];
 
         public List<HotkeyInfo> SavedHotkeys { get; private set; } = [];
+
+        public int SaveCount { get; private set; }
 
         public Task<IEnumerable<HotkeyInfo>> LoadAsync()
         {
@@ -350,12 +452,14 @@ public class HotkeyServiceTests
 
         public Task SaveAsync(IEnumerable<HotkeyInfo> hotkeys)
         {
+            SaveCount++;
             SavedHotkeys = hotkeys.ToList();
             return Task.CompletedTask;
         }
 
         public void Save(IEnumerable<HotkeyInfo> hotkeys)
         {
+            SaveCount++;
             SavedHotkeys = hotkeys.ToList();
         }
     }
