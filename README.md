@@ -4,7 +4,15 @@
 
 **Wallpaper Switcher** is a lightweight, portable wallpaper manager for Windows. It lets you keep multiple wallpaper folders, switch folders quickly, jump to the next wallpaper with a button or global hotkey, and keep the app running quietly from the system tray.
 
-<img src="./assets/gifs/GUI_Demo.gif" alt="Wallpaper Switcher main window demo" width="350"/>
+## Screenshots
+
+### Home
+
+<img src="./assets/Home.png" alt="Wallpaper Switcher home screen" width="720"/>
+
+### Settings
+
+<img src="./assets/Settings.png" alt="Wallpaper Switcher settings screen" width="720"/>
 
 ## Features
 
@@ -18,9 +26,6 @@
   - **Native Mode (System SlideShow):** uses Windows' built-in wallpaper slideshow feature
   - **Custom Mode (Fast Switching):** cycles through images directly with the Windows wallpaper API for faster manual switching
 - **System tray integration**
-
-  <img src="./assets/gifs/SystemTray_Demo.gif" alt="System tray menu demo" width="350"/>
-
   - Closing the main window with the **X** button minimizes the app to the tray
   - Right-click the tray icon to switch folders, show the next wallpaper, open Settings, or exit
   - Left-click the tray icon to reopen the main window
@@ -31,9 +36,6 @@
 - **Optional startup launch**
   - Enable or disable **Launch at startup** from Settings
 - **Settings window**
-
-  <img src="./assets/gifs/Settings_Demo.gif" alt="Settings window demo" width="350"/>
-
   - Configure hotkeys, startup behavior, and wallpaper switching mode
   - Check whether a newer GitHub release is available
 
