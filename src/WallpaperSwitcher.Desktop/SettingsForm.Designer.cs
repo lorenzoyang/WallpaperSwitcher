@@ -42,8 +42,8 @@ namespace WallpaperSwitcher.Desktop
             launchStartupCheckBox = new CheckBox();
             checkForUpdatesButton = new Button();
             settingsFormOkButton = new Button();
-            hotkeysGroupBox = new GroupBox();
-            generalGroupBox = new GroupBox();
+            hotkeysGroupBox = new ModernCard();
+            generalGroupBox = new ModernCard();
             mainPanel = new Panel();
             hotkeysGroupBox.SuspendLayout();
             generalGroupBox.SuspendLayout();
@@ -54,7 +54,7 @@ namespace WallpaperSwitcher.Desktop
             // 
             nextWallpaperHkLabel.AutoSize = true;
             nextWallpaperHkLabel.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
-            nextWallpaperHkLabel.Location = new Point(20, 35);
+            nextWallpaperHkLabel.Location = new Point(22, 44);
             nextWallpaperHkLabel.Name = "nextWallpaperHkLabel";
             nextWallpaperHkLabel.Size = new Size(142, 15);
             nextWallpaperHkLabel.TabIndex = 0;
@@ -66,10 +66,10 @@ namespace WallpaperSwitcher.Desktop
            | AnchorStyles.Right)));
             nextWallpaperHkTextBox.BackColor = SystemColors.ControlLightLight;
             nextWallpaperHkTextBox.BorderStyle = BorderStyle.FixedSingle;
-            nextWallpaperHkTextBox.Location = new Point(168, 32);
+            nextWallpaperHkTextBox.Location = new Point(184, 41);
             nextWallpaperHkTextBox.Name = "nextWallpaperHkTextBox";
             nextWallpaperHkTextBox.ReadOnly = true;
-            nextWallpaperHkTextBox.Size = new Size(200, 23);
+            nextWallpaperHkTextBox.Size = new Size(224, 24);
             nextWallpaperHkTextBox.TabIndex = 1;
             // 
             // nextWallpaperHkModifyButton
@@ -82,9 +82,9 @@ namespace WallpaperSwitcher.Desktop
             nextWallpaperHkModifyButton.FlatStyle = FlatStyle.Flat;
             nextWallpaperHkModifyButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             nextWallpaperHkModifyButton.ForeColor = Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(58)))), ((int)(((byte)(64)))));
-            nextWallpaperHkModifyButton.Location = new Point(384, 31);
+            nextWallpaperHkModifyButton.Location = new Point(424, 39);
             nextWallpaperHkModifyButton.Name = "nextWallpaperHkModifyButton";
-            nextWallpaperHkModifyButton.Size = new Size(75, 25);
+            nextWallpaperHkModifyButton.Size = new Size(74, 30);
             nextWallpaperHkModifyButton.TabIndex = 2;
             nextWallpaperHkModifyButton.Text = "Modify";
             nextWallpaperHkModifyButton.UseVisualStyleBackColor = false;
@@ -101,9 +101,9 @@ namespace WallpaperSwitcher.Desktop
             nextWallpaperHkSaveButton.FlatStyle = FlatStyle.Flat;
             nextWallpaperHkSaveButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             nextWallpaperHkSaveButton.ForeColor = Color.FromArgb(((int)(((byte)(21)))), ((int)(((byte)(87)))), ((int)(((byte)(36)))));
-            nextWallpaperHkSaveButton.Location = new Point(465, 31);
+            nextWallpaperHkSaveButton.Location = new Point(506, 39);
             nextWallpaperHkSaveButton.Name = "nextWallpaperHkSaveButton";
-            nextWallpaperHkSaveButton.Size = new Size(75, 25);
+            nextWallpaperHkSaveButton.Size = new Size(72, 30);
             nextWallpaperHkSaveButton.TabIndex = 3;
             nextWallpaperHkSaveButton.Text = "Save";
             nextWallpaperHkSaveButton.UseVisualStyleBackColor = false;
@@ -115,9 +115,9 @@ namespace WallpaperSwitcher.Desktop
            | AnchorStyles.Right)));
             folderHkComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             folderHkComboBox.FormattingEnabled = true;
-            folderHkComboBox.Location = new Point(168, 70);
+            folderHkComboBox.Location = new Point(184, 84);
             folderHkComboBox.Name = "folderHkComboBox";
-            folderHkComboBox.Size = new Size(372, 23);
+            folderHkComboBox.Size = new Size(394, 25);
             folderHkComboBox.TabIndex = 4;
             folderHkComboBox.SelectedIndexChanged += folderHkComboBox_SelectedIndexChanged;
             // 
@@ -127,10 +127,10 @@ namespace WallpaperSwitcher.Desktop
            | AnchorStyles.Right)));
             folderHkTextBox.BackColor = SystemColors.ControlLightLight;
             folderHkTextBox.BorderStyle = BorderStyle.FixedSingle;
-            folderHkTextBox.Location = new Point(168, 108);
+            folderHkTextBox.Location = new Point(184, 125);
             folderHkTextBox.Name = "folderHkTextBox";
             folderHkTextBox.ReadOnly = true;
-            folderHkTextBox.Size = new Size(200, 23);
+            folderHkTextBox.Size = new Size(224, 24);
             folderHkTextBox.TabIndex = 5;
             // 
             // folderHkModifyButton
@@ -144,9 +144,9 @@ namespace WallpaperSwitcher.Desktop
             folderHkModifyButton.FlatStyle = FlatStyle.Flat;
             folderHkModifyButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             folderHkModifyButton.ForeColor = Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(58)))), ((int)(((byte)(64)))));
-            folderHkModifyButton.Location = new Point(384, 107);
+            folderHkModifyButton.Location = new Point(424, 123);
             folderHkModifyButton.Name = "folderHkModifyButton";
-            folderHkModifyButton.Size = new Size(75, 25);
+            folderHkModifyButton.Size = new Size(74, 30);
             folderHkModifyButton.TabIndex = 6;
             folderHkModifyButton.Text = "Modify";
             folderHkModifyButton.UseVisualStyleBackColor = false;
@@ -163,9 +163,9 @@ namespace WallpaperSwitcher.Desktop
             folderHkSaveButton.FlatStyle = FlatStyle.Flat;
             folderHkSaveButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             folderHkSaveButton.ForeColor = Color.FromArgb(((int)(((byte)(21)))), ((int)(((byte)(87)))), ((int)(((byte)(36)))));
-            folderHkSaveButton.Location = new Point(465, 107);
+            folderHkSaveButton.Location = new Point(506, 123);
             folderHkSaveButton.Name = "folderHkSaveButton";
-            folderHkSaveButton.Size = new Size(75, 25);
+            folderHkSaveButton.Size = new Size(72, 30);
             folderHkSaveButton.TabIndex = 7;
             folderHkSaveButton.Text = "Save";
             folderHkSaveButton.UseVisualStyleBackColor = false;
@@ -175,7 +175,7 @@ namespace WallpaperSwitcher.Desktop
             // 
             folderHkLabel.AutoSize = true;
             folderHkLabel.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
-            folderHkLabel.Location = new Point(20, 73);
+            folderHkLabel.Location = new Point(22, 88);
             folderHkLabel.Name = "folderHkLabel";
             folderHkLabel.Size = new Size(124, 15);
             folderHkLabel.TabIndex = 8;
@@ -184,7 +184,7 @@ namespace WallpaperSwitcher.Desktop
             // launchStartupCheckBox
             // 
             launchStartupCheckBox.AutoSize = true;
-            launchStartupCheckBox.Location = new Point(23, 30);
+            launchStartupCheckBox.Location = new Point(22, 42);
             launchStartupCheckBox.Name = "launchStartupCheckBox";
             launchStartupCheckBox.Size = new Size(122, 19);
             launchStartupCheckBox.TabIndex = 12;
@@ -201,9 +201,9 @@ namespace WallpaperSwitcher.Desktop
             checkForUpdatesButton.FlatStyle = FlatStyle.Flat;
             checkForUpdatesButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             checkForUpdatesButton.ForeColor = Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(58)))), ((int)(((byte)(64)))));
-            checkForUpdatesButton.Location = new Point(23, 65);
+            checkForUpdatesButton.Location = new Point(22, 72);
             checkForUpdatesButton.Name = "checkForUpdatesButton";
-            checkForUpdatesButton.Size = new Size(160, 30);
+            checkForUpdatesButton.Size = new Size(170, 32);
             checkForUpdatesButton.TabIndex = 13;
             checkForUpdatesButton.Text = "Check for Updates";
             checkForUpdatesButton.UseVisualStyleBackColor = false;
@@ -220,9 +220,9 @@ namespace WallpaperSwitcher.Desktop
             settingsFormOkButton.FlatStyle = FlatStyle.Flat;
             settingsFormOkButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             settingsFormOkButton.ForeColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(69)))), ((int)(((byte)(149)))));
-            settingsFormOkButton.Location = new Point(490, 315);
+            settingsFormOkButton.Location = new Point(520, 348);
             settingsFormOkButton.Name = "settingsFormOkButton";
-            settingsFormOkButton.Size = new Size(90, 30);
+            settingsFormOkButton.Size = new Size(100, 36);
             settingsFormOkButton.TabIndex = 14;
             settingsFormOkButton.Text = "OK";
             settingsFormOkButton.UseVisualStyleBackColor = false;
@@ -242,9 +242,9 @@ namespace WallpaperSwitcher.Desktop
             hotkeysGroupBox.Controls.Add(folderHkSaveButton);
             hotkeysGroupBox.Controls.Add(folderHkModifyButton);
             hotkeysGroupBox.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, ((byte)(0)));
-            hotkeysGroupBox.Location = new Point(15, 15);
+            hotkeysGroupBox.Location = new Point(20, 20);
             hotkeysGroupBox.Name = "hotkeysGroupBox";
-            hotkeysGroupBox.Size = new Size(565, 150);
+            hotkeysGroupBox.Size = new Size(600, 176);
             hotkeysGroupBox.TabIndex = 14;
             hotkeysGroupBox.TabStop = false;
             hotkeysGroupBox.Text = "Hotkeys";
@@ -256,9 +256,9 @@ namespace WallpaperSwitcher.Desktop
             generalGroupBox.Controls.Add(checkForUpdatesButton);
             generalGroupBox.Controls.Add(launchStartupCheckBox);
             generalGroupBox.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, ((byte)(0)));
-            generalGroupBox.Location = new Point(15, 180);
+            generalGroupBox.Location = new Point(20, 212);
             generalGroupBox.Name = "generalGroupBox";
-            generalGroupBox.Size = new Size(565, 115);
+            generalGroupBox.Size = new Size(600, 112);
             generalGroupBox.TabIndex = 15;
             generalGroupBox.TabStop = false;
             generalGroupBox.Text = "General";
@@ -272,15 +272,15 @@ namespace WallpaperSwitcher.Desktop
             mainPanel.Dock = DockStyle.Fill;
             mainPanel.Location = new Point(0, 0);
             mainPanel.Name = "mainPanel";
-            mainPanel.Padding = new Padding(12);
-            mainPanel.Size = new Size(594, 361);
+            mainPanel.Padding = new Padding(20);
+            mainPanel.Size = new Size(640, 404);
             mainPanel.TabIndex = 16;
             // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(594, 361);
+            ClientSize = new Size(640, 404);
             Controls.Add(mainPanel);
             Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -292,6 +292,7 @@ namespace WallpaperSwitcher.Desktop
             StartPosition = FormStartPosition.CenterParent;
             Text = "Wallpaper Switcher Settings";
             Load += SettingsForm_Load;
+            ApplyModernTheme();
             hotkeysGroupBox.ResumeLayout(false);
             hotkeysGroupBox.PerformLayout();
             generalGroupBox.ResumeLayout(false);
@@ -302,6 +303,29 @@ namespace WallpaperSwitcher.Desktop
         }
 
         #endregion
+
+        private void ApplyModernTheme()
+        {
+            ModernTheme.ApplyForm(this);
+            ModernTheme.ApplySurface(mainPanel);
+            ModernTheme.ApplyCard(hotkeysGroupBox);
+            ModernTheme.ApplyCard(generalGroupBox);
+
+            ModernTheme.ApplyLabel(nextWallpaperHkLabel);
+            ModernTheme.ApplyLabel(folderHkLabel);
+            ModernTheme.ApplyCheckBox(launchStartupCheckBox);
+
+            ModernTheme.ApplyTextBox(nextWallpaperHkTextBox);
+            ModernTheme.ApplyTextBox(folderHkTextBox);
+            ModernTheme.ApplyComboBox(folderHkComboBox);
+
+            ModernTheme.ApplyButton(nextWallpaperHkModifyButton, ModernButtonKind.Secondary);
+            ModernTheme.ApplyButton(nextWallpaperHkSaveButton, ModernButtonKind.Success);
+            ModernTheme.ApplyButton(folderHkModifyButton, ModernButtonKind.Secondary);
+            ModernTheme.ApplyButton(folderHkSaveButton, ModernButtonKind.Success);
+            ModernTheme.ApplyButton(checkForUpdatesButton, ModernButtonKind.Secondary);
+            ModernTheme.ApplyButton(settingsFormOkButton, ModernButtonKind.Primary);
+        }
 
         private Label nextWallpaperHkLabel;
         private TextBox nextWallpaperHkTextBox;
