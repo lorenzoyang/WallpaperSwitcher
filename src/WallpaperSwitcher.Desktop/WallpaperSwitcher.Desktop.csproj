@@ -24,6 +24,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="WallpaperSwitcher.Desktop.Tests"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <Content Include="WallpaperSwitcherIconFile6.ico"/>
     </ItemGroup>
 

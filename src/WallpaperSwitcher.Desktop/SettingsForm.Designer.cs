@@ -39,6 +39,7 @@ namespace WallpaperSwitcher.Desktop
             folderHkModifyButton = new Button();
             folderHkSaveButton = new Button();
             folderHkLabel = new Label();
+            hotkeyInputHintLabel = new Label();
             launchStartupCheckBox = new CheckBox();
             checkForUpdatesButton = new Button();
             settingsFormOkButton = new Button();
@@ -71,6 +72,8 @@ namespace WallpaperSwitcher.Desktop
             nextWallpaperHkTextBox.ReadOnly = true;
             nextWallpaperHkTextBox.Size = new Size(224, 24);
             nextWallpaperHkTextBox.TabIndex = 1;
+            nextWallpaperHkTextBox.TextChanged += hotkeyTextBox_TextChanged;
+            nextWallpaperHkTextBox.KeyDown += hotkeyTextBox_KeyDown;
             // 
             // nextWallpaperHkModifyButton
             // 
@@ -132,6 +135,8 @@ namespace WallpaperSwitcher.Desktop
             folderHkTextBox.ReadOnly = true;
             folderHkTextBox.Size = new Size(224, 24);
             folderHkTextBox.TabIndex = 5;
+            folderHkTextBox.TextChanged += hotkeyTextBox_TextChanged;
+            folderHkTextBox.KeyDown += hotkeyTextBox_KeyDown;
             // 
             // folderHkModifyButton
             // 
@@ -180,6 +185,16 @@ namespace WallpaperSwitcher.Desktop
             folderHkLabel.Size = new Size(124, 15);
             folderHkLabel.TabIndex = 8;
             folderHkLabel.Text = "Folder Hotkey:";
+            //
+            // hotkeyInputHintLabel
+            //
+            hotkeyInputHintLabel.AutoSize = false;
+            hotkeyInputHintLabel.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
+            hotkeyInputHintLabel.Location = new Point(22, 164);
+            hotkeyInputHintLabel.Name = "hotkeyInputHintLabel";
+            hotkeyInputHintLabel.Size = new Size(556, 32);
+            hotkeyInputHintLabel.TabIndex = 9;
+            hotkeyInputHintLabel.Text = "Click Modify, then press Ctrl/Alt/Shift/Win + A–Z or type a hotkey.";
             // 
             // launchStartupCheckBox
             // 
@@ -220,7 +235,7 @@ namespace WallpaperSwitcher.Desktop
             settingsFormOkButton.FlatStyle = FlatStyle.Flat;
             settingsFormOkButton.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             settingsFormOkButton.ForeColor = Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(69)))), ((int)(((byte)(149)))));
-            settingsFormOkButton.Location = new Point(520, 348);
+            settingsFormOkButton.Location = new Point(520, 376);
             settingsFormOkButton.Name = "settingsFormOkButton";
             settingsFormOkButton.Size = new Size(100, 36);
             settingsFormOkButton.TabIndex = 14;
@@ -241,10 +256,11 @@ namespace WallpaperSwitcher.Desktop
             hotkeysGroupBox.Controls.Add(folderHkTextBox);
             hotkeysGroupBox.Controls.Add(folderHkSaveButton);
             hotkeysGroupBox.Controls.Add(folderHkModifyButton);
+            hotkeysGroupBox.Controls.Add(hotkeyInputHintLabel);
             hotkeysGroupBox.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, ((byte)(0)));
             hotkeysGroupBox.Location = new Point(20, 20);
             hotkeysGroupBox.Name = "hotkeysGroupBox";
-            hotkeysGroupBox.Size = new Size(600, 176);
+            hotkeysGroupBox.Size = new Size(600, 204);
             hotkeysGroupBox.TabIndex = 14;
             hotkeysGroupBox.TabStop = false;
             hotkeysGroupBox.Text = "Hotkeys";
@@ -256,7 +272,7 @@ namespace WallpaperSwitcher.Desktop
             generalGroupBox.Controls.Add(checkForUpdatesButton);
             generalGroupBox.Controls.Add(launchStartupCheckBox);
             generalGroupBox.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, ((byte)(0)));
-            generalGroupBox.Location = new Point(20, 212);
+            generalGroupBox.Location = new Point(20, 240);
             generalGroupBox.Name = "generalGroupBox";
             generalGroupBox.Size = new Size(600, 112);
             generalGroupBox.TabIndex = 15;
@@ -273,24 +289,26 @@ namespace WallpaperSwitcher.Desktop
             mainPanel.Location = new Point(0, 0);
             mainPanel.Name = "mainPanel";
             mainPanel.Padding = new Padding(20);
-            mainPanel.Size = new Size(640, 404);
+            mainPanel.Size = new Size(640, 432);
             mainPanel.TabIndex = 16;
             // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(640, 404);
+            ClientSize = new Size(640, 432);
             Controls.Add(mainPanel);
             Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
             FormBorderStyle = FormBorderStyle.FixedDialog;
             Icon = (Icon)resources.GetObject("$this.Icon");
+            KeyPreview = true;
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "SettingsForm";
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
             Text = "Wallpaper Switcher Settings";
+            KeyDown += hotkeyTextBox_KeyDown;
             Load += SettingsForm_Load;
             ApplyModernTheme();
             hotkeysGroupBox.ResumeLayout(false);
@@ -313,6 +331,7 @@ namespace WallpaperSwitcher.Desktop
 
             ModernTheme.ApplyLabel(nextWallpaperHkLabel);
             ModernTheme.ApplyLabel(folderHkLabel);
+            ModernTheme.ApplyLabel(hotkeyInputHintLabel);
             ModernTheme.ApplyCheckBox(launchStartupCheckBox);
 
             ModernTheme.ApplyTextBox(nextWallpaperHkTextBox);
@@ -336,6 +355,7 @@ namespace WallpaperSwitcher.Desktop
         private Button folderHkModifyButton;
         private Button folderHkSaveButton;
         private Label folderHkLabel;
+        private Label hotkeyInputHintLabel;
         private CheckBox launchStartupCheckBox;
         private Button checkForUpdatesButton;
         private Button settingsFormOkButton;

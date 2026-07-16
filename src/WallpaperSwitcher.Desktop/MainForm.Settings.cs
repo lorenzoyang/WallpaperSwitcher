@@ -5,6 +5,8 @@ namespace WallpaperSwitcher.Desktop;
 
 public partial class MainForm
 {
+    private bool _isSettingsDialogOpen;
+
     private async Task LoadInitialSettingsAsync()
     {
         if (!TryBeginInitialSettingsLoad())
@@ -181,18 +183,44 @@ public partial class MainForm
 
     private void settingsButton_Click(object? sender, EventArgs e)
     {
-        using var settingsForm = new SettingsForm(
-            _hotkeyService,
-            GetConfiguredFolders().ToList(),
-            _appSettingsStorage,
-            _appSettings
-        );
-        var result = settingsForm.ShowDialog(this);
-        switch (result)
+        // The tray menu can invoke this handler while the owner window is disabled by ShowDialog.
+        if (_isSettingsDialogOpen)
         {
-            case DialogResult.OK:
-                FormHelper.ShowSuccessMessage("Settings saved successfully.");
-                break;
+            return;
+        }
+
+        _isSettingsDialogOpen = true;
+        try
+        {
+            using var settingsForm = new SettingsForm(
+                _hotkeyService,
+                GetConfiguredFolders().ToList(),
+                _appSettingsStorage,
+                _appSettings
+            );
+
+            DialogResult result;
+            // Let the settings dialog record registered shortcuts without executing their actions.
+            _hotkeyService.HotkeyPressed -= HandleHotkeyPressed;
+            try
+            {
+                result = settingsForm.ShowDialog(this);
+            }
+            finally
+            {
+                _hotkeyService.HotkeyPressed += HandleHotkeyPressed;
+            }
+
+            switch (result)
+            {
+                case DialogResult.OK:
+                    FormHelper.ShowSuccessMessage("Settings saved successfully.");
+                    break;
+            }
+        }
+        finally
+        {
+            _isSettingsDialogOpen = false;
         }
     }
 }
