@@ -157,6 +157,11 @@ Wallpaper Switcher is portable and does not install system-wide files. To remove
 
 - Default hotkey: `Ctrl + Alt + N` for **Next Wallpaper**
 - Hotkeys can be changed in **Settings**
+- To record a hotkey, click **Modify**, then press a supported `Ctrl`/`Alt`/`Shift`/`Win` + `A`-`Z` combination
+- You can also enter a hotkey manually in the same field
+- Recorded or manually entered changes take effect only after you click **Save**
+- Press `Esc` while editing to cancel the change and restore the previous value
+- Clear the field and click **Save** to disable that hotkey binding
 - Use `+` as the separator; spaces and letter case are ignored
 - A hotkey must include at least one modifier and one letter key
 - Only one letter key from `A` to `Z` is supported

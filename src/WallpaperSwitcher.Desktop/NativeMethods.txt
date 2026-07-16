@@ -4,3 +4,6 @@
 // Methods for implement "TryActivateExistingInstance"
 FindWindow
 PostMessage
+
+// Method for detecting the current Windows-key state while recording hotkeys
+GetKeyState

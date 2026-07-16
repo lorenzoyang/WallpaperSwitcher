@@ -10,5 +10,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/WallpaperSwitcher.Core.Tests/WallpaperSwitcher.Core.Tests.csproj" />
+    <Project Path="tests/WallpaperSwitcher.Desktop.Tests/WallpaperSwitcher.Desktop.Tests.csproj" />
   </Folder>
 </Solution>

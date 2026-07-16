@@ -12,12 +12,25 @@ public partial class SettingsForm : Form
 {
     private const string CheckForUpdatesButtonDefaultText = "Check for Updates";
     private const string CheckForUpdatesButtonBusyText = "Checking...";
+    private const string HotkeyInputDefaultHint =
+        "Click Modify, then press Ctrl/Alt/Shift/Win + A–Z or type a hotkey.";
+    private const string HotkeyInputEditingHint =
+        "Press Ctrl/Alt/Shift/Win + A–Z, or type a hotkey. Esc cancels; clear the field to disable.";
+
+    private static readonly Color HotkeyInputErrorColor = Color.FromArgb(185, 28, 28);
+    private static readonly Color HotkeyInputSuccessColor = Color.FromArgb(21, 128, 61);
 
     private readonly HotkeyService _hotkeyService;
     private readonly IAppSettingsStorage _appSettingsStorage;
     private readonly AppSettings _appSettings;
     private readonly IUpdateChecker _updateChecker;
     private CancellationTokenSource? _updateCheckCancellationTokenSource;
+
+    // Tracks the single hotkey editor currently active in this dialog.
+    private TextBox? _activeHotkeyTextBox;
+    private Button? _activeHotkeySaveButton;
+    private string _activeHotkeyName = string.Empty;
+    private string _originalHotkeyValue = string.Empty;
     private bool _isClosing;
 
     // Caches folder hotkeys while the dialog is open so combo-box changes can update quickly.
@@ -71,41 +84,49 @@ public partial class SettingsForm : Form
         launchStartupCheckBox.Checked = _appSettings.LaunchAtStartup;
     }
 
-    private void SetNextWallpaperHkEditMode(bool isEditing)
+    private void BeginHotkeyEdit(TextBox textBox, Button saveButton, string hotkeyName)
     {
-        SetHotkeyEditMode(
-            nextWallpaperHkTextBox,
-            nextWallpaperHkSaveButton,
-            nextWallpaperHkModifyButton,
-            folderHkModifyButton,
-            isEditing
-        );
+        _activeHotkeyTextBox = textBox;
+        _activeHotkeySaveButton = saveButton;
+        _activeHotkeyName = hotkeyName;
+        _originalHotkeyValue = textBox.Text;
+
+        textBox.ReadOnly = false;
+        nextWallpaperHkModifyButton.Enabled = false;
+        folderHkModifyButton.Enabled = false;
+        folderHkComboBox.Enabled = false;
+        settingsFormOkButton.Enabled = false;
+
+        ValidateActiveHotkeyText();
+        textBox.Focus();
+        textBox.SelectAll();
     }
 
-    private void SetFolderHkEditMode(bool isEditing)
+    private void EndHotkeyEdit(bool restoreOriginalValue)
     {
-        SetHotkeyEditMode(
-            folderHkTextBox,
-            folderHkSaveButton,
-            folderHkModifyButton,
-            nextWallpaperHkModifyButton,
-            isEditing
-        );
-    }
+        if (_activeHotkeyTextBox is null)
+        {
+            return;
+        }
 
-    private void SetHotkeyEditMode(
-        TextBox textBox,
-        Button saveButton,
-        Button modifyButton,
-        Button otherModifyButton,
-        bool isEditing)
-    {
-        textBox.ReadOnly = !isEditing;
-        saveButton.Enabled = isEditing;
-        modifyButton.Enabled = !isEditing;
-        otherModifyButton.Enabled = !isEditing;
-        OriginalValue = isEditing ? OriginalValue : string.Empty;
-        settingsFormOkButton.Enabled = !isEditing;
+        if (restoreOriginalValue)
+        {
+            _activeHotkeyTextBox.Text = _originalHotkeyValue;
+        }
+
+        _activeHotkeyTextBox.ReadOnly = true;
+        _activeHotkeySaveButton!.Enabled = false;
+        _activeHotkeyTextBox = null;
+        _activeHotkeySaveButton = null;
+        _activeHotkeyName = string.Empty;
+        _originalHotkeyValue = string.Empty;
+
+        nextWallpaperHkModifyButton.Enabled = true;
+        folderHkModifyButton.Enabled = folderHkComboBox.SelectedItem is not null;
+        folderHkComboBox.Enabled = true;
+        settingsFormOkButton.Enabled = true;
+        SetHotkeyInputHint(HotkeyInputDefaultHint);
+        ActiveControl = nextWallpaperHkLabel;
     }
 
     private void SaveSettings()
@@ -114,13 +135,14 @@ public partial class SettingsForm : Form
         _appSettingsStorage.Save(_appSettings);
     }
 
-    private string OriginalValue { get; set; } = string.Empty;
-
     private void SettingsForm_Load(object sender, EventArgs e)
     {
         // Keep the first editable hotkey box unfocused until the user chooses to modify it.
         ActiveControl = nextWallpaperHkLabel;
         LoadInitialSettings();
+
+        // Registered combinations can arrive through WM_HOTKEY instead of a text-box KeyDown.
+        _hotkeyService.HotkeyPressed += hotkeyService_HotkeyPressed;
     }
 
     protected override void OnFormClosing(FormClosingEventArgs e)
@@ -130,36 +152,50 @@ public partial class SettingsForm : Form
         base.OnFormClosing(e);
     }
 
+    protected override void OnFormClosed(FormClosedEventArgs e)
+    {
+        // The shared service outlives this dialog, so it must not retain the closed form.
+        _hotkeyService.HotkeyPressed -= hotkeyService_HotkeyPressed;
+        base.OnFormClosed(e);
+    }
+
     private void nextWallpaperHkModifyButton_Click(object sender, EventArgs e)
     {
-        OriginalValue = nextWallpaperHkTextBox.Text;
-        nextWallpaperHkTextBox.Focus();
-        SetNextWallpaperHkEditMode(true);
+        BeginHotkeyEdit(
+            nextWallpaperHkTextBox,
+            nextWallpaperHkSaveButton,
+            Default.NextWallpaperHotkeyName
+        );
     }
 
     private async void nextWallpaperHkSaveButton_Click(object sender, EventArgs e)
     {
         try
         {
-            var newHotkeyText = nextWallpaperHkTextBox.Text.Trim();
-            if (newHotkeyText == OriginalValue)
+            if (!TryNormalizeHotkeyText(nextWallpaperHkTextBox.Text, out var newHotkeyText))
             {
-                SetNextWallpaperHkEditMode(false);
                 return;
             }
 
-            await SaveHotkeyChangeAsync(Default.NextWallpaperHotkeyName, newHotkeyText);
+            nextWallpaperHkTextBox.Text = newHotkeyText;
+            if (newHotkeyText == _originalHotkeyValue)
+            {
+                EndHotkeyEdit(restoreOriginalValue: false);
+                return;
+            }
 
-            SetNextWallpaperHkEditMode(false);
+            nextWallpaperHkSaveButton.Enabled = false;
+            await SaveHotkeyChangeAsync(Default.NextWallpaperHotkeyName, newHotkeyText);
+            RefreshHotkeyText(Default.NextWallpaperHotkeyName, nextWallpaperHkTextBox);
+            EndHotkeyEdit(restoreOriginalValue: false);
         }
         catch (Exception exception)
         {
-            SetNextWallpaperHkEditMode(false);
-            nextWallpaperHkTextBox.Text = string.Empty;
             FormHelper.ShowErrorMessage(
                 $"Failed to save the hotkey for '{Default.NextWallpaperHotkeyName}': {exception.Message}, please try again.",
                 "Error Saving Hotkey"
             );
+            RestoreHotkeyEditorAfterSaveFailure(nextWallpaperHkTextBox);
         }
     }
 
@@ -177,42 +213,199 @@ public partial class SettingsForm : Form
 
     private void folderHkModifyButton_Click(object sender, EventArgs e)
     {
-        OriginalValue = folderHkTextBox.Text;
-        folderHkTextBox.Focus();
-        SetFolderHkEditMode(true);
+        if (!TryGetSelectedFolder(out var selectedFolder))
+        {
+            return;
+        }
+
+        BeginHotkeyEdit(folderHkTextBox, folderHkSaveButton, selectedFolder);
     }
 
     private async void folderHkSaveButton_Click(object sender, EventArgs e)
     {
         try
         {
-            var newHotkeyText = folderHkTextBox.Text.Trim();
-            if (newHotkeyText == OriginalValue)
+            if (!TryNormalizeHotkeyText(folderHkTextBox.Text, out var newHotkeyText))
             {
-                SetFolderHkEditMode(false);
                 return;
             }
 
-            if (!TryGetSelectedFolder(out var selectedFolder))
+            folderHkTextBox.Text = newHotkeyText;
+            if (newHotkeyText == _originalHotkeyValue)
             {
-                SetFolderHkEditMode(false);
+                EndHotkeyEdit(restoreOriginalValue: false);
                 return;
             }
 
+            var selectedFolder = _activeHotkeyName;
+            folderHkSaveButton.Enabled = false;
             await SaveHotkeyChangeAsync(selectedFolder, newHotkeyText);
             RefreshFolderHotkey(selectedFolder);
-
-            SetFolderHkEditMode(false);
+            EndHotkeyEdit(restoreOriginalValue: false);
         }
         catch (Exception exception)
         {
-            SetFolderHkEditMode(false);
-            folderHkTextBox.Text = string.Empty;
             FormHelper.ShowErrorMessage(
                 $"Failed to save the hotkey for the selected folder: {exception.Message}, please try again.",
                 "Error Saving Hotkey"
             );
+            RestoreHotkeyEditorAfterSaveFailure(folderHkTextBox);
         }
+    }
+
+    private void hotkeyTextBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        // KeyPreview also routes form-level events here; ignore unrelated text boxes.
+        if (_activeHotkeyTextBox is null ||
+            sender is TextBox textBox && !ReferenceEquals(textBox, _activeHotkeyTextBox))
+        {
+            return;
+        }
+
+        if (e.KeyCode == Keys.Escape)
+        {
+            SuppressKey(e);
+            EndHotkeyEdit(restoreOriginalValue: true);
+            return;
+        }
+
+        var captureResult = HotkeyCaptureInterpreter.Interpret(
+            e.KeyCode,
+            e.Modifiers,
+            HotkeyCaptureInterpreter.IsWindowsKeyPressed()
+        );
+
+        switch (captureResult.Status)
+        {
+            case HotkeyCaptureStatus.ManualInput:
+                return;
+            case HotkeyCaptureStatus.WaitingForPrimaryKey:
+                SuppressKey(e);
+                SetHotkeyInputHint(captureResult.Message);
+                return;
+            case HotkeyCaptureStatus.Recorded when captureResult.Hotkey is { } hotkey:
+                SuppressKey(e);
+                RecordHotkey(hotkey);
+                return;
+            case HotkeyCaptureStatus.Unsupported:
+                SuppressKey(e);
+                SetHotkeyInputHint(captureResult.Message, isError: true);
+                return;
+        }
+    }
+
+    private void hotkeyTextBox_TextChanged(object sender, EventArgs e)
+    {
+        if (ReferenceEquals(sender, _activeHotkeyTextBox))
+        {
+            ValidateActiveHotkeyText();
+        }
+    }
+
+    private void hotkeyService_HotkeyPressed(object? sender, HotkeyPressedEventArgs e)
+    {
+        if (_activeHotkeyTextBox is null || _isClosing)
+        {
+            return;
+        }
+
+        if (InvokeRequired)
+        {
+            BeginInvoke(() => RecordHotkey(e.HotkeyInfo.Hotkey));
+            return;
+        }
+
+        RecordHotkey(e.HotkeyInfo.Hotkey);
+    }
+
+    private void RecordHotkey(Hotkey hotkey)
+    {
+        if (_activeHotkeyTextBox is null)
+        {
+            return;
+        }
+
+        _activeHotkeyTextBox.Text = hotkey.ToString();
+        _activeHotkeyTextBox.SelectAll();
+        SetHotkeyInputHint(
+            $"Recorded {_activeHotkeyTextBox.Text}. Click Save to apply it.",
+            isSuccess: true
+        );
+    }
+
+    private void ValidateActiveHotkeyText()
+    {
+        if (_activeHotkeyTextBox is null || _activeHotkeySaveButton is null)
+        {
+            return;
+        }
+
+        var hotkeyText = _activeHotkeyTextBox.Text.Trim();
+        if (string.IsNullOrEmpty(hotkeyText))
+        {
+            // A blank value intentionally disables the selected binding.
+            _activeHotkeySaveButton.Enabled = true;
+            SetHotkeyInputHint("Click Save to disable this hotkey, or press Esc to cancel.");
+            return;
+        }
+
+        if (Hotkey.TryParseFrom(hotkeyText, out _, out var errorMessage))
+        {
+            _activeHotkeySaveButton.Enabled = true;
+            SetHotkeyInputHint(HotkeyInputEditingHint);
+            return;
+        }
+
+        _activeHotkeySaveButton.Enabled = false;
+        SetHotkeyInputHint($"{errorMessage} Use Ctrl/Alt/Shift/Win + A–Z.", isError: true);
+    }
+
+    private void SetHotkeyInputHint(string message, bool isError = false, bool isSuccess = false)
+    {
+        hotkeyInputHintLabel.Text = message;
+        hotkeyInputHintLabel.ForeColor = isError
+            ? HotkeyInputErrorColor
+            : isSuccess
+                ? HotkeyInputSuccessColor
+                : ModernTheme.TextPrimary;
+    }
+
+    private static void SuppressKey(KeyEventArgs e)
+    {
+        e.Handled = true;
+        e.SuppressKeyPress = true;
+    }
+
+    private static bool TryNormalizeHotkeyText(string value, out string normalizedValue)
+    {
+        // Canonical text prevents equivalent spellings from causing a needless rebind.
+        var trimmedValue = value.Trim();
+        if (string.IsNullOrEmpty(trimmedValue))
+        {
+            normalizedValue = string.Empty;
+            return true;
+        }
+
+        if (Hotkey.TryParseFrom(trimmedValue, out var hotkey, out _))
+        {
+            normalizedValue = hotkey.ToString();
+            return true;
+        }
+
+        normalizedValue = trimmedValue;
+        return false;
+    }
+
+    private void RestoreHotkeyEditorAfterSaveFailure(TextBox textBox)
+    {
+        if (!ReferenceEquals(textBox, _activeHotkeyTextBox))
+        {
+            return;
+        }
+
+        ValidateActiveHotkeyText();
+        textBox.Focus();
+        textBox.SelectAll();
     }
 
     private void settingsFormOkButton_Click(object sender, EventArgs e)
@@ -370,23 +563,84 @@ public partial class SettingsForm : Form
 
     private async Task SaveHotkeyChangeAsync(string name, string newHotkeyText)
     {
-        ApplyHotkeyChange(name, newHotkeyText);
-        await _hotkeyService.SaveHotkeysAsync();
+        // Snapshot the runtime registration so any failed change can be rolled back.
+        var previousHotkey = _hotkeyService.GetHotKeyInfoBy(h => h.Name, name);
+
+        try
+        {
+            ApplyHotkeyChange(name, newHotkeyText);
+            await _hotkeyService.SaveHotkeysAsync();
+        }
+        catch (Exception saveException)
+        {
+            try
+            {
+                RestoreHotkeyBinding(name, previousHotkey);
+            }
+            catch (Exception restoreException)
+            {
+                throw new AggregateException(
+                    $"Failed to save hotkey '{name}' and restore its previous binding.",
+                    saveException,
+                    restoreException
+                );
+            }
+
+            throw;
+        }
     }
 
     private void ApplyHotkeyChange(string name, string newHotkeyText)
     {
+        // Use live service state so retrying after a persistence failure remains safe.
+        var existingHotkey = _hotkeyService.GetHotKeyInfoBy(h => h.Name, name);
+
         if (string.IsNullOrEmpty(newHotkeyText))
         {
-            _ = _hotkeyService.UnregisterHotkey(name);
+            if (existingHotkey is not null && !_hotkeyService.UnregisterHotkey(name))
+            {
+                throw new InvalidOperationException($"Failed to unregister hotkey '{name}'.");
+            }
+
+            return;
         }
-        else if (string.IsNullOrEmpty(OriginalValue))
+
+        if (existingHotkey is null)
         {
             _ = _hotkeyService.RegisterHotkey(newHotkeyText, name);
+            return;
         }
-        else
+
+        if (!string.Equals(existingHotkey.Hotkey.ToString(), newHotkeyText, StringComparison.Ordinal))
         {
             _hotkeyService.ChangeHotkeyBinding(name, newHotkeyText);
+        }
+    }
+
+    private void RestoreHotkeyBinding(string name, HotkeyInfo? previousHotkey)
+    {
+        // Restore only the runtime binding; the candidate text stays available for retry.
+        var currentHotkey = _hotkeyService.GetHotKeyInfoBy(h => h.Name, name);
+        if (previousHotkey is null)
+        {
+            if (currentHotkey is not null && !_hotkeyService.UnregisterHotkey(name))
+            {
+                throw new InvalidOperationException($"Failed to remove the unsaved hotkey '{name}'.");
+            }
+
+            return;
+        }
+
+        var previousHotkeyText = previousHotkey.Hotkey.ToString();
+        if (currentHotkey is null)
+        {
+            _ = _hotkeyService.RegisterHotkey(previousHotkeyText, name, previousHotkey.Id);
+            return;
+        }
+
+        if (currentHotkey.Hotkey != previousHotkey.Hotkey)
+        {
+            _hotkeyService.ChangeHotkeyBinding(name, previousHotkeyText);
         }
     }
 
@@ -401,5 +655,10 @@ public partial class SettingsForm : Form
         var hotkeyInfo = _hotkeyService.GetHotKeyInfoBy(h => h.Name, folder);
         _folderHotkeys[folder] = hotkeyInfo;
         folderHkTextBox.Text = hotkeyInfo?.ToString() ?? string.Empty;
+    }
+
+    private void RefreshHotkeyText(string name, TextBox textBox)
+    {
+        textBox.Text = _hotkeyService.GetHotKeyInfoBy(h => h.Name, name)?.ToString() ?? string.Empty;
     }
 }
