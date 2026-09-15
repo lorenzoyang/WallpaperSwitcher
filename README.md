@@ -14,6 +14,12 @@
 
 <img src="./assets/Settings.png" alt="Wallpaper Switcher settings screen" width="720"/>
 
+### System tray menu
+
+The tray menu shares the main window's colors and typography, with scalable line icons and a checkmark for the current folder. Preview with sample folders:
+
+<img src="./assets/TrayMenu-Folders.png" alt="Wallpaper Switcher tray menu and folder submenu" width="720"/>
+
 ## Features
 
 - **Wallpaper folder management**

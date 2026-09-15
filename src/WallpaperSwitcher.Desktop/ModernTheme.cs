@@ -18,6 +18,20 @@ internal static class ModernTheme
     public static readonly Color DisabledBackground = Color.FromArgb(238, 242, 247);
     public static readonly Color DisabledBorder = Color.FromArgb(203, 213, 225);
     public static readonly Color DisabledText = Color.FromArgb(148, 163, 184);
+    public static readonly Color PrimaryAccent = Color.FromArgb(30, 87, 214);
+    public static readonly Color DangerAccent = Color.FromArgb(196, 42, 58);
+    public static readonly Color MenuHoverBackground = Color.FromArgb(226, 232, 240);
+    public static readonly Color MenuPressedBackground = Color.FromArgb(203, 213, 225);
+
+    public const int MenuItemHeight = 32;
+    public const int MenuVerticalPadding = 4;
+    public const int MenuItemVerticalPadding = 12;
+    public const int MenuSeparatorHeight = 8;
+    public const int MenuIconSize = 16;
+    public const int MenuMinimumWidth = 216;
+    public const int MenuMaximumWidth = 360;
+    public const int MenuTextInset = 40;
+    public const int MenuTrailingInset = 28;
 
     public static readonly Font BodyFont = new("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
     public static readonly Font LabelFont = new("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -27,6 +41,11 @@ internal static class ModernTheme
     public static void ApplyForm(Form form)
     {
         form.BackColor = AppBackground;
+    }
+
+    internal static int ScaleMenu(int value, int dpi)
+    {
+        return (int)Math.Round(value * dpi / 96F);
     }
 
     public static void ApplySurface(Panel panel)
@@ -182,7 +201,7 @@ internal sealed class ModernButtonPalette
         return kind switch
         {
             ModernButtonKind.Primary => new ModernButtonPalette(
-                Color.FromArgb(30, 87, 214),
+                ModernTheme.PrimaryAccent,
                 Color.White,
                 Color.FromArgb(24, 75, 190),
                 Color.FromArgb(23, 61, 150),
@@ -194,7 +213,7 @@ internal sealed class ModernButtonPalette
                 Color.FromArgb(15, 84, 52),
                 Color.FromArgb(15, 84, 52)),
             ModernButtonKind.Danger => new ModernButtonPalette(
-                Color.FromArgb(196, 42, 58),
+                ModernTheme.DangerAccent,
                 Color.White,
                 Color.FromArgb(169, 36, 50),
                 Color.FromArgb(139, 30, 42),
