@@ -9,14 +9,24 @@ public partial class MainForm
 
     private void InitializeSystemTray()
     {
-        var trayMenu = new ContextMenuStrip();
-        trayMenu.Items.Add(new ToolStripMenuItem(TraySwitchFolderText));
+        components ??= new System.ComponentModel.Container();
+        var trayMenu = new ModernContextMenuStrip(components);
+        var folderMenuItem = new ModernMenuItem(TraySwitchFolderText, ModernMenuIcon.Folder)
+        {
+            DropDown = new ModernContextMenuStrip(components)
+        };
+        trayMenu.Items.Add(folderMenuItem);
+        trayMenu.Items.Add(new ModernMenuItem(TrayNextWallpaperText, ModernMenuIcon.NextWallpaper, nextWallpaperButton_Click)
+        {
+            ForeColor = ModernTheme.PrimaryAccent
+        });
         trayMenu.Items.Add(new ToolStripSeparator());
-        trayMenu.Items.Add(new ToolStripMenuItem(TrayNextWallpaperText, null, nextWallpaperButton_Click));
+        trayMenu.Items.Add(new ModernMenuItem(TraySettingsText, ModernMenuIcon.Settings, settingsButton_Click));
         trayMenu.Items.Add(new ToolStripSeparator());
-        trayMenu.Items.Add(new ToolStripMenuItem(TraySettingsText, null, settingsButton_Click));
-        trayMenu.Items.Add(new ToolStripSeparator());
-        trayMenu.Items.Add(new ToolStripMenuItem(TrayExitText, null, ExitApplication));
+        trayMenu.Items.Add(new ModernMenuItem(TrayExitText, ModernMenuIcon.Exit, ExitApplication)
+        {
+            ForeColor = ModernTheme.DangerAccent
+        });
 
         _trayIcon.MouseClick += (_, e) =>
         {
@@ -33,16 +43,28 @@ public partial class MainForm
     private void UpdateTrayMenu()
     {
         var folderMenuItem = GetTrayMenuItem<ToolStripMenuItem>(TraySwitchFolderText);
-        folderMenuItem.DropDownItems.Clear();
-
-        foreach (var folderPath in GetConfiguredFolders())
+        var folderMenu = folderMenuItem.DropDown;
+        folderMenu.SuspendLayout();
+        try
         {
-            folderMenuItem.DropDownItems.Add(CreateFolderTrayMenuItem(folderPath));
+            while (folderMenu.Items.Count > 0)
+            {
+                folderMenu.Items[0].Dispose();
+            }
+
+            foreach (var folderPath in GetConfiguredFolders())
+            {
+                folderMenu.Items.Add(CreateFolderTrayMenuItem(folderPath));
+            }
+
+            if (folderMenu.Items.Count == 0)
+            {
+                folderMenu.Items.Add(new ModernMenuItem("No folders configured") { Enabled = false });
+            }
         }
-
-        if (folderMenuItem.DropDownItems.Count == 0)
+        finally
         {
-            folderMenuItem.DropDownItems.Add(new ToolStripMenuItem("No folders configured") { Enabled = false });
+            folderMenu.ResumeLayout(true);
         }
 
         GetTrayMenuItem(TrayNextWallpaperText).Enabled = currentFolderComboBox.SelectedItem != null;
@@ -50,8 +72,17 @@ public partial class MainForm
 
     private ToolStripMenuItem CreateFolderTrayMenuItem(string folderPath)
     {
-        var menuItem = new ToolStripMenuItem(Path.GetFileName(folderPath))
+        var trimmedPath = Path.TrimEndingDirectorySeparator(folderPath);
+        var folderName = Path.GetFileName(trimmedPath);
+        if (string.IsNullOrEmpty(folderName))
         {
+            folderName = trimmedPath;
+        }
+
+        // Escape menu mnemonics without changing the path used by the click handler.
+        var menuItem = new ModernMenuItem(folderName.Replace("&", "&&"))
+        {
+            AccessibleName = folderName,
             Tag = folderPath,
             Checked = folderPath == currentFolderComboBox.SelectedItem?.ToString(),
             ToolTipText = folderPath
