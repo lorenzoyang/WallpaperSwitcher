@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+using Windows.Win32;
 using Windows.Win32.Foundation;
 
 namespace WallpaperSwitcher.Core.Wallpaper;
@@ -7,80 +9,61 @@ namespace WallpaperSwitcher.Core.Wallpaper;
 /// </summary>
 public sealed class CustomWallpaperManager : WallpaperManager
 {
-    private string _slideShowFolder = string.Empty;
-    private List<string> _slideShowWallpapers = [];
-    private int _currentIndex;
+    private readonly CustomSlideshow _slideshow;
 
     /// <summary>
-    /// Gets or sets the folder containing top-level images used in the custom slideshow.
+    /// Initializes the custom slideshow with the Windows wallpaper operations.
     /// </summary>
-    /// <remarks>
-    /// Setting this property rebuilds the ordered wallpaper list and resets the slideshow index.
-    /// </remarks>
-    protected override string SlideShowFolder
+    public CustomWallpaperManager()
     {
-        get => _slideShowFolder;
-        set
-        {
-            _slideShowFolder = value;
-            _slideShowWallpapers = WallpaperHelper.EnumerateWallpaperFiles(value)
-                .OrderBy(Path.GetFileName)
-                .ToList();
-            CurrentIndex = 0;
-        }
-    }
-
-    private int CurrentIndex
-    {
-        get => _currentIndex;
-        set => _currentIndex = (value >= _slideShowWallpapers.Count || value < 0) ? 0 : value;
+        _slideshow = new CustomSlideshow(
+            WallpaperHelper.EnumerateWallpaperFiles,
+            GetCurrentWallpaper,
+            TrySetWallpaper);
     }
 
     /// <inheritdoc/>
     /// <remarks>
-    /// If the specified folder is already the active slideshow folder and the
-    /// current wallpaper is one of its images, the slideshow is not restarted
-    /// and the current index is preserved.
+    /// Preserves the current wallpaper when it belongs to the selected folder.
+    /// Empty or temporarily inaccessible folders are retried on the next advance.
     /// </remarks>
     public override void SetSlideShow(string folder)
     {
-        if (!WallpaperHelper.IsValidWallpaperFolder(folder, out _))
-        {
-            ClearSlideShow();
-            return;
-        }
-
-        SlideShowFolder = folder;
-        var currentWallpaper = GetCurrentWallpaper();
-        var index = _slideShowWallpapers.IndexOf(currentWallpaper);
-
-        // Preserve the user's current wallpaper when it is already part of the selected folder.
-        if (index >= 0)
-        {
-            CurrentIndex = index;
-            return;
-        }
-
-        CurrentIndex = 0;
-        SetWallpaper(_slideShowWallpapers[CurrentIndex]);
+        _slideshow.SetSlideShow(folder);
     }
 
     /// <inheritdoc/>
     /// <remarks>
-    /// If the slideshow folder is empty or contains only one image, no action is taken.
+    /// Refreshes the current folder before advancing, including newly added images and
+    /// skipping deleted or unavailable images without resetting the current position.
     /// </remarks>
     public override void AdvanceForwardSlideshow()
     {
-        if (string.IsNullOrEmpty(SlideShowFolder) || _slideShowWallpapers.Count <= 1) return;
-        CurrentIndex++;
-        SetWallpaper(_slideShowWallpapers[CurrentIndex]);
+        _slideshow.AdvanceForwardSlideshow();
     }
 
-    private void ClearSlideShow()
+    private bool TrySetWallpaper(string wallpaper)
     {
-        _slideShowFolder = string.Empty;
-        _slideShowWallpapers = [];
-        _currentIndex = 0;
+        try
+        {
+            if (!WallpaperHelper.IsValidWallpaper(wallpaper))
+            {
+                return false;
+            }
+
+            // The generated COM signature throws on a failed HRESULT.
+            DesktopWallpaper.SetWallpaper(null, wallpaper);
+            return true;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or COMException)
+        {
+            return false;
+        }
+        catch (ArgumentException exception) when (exception.HResult == unchecked((int)0x80070057))
+        {
+            // Windows reports invalid image contents as E_INVALIDARG, mapped to ArgumentException.
+            return false;
+        }
     }
 
     /// <summary>
@@ -90,8 +73,18 @@ public sealed class CustomWallpaperManager : WallpaperManager
     private unsafe string GetCurrentWallpaper()
     {
         PWSTR pWallpaperPath = default;
-        DesktopWallpaper.GetWallpaper(null, &pWallpaperPath);
-        var result = pWallpaperPath.ToString();
-        return result ?? string.Empty;
+        try
+        {
+            DesktopWallpaper.GetWallpaper(null, &pWallpaperPath);
+            return pWallpaperPath.ToString() ?? string.Empty;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or COMException)
+        {
+            return string.Empty;
+        }
+        finally
+        {
+            Marshal.FreeCoTaskMem((nint)pWallpaperPath.Value);
+        }
     }
 }
