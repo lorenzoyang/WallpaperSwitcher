@@ -100,6 +100,10 @@ Wallpaper Switcher provides two modes because Windows' native slideshow behavior
 - **Native Mode (System SlideShow)** asks Windows to manage the slideshow for the selected folder. This mode follows Windows' own slideshow behavior.
 - **Custom Mode (Fast Switching)** builds an ordered list of images in the selected folder and sets the next image directly when you switch.
 
+In **Custom Mode**, every **Next Wallpaper** action (button, tray menu, or hotkey) rescans the selected folder before switching. Newly added images join the filename order, deleted images leave the list, and switching continues from the current image. Only supported image files directly inside the selected folder are included; subfolders are not scanned. No restart or manual refresh is needed.
+
+Images that cannot be set, such as files still being copied, are skipped for that action and may be retried on later switches. If the folder is empty or temporarily inaccessible, or no other image can be set, the current wallpaper stays in place. The selected folder is retried the next time you use **Next Wallpaper**.
+
 ### Known Limitation: Multi-Monitor Setups
 
 Wallpaper Switcher does not currently provide consistent multi-monitor support.
