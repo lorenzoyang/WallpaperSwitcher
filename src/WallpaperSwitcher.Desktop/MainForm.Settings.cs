@@ -211,11 +211,9 @@ public partial class MainForm
                 _hotkeyService.HotkeyPressed += HandleHotkeyPressed;
             }
 
-            switch (result)
+            if (result == DialogResult.OK && settingsForm.HasSavedChanges)
             {
-                case DialogResult.OK:
-                    FormHelper.ShowSuccessMessage("Settings saved successfully.");
-                    break;
+                FormHelper.ShowSuccessMessage("Settings saved successfully.");
             }
         }
         finally
