@@ -24,6 +24,7 @@ public partial class SettingsForm : Form
     private readonly IAppSettingsStorage _appSettingsStorage;
     private readonly AppSettings _appSettings;
     private readonly IUpdateChecker _updateChecker;
+    private readonly Func<bool, bool, bool> _setStartupEnabled;
     private CancellationTokenSource? _updateCheckCancellationTokenSource;
 
     // Tracks the single hotkey editor currently active in this dialog.
@@ -35,6 +36,8 @@ public partial class SettingsForm : Form
 
     // Caches folder hotkeys while the dialog is open so combo-box changes can update quickly.
     private readonly Dictionary<string, HotkeyInfo?> _folderHotkeys;
+
+    internal bool HasSavedChanges { get; private set; }
 
     /// <summary>
     /// Initializes a settings dialog backed by the running hotkey service and shared app settings.
@@ -49,6 +52,17 @@ public partial class SettingsForm : Form
         IAppSettingsStorage appSettingsStorage,
         AppSettings appSettings,
         IUpdateChecker? updateChecker = null)
+        : this(hotkeyService, folders, appSettingsStorage, appSettings, updateChecker, StartupManager.SetStartupEnabled)
+    {
+    }
+
+    internal SettingsForm(
+        HotkeyService hotkeyService,
+        List<string> folders,
+        IAppSettingsStorage appSettingsStorage,
+        AppSettings appSettings,
+        IUpdateChecker? updateChecker,
+        Func<bool, bool, bool> setStartupEnabled)
     {
         InitializeComponent();
 
@@ -56,6 +70,7 @@ public partial class SettingsForm : Form
         _appSettingsStorage = appSettingsStorage;
         _appSettings = appSettings;
         _updateChecker = updateChecker ?? new GitHubUpdateChecker();
+        _setStartupEnabled = setStartupEnabled;
         _folderHotkeys = folders.ToDictionary(folder => folder, HotkeyInfo? (_) => null);
     }
 
@@ -523,13 +538,19 @@ public partial class SettingsForm : Form
     private void launchStartupCheckBox_CheckedChanged(object? sender, EventArgs e)
     {
         var requestedStartupState = launchStartupCheckBox.Checked;
+        var previousStartupState = _appSettings.LaunchAtStartup;
+        if (requestedStartupState == previousStartupState)
+        {
+            return;
+        }
+
         var actionMessage = requestedStartupState ? "enable" : "disable";
 
         try
         {
-            var success = StartupManager.SetStartupEnabled(
+            var success = _setStartupEnabled(
                 requestedStartupState,
-                startMinimized: true // Startup launches to the tray instead of showing the main window.
+                true // Startup launches to the tray instead of showing the main window.
             );
             if (!success)
             {
@@ -538,9 +559,11 @@ public partial class SettingsForm : Form
                     $"Failed to {actionMessage} launch at startup. Please check your permissions and try again.",
                     "Startup Registration Error"
                 );
+                return;
             }
 
             SaveSettings();
+            HasSavedChanges = true;
         }
         catch (Exception exception)
         {
@@ -555,8 +578,9 @@ public partial class SettingsForm : Form
 
         void RevertCheckboxState()
         {
+            _appSettings.LaunchAtStartup = previousStartupState;
             launchStartupCheckBox.CheckedChanged -= launchStartupCheckBox_CheckedChanged;
-            launchStartupCheckBox.Checked = !launchStartupCheckBox.Checked;
+            launchStartupCheckBox.Checked = previousStartupState;
             launchStartupCheckBox.CheckedChanged += launchStartupCheckBox_CheckedChanged;
         }
     }
@@ -570,6 +594,7 @@ public partial class SettingsForm : Form
         {
             ApplyHotkeyChange(name, newHotkeyText);
             await _hotkeyService.SaveHotkeysAsync();
+            HasSavedChanges = true;
         }
         catch (Exception saveException)
         {
