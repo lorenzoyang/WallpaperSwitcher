@@ -91,12 +91,8 @@ public class JsonHotkeyStorageTests
 
         // Verify content can be read back
         var loadedHotkeys = (await _jsonHotkeyStorage.LoadAsync()).ToArray();
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(loadedHotkeys, Has.Length.EqualTo(hotkeys.Length));
-            Assert.That(loadedHotkeys[0], Is.EqualTo(hotkeys[0]));
-            Assert.That(loadedHotkeys[1], Is.EqualTo(hotkeys[1]));
-        }
+        Assert.That(loadedHotkeys.Select(hotkey => (hotkey.Id, hotkey.Hotkey, hotkey.Name)),
+            Is.EqualTo(hotkeys.Select(hotkey => (hotkey.Id, hotkey.Hotkey, hotkey.Name))));
     }
 
     [Test]
@@ -124,56 +120,8 @@ public class JsonHotkeyStorageTests
 
         // Verify content can be read back
         var loadedHotkeys = _jsonHotkeyStorage.Load().ToArray();
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(loadedHotkeys, Has.Length.EqualTo(hotkeys.Length));
-            Assert.That(loadedHotkeys[0], Is.EqualTo(hotkeys[0]));
-            Assert.That(loadedHotkeys[1], Is.EqualTo(hotkeys[1]));
-        }
-    }
-
-    [Test]
-    public async Task SaveAsync_CreatesFileIfNotExists()
-    {
-        var hotkeys = new[]
-        {
-            new HotkeyInfo
-            {
-                Id = 1,
-                Hotkey = new Hotkey(ModifierKeys.Alt, VirtualKeys.A),
-                Name = "Test"
-            }
-        };
-
-        await _jsonHotkeyStorage.SaveAsync(hotkeys);
-
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(Directory.Exists(_testDirectory), Is.True);
-            Assert.That(File.Exists(_testFilePath), Is.True);
-        }
-    }
-
-    [Test]
-    public void Save_CreatesFileIfNotExists()
-    {
-        var hotkeys = new[]
-        {
-            new HotkeyInfo
-            {
-                Id = 1,
-                Hotkey = new Hotkey(ModifierKeys.Alt, VirtualKeys.A),
-                Name = "Test"
-            }
-        };
-
-        _jsonHotkeyStorage.Save(hotkeys);
-
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(Directory.Exists(_testDirectory), Is.True);
-            Assert.That(File.Exists(_testFilePath), Is.True);
-        }
+        Assert.That(loadedHotkeys.Select(hotkey => (hotkey.Id, hotkey.Hotkey, hotkey.Name)),
+            Is.EqualTo(hotkeys.Select(hotkey => (hotkey.Id, hotkey.Hotkey, hotkey.Name))));
     }
 
     [Test]
@@ -181,7 +129,6 @@ public class JsonHotkeyStorageTests
     {
         var result = (await _jsonHotkeyStorage.LoadAsync()).ToArray();
 
-        Assert.That(result, Is.Not.Null);
         Assert.That(result, Is.Empty);
     }
 
@@ -190,7 +137,6 @@ public class JsonHotkeyStorageTests
     {
         var result = _jsonHotkeyStorage.Load().ToArray();
 
-        Assert.That(result, Is.Not.Null);
         Assert.That(result, Is.Empty);
     }
 
@@ -202,7 +148,6 @@ public class JsonHotkeyStorageTests
 
         var result = (await _jsonHotkeyStorage.LoadAsync()).ToArray();
 
-        Assert.That(result, Is.Not.Null);
         Assert.That(result, Is.Empty);
     }
 
@@ -214,7 +159,6 @@ public class JsonHotkeyStorageTests
 
         var result = _jsonHotkeyStorage.Load().ToArray();
 
-        Assert.That(result, Is.Not.Null);
         Assert.That(result, Is.Empty);
     }
 

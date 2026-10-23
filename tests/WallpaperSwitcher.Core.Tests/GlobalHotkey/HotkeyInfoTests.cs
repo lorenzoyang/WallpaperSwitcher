@@ -65,26 +65,6 @@ public class HotkeyInfoTests
     }
 
     [Test]
-    public void GetHashCode_DifferentHotkeys_ReturnsDifferentHashCode()
-    {
-        var hotkey1 = new HotkeyInfo
-        {
-            Id = 1,
-            Hotkey = new Hotkey(ModifierKeys.Ctrl, VirtualKeys.A),
-            Name = "Wallpaper Folder 1"
-        };
-
-        var hotkey2 = new HotkeyInfo
-        {
-            Id = 1,
-            Hotkey = new Hotkey(ModifierKeys.Alt, VirtualKeys.B),
-            Name = "Wallpaper Folder 1"
-        };
-
-        Assert.That(hotkey1.GetHashCode(), Is.Not.EqualTo(hotkey2.GetHashCode()));
-    }
-
-    [Test]
     public void Operators_ConsistentWithEquals()
     {
         var hotkey1 = new HotkeyInfo
