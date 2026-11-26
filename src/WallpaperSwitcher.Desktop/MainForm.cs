@@ -14,7 +14,7 @@ public partial class MainForm : Form
     private const int NativeModeIndex = 0;
     private const int CustomModeIndex = 1;
 
-    private readonly IAppSettingsStorage _appSettingsStorage = new JsonAppSettingsStorage();
+    private readonly IAppSettingsStorage _appSettingsStorage;
 
     private readonly AppSettings _appSettings;
 
@@ -47,16 +47,23 @@ public partial class MainForm : Form
     /// <see langword="true"/> to load settings without showing the main window.
     /// </param>
     public MainForm(bool startMinimized = false)
+        : this(startMinimized, new JsonAppSettingsStorage())
     {
+    }
+
+    internal MainForm(bool startMinimized, IAppSettingsStorage settingsStorage,
+        WallpaperManager? wallpaperManager = null, HotkeyService? hotkeyService = null)
+    {
+        _appSettingsStorage = settingsStorage;
         _appSettings = _appSettingsStorage.Load();
-        _wallpaperManager = CreateWallpaperManager(_appSettings.SelectedModeIndex);
+        _wallpaperManager = wallpaperManager ?? CreateWallpaperManager(_appSettings.SelectedModeIndex);
 
         InitializeComponent();
 
         _trayIcon = CreateTrayIcon();
         InitializeSystemTray();
 
-        _hotkeyService = CreateHotkeyService();
+        _hotkeyService = hotkeyService ?? new HotkeyService(new Win32HotkeyRegistrar(Handle), new JsonHotkeyStorage());
         _hotkeyService.HotkeyPressed += HandleHotkeyPressed;
 
         if (startMinimized)
@@ -84,14 +91,6 @@ public partial class MainForm : Form
         {
             _hotkeyService.ProcessWindowMessage(m.WParam.ToInt32());
         }
-    }
-
-    private HotkeyService CreateHotkeyService()
-    {
-        return new HotkeyService(
-            new Win32HotkeyRegistrar(Handle),
-            new JsonHotkeyStorage()
-        );
     }
 
     private NotifyIcon CreateTrayIcon()

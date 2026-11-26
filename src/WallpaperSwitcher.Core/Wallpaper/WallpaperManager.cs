@@ -13,6 +13,8 @@ namespace WallpaperSwitcher.Core.Wallpaper;
 /// </remarks>
 public abstract class WallpaperManager
 {
+    private IDesktopWallpaper? _desktopWallpaper;
+
     /// <summary>
     /// Gets the instance of the <see cref="IDesktopWallpaper"/> interface used to control the desktop wallpaper.
     /// This interface is generated via the CsWin32 source generator and provides access to Windows wallpaper APIs.
@@ -20,7 +22,7 @@ public abstract class WallpaperManager
     /// <exception cref="InvalidOperationException">
     /// Thrown if the <see cref="IDesktopWallpaper"/> instance cannot be created.
     /// </exception>
-    private protected IDesktopWallpaper DesktopWallpaper { get; } = new DesktopWallpaper()
+    private protected IDesktopWallpaper DesktopWallpaper => _desktopWallpaper ??= new DesktopWallpaper()
         // ReSharper disable once SuspiciousTypeConversion.Global
         as IDesktopWallpaper ?? throw new InvalidOperationException("Failed to create IDesktopWallpaper instance.");
 
@@ -59,6 +61,16 @@ public abstract class WallpaperManager
     /// </summary>
     /// <param name="folder">The full path to the folder containing images to use in the slideshow.</param>
     public abstract void SetSlideShow(string folder);
+
+    /// <summary>
+    /// Selects a folder and reports whether the selection was accepted. An empty path clears it.
+    /// </summary>
+    public virtual bool TrySetSlideShow(string folder, out string errorMessage)
+    {
+        SetSlideShow(folder);
+        errorMessage = string.Empty;
+        return true;
+    }
 
     /// <summary>
     /// Advances the current wallpaper slideshow to the next image.

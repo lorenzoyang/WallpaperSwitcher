@@ -104,6 +104,8 @@ In **Custom Mode**, every **Next Wallpaper** action (button, tray menu, or hotke
 
 Images that cannot be set, such as files still being copied, are skipped for that action and may be retried on later switches. If the folder is empty or temporarily inaccessible, or no other image can be set, the current wallpaper stays in place. The selected folder is retried the next time you use **Next Wallpaper**.
 
+Configured folders stay in the list when a drive is disconnected. In Native Mode, if Windows cannot switch to a folder, the previous active folder stays selected. If the last folder is unavailable at startup, Next Wallpaper is disabled. Select the folder again when it is available.
+
 ### Known Limitation: Multi-Monitor Setups
 
 Wallpaper Switcher does not currently provide consistent multi-monitor support.

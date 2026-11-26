@@ -6,6 +6,7 @@ namespace WallpaperSwitcher.Desktop;
 public partial class MainForm
 {
     private const int MaxFolderNumber = 5;
+    private string _activeFolder = string.Empty;
 
     private void browseFolderButton_Click(object sender, EventArgs e)
     {
@@ -23,7 +24,7 @@ public partial class MainForm
 
     private void addFolderButton_Click(object sender, EventArgs e)
     {
-        if (currentFolderComboBox.Items.Count >= MaxFolderNumber)
+        if (_appSettings.WallpaperFolders.Count >= MaxFolderNumber)
         {
             FormHelper.ShowWarningMessage($"Max folders reached ({MaxFolderNumber}). Cannot add more.");
             addFolderTextBox.Clear();
@@ -39,13 +40,14 @@ public partial class MainForm
             return;
         }
 
-        if (currentFolderComboBox.Items.Contains(newFolderPath))
+        if (_appSettings.WallpaperFolders.Contains(newFolderPath))
         {
             FormHelper.ShowWarningMessage("This folder is already added.");
             addFolderTextBox.Clear();
             return;
         }
 
+        _appSettings.WallpaperFolders.Add(newFolderPath);
         AddFolderToComboBoxes(newFolderPath);
         addFolderTextBox.Clear();
 
@@ -69,22 +71,7 @@ public partial class MainForm
                 return;
             }
 
-            var wasCurrentSelection = currentFolderComboBox.SelectedItem?.ToString() == folderToRemove;
-
-            RemoveFolderFromComboBoxes(folderToRemove);
-
-            if (wasCurrentSelection)
-            {
-                _wallpaperManager.SetWallpaper(WallpaperManager.DefaultWallpaper);
-                currentFolderComboBox_SelectedIndexChanged(currentFolderComboBox, EventArgs.Empty);
-            }
-
-            removeFolderComboBox_SelectedIndexChanged(removeFolderComboBox, EventArgs.Empty);
-
-            _ = _hotkeyService.UnregisterHotkey(folderToRemove);
-            await _hotkeyService.SaveHotkeysAsync();
-
-            SaveSettings();
+            await RemoveFolderAsync(folderToRemove);
         }
         catch (Exception exception)
         {
@@ -109,9 +96,32 @@ public partial class MainForm
         return result == DialogResult.Yes;
     }
 
+    internal async Task RemoveFolderAsync(string folder)
+    {
+        if (_activeFolder == folder)
+        {
+            currentFolderComboBox.SelectedIndex = -1;
+            _wallpaperManager.SetWallpaper(WallpaperManager.DefaultWallpaper);
+        }
+
+        if (_appSettings.LastSelectedFolder == folder)
+        {
+            _appSettings.LastSelectedFolder = string.Empty;
+        }
+
+        _appSettings.WallpaperFolders.Remove(folder);
+        RemoveFolderFromComboBoxes(folder);
+        _ = _hotkeyService.UnregisterHotkey(folder);
+        await _hotkeyService.SaveHotkeysAsync();
+        SaveSettings();
+    }
+
     private void nextWallpaperButton_Click(object? sender, EventArgs e)
     {
-        _wallpaperManager.AdvanceForwardSlideshow();
+        if (_activeFolder.Length > 0)
+        {
+            _wallpaperManager.AdvanceForwardSlideshow();
+        }
     }
 
     private void removeFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -121,8 +131,28 @@ public partial class MainForm
 
     private void currentFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
-        nextWallpaperButton.Enabled = currentFolderComboBox.SelectedItem != null;
-        _wallpaperManager.SetSlideShow(currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty);
+        var requested = currentFolderComboBox.SelectedItem as string ?? string.Empty;
+        if (requested == _activeFolder) return;
+
+        if (_wallpaperManager.TrySetSlideShow(requested, out var errorMessage))
+        {
+            _activeFolder = requested;
+            _appSettings.LastSelectedFolder = requested;
+            nextWallpaperButton.Enabled = requested.Length > 0;
+            return;
+        }
+
+        // Restoring the selection raises this event again with the already active folder.
+        currentFolderComboBox.SelectedIndex = currentFolderComboBox.Items.IndexOf(_activeFolder);
+        var message = $"{requested}\n\n{errorMessage}";
+        if (Visible)
+        {
+            FormHelper.ShowWarningMessage(message, "Unable to switch folders");
+        }
+        else
+        {
+            _trayIcon.ShowBalloonTip(5000, "Unable to switch folders", message, ToolTipIcon.Warning);
+        }
     }
 
     private void addFolderTextBox_TextChanged(object sender, EventArgs e)

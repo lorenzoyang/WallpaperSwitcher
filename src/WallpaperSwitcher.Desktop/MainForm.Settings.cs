@@ -87,7 +87,7 @@ public partial class MainForm
     private void PopulateComponentsFromInitialSettings()
     {
         ResetFolderComboBoxes();
-        foreach (var folderPath in _appSettings.WallpaperFolders.Where(Directory.Exists))
+        foreach (var folderPath in _appSettings.WallpaperFolders)
         {
             AddFolderToComboBoxes(folderPath);
         }
@@ -101,11 +101,6 @@ public partial class MainForm
 
     private void SaveSettings()
     {
-        _appSettings.WallpaperFolders = GetConfiguredFolders()
-            .Where(Directory.Exists)
-            .ToList();
-
-        _appSettings.LastSelectedFolder = currentFolderComboBox.SelectedItem?.ToString() ?? string.Empty;
         _appSettings.SelectedModeIndex = NormalizeModeIndex(modeComboBox.SelectedIndex);
 
         _appSettingsStorage.Save(_appSettings);
@@ -113,7 +108,7 @@ public partial class MainForm
 
     private IEnumerable<string> GetConfiguredFolders()
     {
-        return currentFolderComboBox.Items.Cast<string>();
+        return _appSettings.WallpaperFolders;
     }
 
     private void ResetFolderComboBoxes()
