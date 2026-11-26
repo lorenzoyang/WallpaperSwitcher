@@ -107,6 +107,31 @@ public class JsonAppSettingsStorageTests
         Assert.That(settings.WallpaperFolders, Is.Empty);
     }
 
+    [TestCase(false)]
+    [TestCase(true)]
+    public async Task Save_WhenDestinationIsLocked_KeepsSettingsAndCanRetry(bool useAsync)
+    {
+        var changed = new AppSettings { LaunchAtStartup = true };
+        _storage.Save(new AppSettings());
+        var originalBytes = File.ReadAllBytes(_testFilePath);
+        using (File.OpenRead(_testFilePath))
+        {
+            await Assert.ThatAsync(Save, Throws.InstanceOf<IOException>().Or.InstanceOf<UnauthorizedAccessException>());
+        }
+
+        Assert.That(File.ReadAllBytes(_testFilePath), Is.EqualTo(originalBytes));
+        Assert.That(Directory.GetFiles(_testDirectory), Is.EqualTo(new[] { _testFilePath }));
+        Assert.That(_storage.Load().LaunchAtStartup, Is.False);
+        await Save();
+        Assert.That(_storage.Load().LaunchAtStartup, Is.True);
+
+        async Task Save()
+        {
+            if (useAsync) await _storage.SaveAsync(changed);
+            else _storage.Save(changed);
+        }
+    }
+
     [Test]
     public void Load_WithNullJsonProperties_NormalizesDefaultValues()
     {

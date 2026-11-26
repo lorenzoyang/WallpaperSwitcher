@@ -1,20 +1,43 @@
 namespace WallpaperSwitcher.Core.Persistence;
 
 /// <summary>
-/// Provides small file-system helpers shared by JSON-backed storage implementations.
+/// Stages a configuration file alongside its destination until serialization succeeds.
 /// </summary>
-internal static class StorageFile
+internal sealed class StorageFile : IDisposable
 {
-    /// <summary>
-    /// Creates the parent directory for a storage file when the location includes one.
-    /// </summary>
-    /// <param name="location">The storage file path.</param>
-    public static void EnsureParentDirectoryExists(string location)
+    private readonly string _destination;
+    private bool _committed;
+
+    public FileStream Stream { get; }
+
+    public StorageFile(string location)
     {
-        var directory = Path.GetDirectoryName(location);
-        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        _destination = Path.GetFullPath(location);
+        var directory = Path.GetDirectoryName(_destination)!;
+        Directory.CreateDirectory(directory);
+        var temporaryPath = Path.Combine(directory, $"{Guid.NewGuid():N}.tmp");
+        Stream = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+    }
+
+    public void Commit()
+    {
+        Stream.Dispose();
+        File.Move(Stream.Name, _destination, overwrite: true);
+        _committed = true;
+    }
+
+    public void Dispose()
+    {
+        if (!_committed)
         {
-            Directory.CreateDirectory(directory);
+            try
+            {
+                Stream.Dispose();
+            }
+            finally
+            {
+                File.Delete(Stream.Name);
+            }
         }
     }
 
