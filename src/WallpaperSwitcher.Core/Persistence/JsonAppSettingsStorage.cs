@@ -59,25 +59,17 @@ public sealed class JsonAppSettingsStorage : IAppSettingsStorage
     /// <inheritdoc/>
     public void Save(AppSettings settings)
     {
-        StorageFile.EnsureParentDirectoryExists(Location);
-        using var fileStream = File.Create(Location);
-        JsonSerializer.Serialize(
-            fileStream,
-            settings,
-            SourceGenerationContext.Default.AppSettings
-        );
+        using var file = new StorageFile(Location);
+        JsonSerializer.Serialize(file.Stream, settings, SourceGenerationContext.Default.AppSettings);
+        file.Commit();
     }
 
     /// <inheritdoc/>
     public async Task SaveAsync(AppSettings settings)
     {
-        StorageFile.EnsureParentDirectoryExists(Location);
-        await using var fileStream = File.Create(Location);
-        await JsonSerializer.SerializeAsync(
-            fileStream,
-            settings,
-            SourceGenerationContext.Default.AppSettings
-        );
+        using var file = new StorageFile(Location);
+        await JsonSerializer.SerializeAsync(file.Stream, settings, SourceGenerationContext.Default.AppSettings);
+        file.Commit();
     }
 
     private static AppSettings ReadSettings(Stream stream)

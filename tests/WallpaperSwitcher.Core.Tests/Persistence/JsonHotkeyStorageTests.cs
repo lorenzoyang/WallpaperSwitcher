@@ -245,4 +245,27 @@ public class JsonHotkeyStorageTests
         Assert.That(result, Has.Length.EqualTo(1));
         Assert.That(result[0].Name, Is.EqualTo("Second"));
     }
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public async Task Save_WhenDestinationIsLocked_KeepsBindingsAndCanRetry(bool useAsync)
+    {
+        _jsonHotkeyStorage.Save([]);
+        HotkeyInfo[] changed = [new() { Id = 1, Hotkey = new Hotkey(ModifierKeys.Alt, VirtualKeys.A), Name = "A" }];
+        using (File.OpenRead(_testFilePath))
+        {
+            await Assert.ThatAsync(Save, Throws.InstanceOf<IOException>().Or.InstanceOf<UnauthorizedAccessException>());
+        }
+
+        Assert.That(_jsonHotkeyStorage.Load(), Is.Empty);
+        Assert.That(Directory.GetFiles(_testDirectory), Is.EqualTo(new[] { _testFilePath }));
+        await Save();
+        Assert.That(_jsonHotkeyStorage.Load().Single().Name, Is.EqualTo("A"));
+
+        async Task Save()
+        {
+            if (useAsync) await _jsonHotkeyStorage.SaveAsync(changed);
+            else _jsonHotkeyStorage.Save(changed);
+        }
+    }
 }

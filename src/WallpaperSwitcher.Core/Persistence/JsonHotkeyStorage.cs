@@ -67,18 +67,18 @@ public sealed class JsonHotkeyStorage : IHotkeyStorage
     public async Task SaveAsync(IEnumerable<HotkeyInfo> hotkeys)
     {
         var hotkeyArray = ToHotkeyArray(hotkeys);
-        StorageFile.EnsureParentDirectoryExists(Location);
-        await using var fileStream = File.Create(Location);
-        await JsonSerializer.SerializeAsync(fileStream, hotkeyArray, SourceGenerationContext.Default.HotkeyInfoArray);
+        using var file = new StorageFile(Location);
+        await JsonSerializer.SerializeAsync(file.Stream, hotkeyArray, SourceGenerationContext.Default.HotkeyInfoArray);
+        file.Commit();
     }
 
     /// <inheritdoc/>
     public void Save(IEnumerable<HotkeyInfo> hotkeys)
     {
         var hotkeyArray = ToHotkeyArray(hotkeys);
-        StorageFile.EnsureParentDirectoryExists(Location);
-        using var fileStream = File.Create(Location);
-        JsonSerializer.Serialize(fileStream, hotkeyArray, SourceGenerationContext.Default.HotkeyInfoArray);
+        using var file = new StorageFile(Location);
+        JsonSerializer.Serialize(file.Stream, hotkeyArray, SourceGenerationContext.Default.HotkeyInfoArray);
+        file.Commit();
     }
 
     private static HotkeyInfo[] ToHotkeyArray(IEnumerable<HotkeyInfo> hotkeys)
