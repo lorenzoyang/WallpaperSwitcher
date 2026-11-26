@@ -14,11 +14,38 @@ public sealed class NativeWallpaperManager : WallpaperManager
     /// <inheritdoc/>
     public override void SetSlideShow(string folder)
     {
-        if (!WallpaperHelper.IsValidWallpaperFolder(folder, out _)) return;
-        SlideShowFolder = folder;
+        ApplyFolder(folder, out _);
+    }
+
+    /// <inheritdoc/>
+    public override bool TrySetSlideShow(string folder, out string errorMessage)
+    {
+        try
+        {
+            return ApplyFolder(folder, out errorMessage);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException or ArgumentException)
+        {
+            errorMessage = ex.Message;
+            return false;
+        }
+    }
+
+    private bool ApplyFolder(string folder, out string errorMessage)
+    {
+        if (string.IsNullOrEmpty(folder))
+        {
+            SlideShowFolder = string.Empty;
+            errorMessage = string.Empty;
+            return true;
+        }
+
+        if (!WallpaperHelper.IsValidWallpaperFolder(folder, out errorMessage)) return false;
 
         // Windows keeps its current slideshow position when the same folder is assigned again.
-        DesktopWallpaper.SetSlideshow(WallpaperHelper.CreateShellItemArrayFromFolder(SlideShowFolder));
+        DesktopWallpaper.SetSlideshow(WallpaperHelper.CreateShellItemArrayFromFolder(folder));
+        SlideShowFolder = folder;
+        return true;
     }
 
     /// <inheritdoc/>

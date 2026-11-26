@@ -15,8 +15,12 @@ public sealed class AppSettings
     /// <returns>The current settings instance after default values are restored where needed.</returns>
     internal AppSettings Normalize()
     {
-        WallpaperFolders ??= [];
-        LastSelectedFolder ??= string.Empty;
+        WallpaperFolders = (WallpaperFolders ?? []).Where(path => !string.IsNullOrWhiteSpace(path))
+            .Distinct(StringComparer.Ordinal).ToList();
+        if (!WallpaperFolders.Contains(LastSelectedFolder))
+        {
+            LastSelectedFolder = string.Empty;
+        }
         return this;
     }
 
